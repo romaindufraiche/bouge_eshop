@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" role="img" aria-label="Visuel de démonstration">
+  <rect width="800" height="1000" fill="#EFEAE2"/>
+  <ellipse cx="400" cy="520" rx="210" ry="180" fill="#232323"/><path d="M190 540 q210 -120 420 0" fill="none" stroke="#EFEAE2" stroke-width="10"/>
+</svg>
