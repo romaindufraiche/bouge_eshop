@@ -4,29 +4,27 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
-  useState,
+  useSyncExternalStore,
   type ReactNode,
 } from 'react';
 import {
   addLine,
   countItems,
-  readCart,
   removeLine,
   setLineQuantity,
-  writeCart,
   type CartLine,
 } from '@/lib/cart';
+import { cartStore } from '@/lib/cart-store';
 
 type CartContextValue = {
   lines: CartLine[];
   /** Nombre total d'articles, toutes lignes confondues. */
   itemCount: number;
   /**
-   * Faux tant que le panier du localStorage n'a pas été relu côté navigateur.
-   * Le rendu serveur ne connaît pas le panier : afficher un compteur avant
-   * l'hydratation provoquerait un écart entre les deux rendus.
+   * Faux pendant le rendu serveur et l'hydratation, vrai ensuite.
+   * Le serveur ne connaît pas le panier : afficher un compteur avant
+   * l'hydratation créerait un écart entre les deux rendus.
    */
   isReady: boolean;
   add: (line: CartLine) => void;
@@ -40,49 +38,42 @@ type CartContextValue = {
 
 const CartContext = createContext<CartContextValue | null>(null);
 
+// Déclarées hors du composant pour garder une référence stable d'un rendu à
+// l'autre, comme `useSyncExternalStore` l'exige.
+const subscribe = cartStore.subscribe;
+const getSnapshot = () => cartStore.getSnapshot();
+const getServerSnapshot = () => cartStore.getServerSnapshot();
+const alwaysReady = () => true;
+const neverReadyOnServer = () => false;
+
 export function CartProvider({ children }: { children: ReactNode }) {
-  const [lines, setLines] = useState<CartLine[]>([]);
-  const [isReady, setIsReady] = useState(false);
+  const lines = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const isReady = useSyncExternalStore(
+    subscribe,
+    alwaysReady,
+    neverReadyOnServer,
+  );
 
-  // Lecture initiale, après montage uniquement.
-  useEffect(() => {
-    setLines(readCart());
-    setIsReady(true);
-  }, []);
-
-  // Le panier reste synchronisé entre les onglets ouverts sur la boutique.
-  useEffect(() => {
-    function handleStorage() {
-      setLines(readCart());
-    }
-
-    window.addEventListener('storage', handleStorage);
-    return () => window.removeEventListener('storage', handleStorage);
-  }, []);
-
-  const persist = useCallback((next: CartLine[]) => {
-    setLines(next);
-    writeCart(next);
-  }, []);
-
+  // Chaque modification repart de la valeur stockée, et non de celle capturée
+  // au rendu : deux ajouts rapprochés ne s'écrasent donc pas.
   const add = useCallback(
-    (line: CartLine) => persist(addLine(readCart(), line)),
-    [persist],
+    (line: CartLine) => cartStore.set(addLine(cartStore.read(), line)),
+    [],
   );
 
   const setQuantity = useCallback(
     (target: Pick<CartLine, 'productId' | 'variantId'>, quantity: number) =>
-      persist(setLineQuantity(readCart(), target, quantity)),
-    [persist],
+      cartStore.set(setLineQuantity(cartStore.read(), target, quantity)),
+    [],
   );
 
   const remove = useCallback(
     (target: Pick<CartLine, 'productId' | 'variantId'>) =>
-      persist(removeLine(readCart(), target)),
-    [persist],
+      cartStore.set(removeLine(cartStore.read(), target)),
+    [],
   );
 
-  const clear = useCallback(() => persist([]), [persist]);
+  const clear = useCallback(() => cartStore.set([]), []);
 
   const value = useMemo<CartContextValue>(
     () => ({

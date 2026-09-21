@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useCart } from '@/components/cart/CartProvider';
 import { Container } from '@/components/ui/Container';
 import { SHOP } from '@/lib/shop-config';
@@ -14,10 +14,10 @@ export function SiteHeader({ categories }: { categories: HeaderCategory[] }) {
   const { itemCount, isReady } = useCart();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  // Le menu mobile se referme dès qu'on change de page.
-  useEffect(() => {
-    setIsMenuOpen(false);
-  }, [pathname]);
+  // Le menu mobile se referme dès qu'un lien est suivi. Fermer sur clic plutôt
+  // qu'en réaction au changement d'URL évite un rendu en cascade, et couvre
+  // aussi le cas où l'on reclique sur la page déjà ouverte.
+  const closeMenu = () => setIsMenuOpen(false);
 
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-cream/95 backdrop-blur-sm">
@@ -25,6 +25,7 @@ export function SiteHeader({ categories }: { categories: HeaderCategory[] }) {
         <div className="flex h-16 items-center justify-between gap-4 sm:h-20">
           <Link
             href="/"
+            onClick={closeMenu}
             className="font-display text-xl tracking-tight sm:text-2xl"
             aria-label={`${SHOP.name} — accueil`}
           >
@@ -52,6 +53,7 @@ export function SiteHeader({ categories }: { categories: HeaderCategory[] }) {
           <div className="flex items-center gap-2">
             <Link
               href="/panier"
+              onClick={closeMenu}
               className="px-2 py-2 text-sm hover:underline hover:underline-offset-4"
             >
               Panier
@@ -89,11 +91,16 @@ export function SiteHeader({ categories }: { categories: HeaderCategory[] }) {
           <Container size="wide">
             <ul className="flex flex-col py-2">
               <li>
-                <MobileLink href="/boutique">Tout le matériel</MobileLink>
+                <MobileLink href="/boutique" onClick={closeMenu}>
+                  Tout le matériel
+                </MobileLink>
               </li>
               {categories.map((category) => (
                 <li key={category.slug}>
-                  <MobileLink href={`/boutique/${category.slug}`}>
+                  <MobileLink
+                    href={`/boutique/${category.slug}`}
+                    onClick={closeMenu}
+                  >
                     {category.name}
                   </MobileLink>
                 </li>
@@ -130,13 +137,19 @@ function NavLink({
 
 function MobileLink({
   href,
+  onClick,
   children,
 }: {
   href: string;
+  onClick: () => void;
   children: React.ReactNode;
 }) {
   return (
-    <Link href={href} className="block border-b border-line/60 py-3 text-base">
+    <Link
+      href={href}
+      onClick={onClick}
+      className="block border-b border-line/60 py-3 text-base"
+    >
       {children}
     </Link>
   );
