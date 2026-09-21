@@ -1,4 +1,4 @@
-import { PrismaClient } from '@/generated/prisma';
+import { PrismaClient } from '@prisma/client';
 
 /**
  * Client Prisma partagé.
@@ -32,4 +32,4 @@ export type {
   Product,
   ProductImage,
   ProductVariant,
-} from '@/generated/prisma';
+} from '@prisma/client';

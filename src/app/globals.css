@@ -1,26 +1,101 @@
 @import "tailwindcss";
 
+/* ===========================================================================
+   BOUGE. — jetons de design
+   ---------------------------------------------------------------------------
+   Toute la direction artistique tient dans ce bloc. Pour faire évoluer
+   l'identité (couleurs, rayons, typographies), il suffit de modifier les
+   valeurs ci-dessous : aucun composant ne code une couleur en dur.
+
+   Valeurs provisoires, issues de la description du brief. À confronter au PDF
+   de charte graphique (dossier Drive BOUGE.) puis à remplacer ici.
+   =========================================================================== */
+
+@theme {
+  /* --- Couleurs ---------------------------------------------------------- */
+
+  /* Fond principal, crème/blanc cassé. */
+  --color-cream: #faf8f4;
+  /* Surfaces légèrement contrastées : cartes produit, encarts. */
+  --color-sand: #efeae2;
+  /* Encre : titres, texte courant, aplats sombres. */
+  --color-ink: #232323;
+  /* Texte secondaire, mentions, légendes. */
+  --color-ink-soft: #6b6660;
+  /* Traits de séparation et contours de champs. */
+  --color-line: #ddd7cc;
+  /* Accent unique, réservé aux promotions et aux états d'erreur. */
+  --color-accent: #b4432a;
+  /* Confirmation (commande payée, stock disponible). */
+  --color-success: #2f6b4a;
+
+  /* --- Typographie ------------------------------------------------------- */
+
+  --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-heading), Georgia, "Times New Roman", serif;
+
+  /* --- Géométrie --------------------------------------------------------- */
+
+  /* Coins peu arrondis : la marque reste anguleuse. */
+  --radius-none: 0px;
+  --radius-sm: 2px;
+  --radius-md: 3px;
+
+  /* Largeur maximale du contenu. */
+  --spacing-gutter: 1.25rem;
+}
+
+/* ===========================================================================
+   Base
+   =========================================================================== */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: light;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  /* Le titre de page ne doit pas se glisser sous l'en-tête collant lors
+     d'une navigation par ancre. */
+  scroll-padding-top: 6rem;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-cream);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Titres : typographie éditoriale, interlettrage resserré, pas de graisse
+   excessive. */
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+/* Paragraphes : on évite les lignes orphelines en fin de bloc. */
+p {
+  text-wrap: pretty;
+}
+
+/* Focus visible et cohérent partout, sans halo arrondi. */
+:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 2px;
+}
+
+/* Respecte les réglages système de réduction d'animation. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
