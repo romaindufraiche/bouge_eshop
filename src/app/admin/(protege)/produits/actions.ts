@@ -101,21 +101,10 @@ export async function saveProduct(
 
   const submitted = readSubmittedValues(formData, variants);
 
-  const parsed = productSchema.safeParse({
-    name: formData.get('name'),
-    slug: formData.get('slug'),
-    description: formData.get('description'),
-    categoryId: formData.get('categoryId'),
-    price: formData.get('price'),
-    salePrice: formData.get('salePrice'),
-    saleStartsAt: formData.get('saleStartsAt'),
-    saleEndsAt: formData.get('saleEndsAt'),
-    status: formData.get('status'),
-    stock: formData.get('stock'),
-    metaTitle: formData.get('metaTitle'),
-    metaDescription: formData.get('metaDescription'),
-    variants,
-  });
+  // On valide les valeurs déjà normalisées en chaînes : `formData.get()`
+  // renvoie `null` pour un champ absent, ce qu'un schéma attendant une chaîne
+  // rejette avec un message impossible à relier à un champ visible.
+  const parsed = productSchema.safeParse({ ...submitted, variants });
 
   if (!parsed.success) {
     const fieldErrors: Record<string, string> = {};

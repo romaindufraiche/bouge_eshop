@@ -75,16 +75,16 @@ export async function createCheckoutSession(
     };
   }
 
+  // On valide les valeurs DÉJÀ normalisées en chaînes.
+  //
+  // `formData.get()` renvoie `null` pour un champ absent du document, et les
+  // champs d'adresse comme ceux du point de retrait ne sont rendus que dans la
+  // branche choisie : lire le formulaire brut faisait donc échouer toute
+  // commande, quel que soit le mode, sur un champ que le client ne voyait même
+  // pas à l'écran.
   const parsed = checkoutSchema.safeParse({
-    email: formData.get('email'),
-    customerName: formData.get('customerName'),
-    phone: formData.get('phone'),
-    fulfilment: formData.get('fulfilment'),
-    shippingAddressLine1: formData.get('shippingAddressLine1'),
-    shippingAddressLine2: formData.get('shippingAddressLine2'),
-    shippingPostalCode: formData.get('shippingPostalCode'),
-    shippingCity: formData.get('shippingCity'),
-    pickupPointId: formData.get('pickupPointId'),
+    ...submitted,
+    fulfilment: String(formData.get('fulfilment') ?? ''),
     lines,
   });
 
@@ -260,6 +260,7 @@ export async function createCheckoutSession(
     return {
       error:
         'Le paiement n’a pas pu être lancé. Réessayez dans un instant ; si le problème persiste, contactez-nous.',
+      values: submitted,
     };
   }
 }

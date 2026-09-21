@@ -66,20 +66,25 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Titres : typographie éditoriale, interlettrage resserré, pas de graisse
-   excessive. */
-h1,
-h2,
-h3 {
-  font-family: var(--font-display);
-  font-weight: 400;
-  letter-spacing: -0.02em;
-  text-wrap: balance;
-}
+/* Ces règles vivent dans la couche `base` : une règle hors couche l'emporte
+   sur les utilitaires Tailwind quelle que soit sa spécificité, et un
+   `font-sans` posé sur un titre n'aurait alors aucun effet. */
+@layer base {
+  /* Titres : typographie éditoriale, interlettrage resserré, pas de graisse
+     excessive. */
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
 
-/* Paragraphes : on évite les lignes orphelines en fin de bloc. */
-p {
-  text-wrap: pretty;
+  /* Paragraphes : on évite les lignes orphelines en fin de bloc. */
+  p {
+    text-wrap: pretty;
+  }
 }
 
 /* Focus visible et cohérent partout, sans halo arrondi. */
