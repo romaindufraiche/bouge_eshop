@@ -1,3 +1,4 @@
+import 'server-only';
 import { PRODUCT_STATUS } from '@/lib/constants';
 import { prisma } from '@/lib/prisma';
 import { getEffectivePrice, getVariantPrice, formatVariantLabel } from '@/lib/pricing';

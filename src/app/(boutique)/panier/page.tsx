@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { CartView } from '@/app/panier/CartView';
+import { CartView } from '@/app/(boutique)/panier/CartView';
 import { Container } from '@/components/ui/Container';
 import { buildMetadata } from '@/lib/seo';
 

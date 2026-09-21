@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { CheckoutView } from '@/app/commande/CheckoutView';
+import { CheckoutView } from '@/app/(boutique)/commande/CheckoutView';
 import { Container } from '@/components/ui/Container';
 import { isStripeConfigured } from '@/lib/env';
 import { getActivePickupPoints } from '@/lib/queries';

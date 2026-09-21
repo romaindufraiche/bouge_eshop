@@ -1,7 +1,7 @@
 'use client';
 
 import { useActionState, useEffect, useState } from 'react';
-import { createCheckoutSession, type CheckoutState } from '@/app/commande/actions';
+import { createCheckoutSession, type CheckoutState } from '@/app/(boutique)/commande/actions';
 import { CartIssues } from '@/components/cart/CartIssues';
 import { CartLines } from '@/components/cart/CartLines';
 import { CartSummary } from '@/components/cart/CartSummary';
@@ -75,8 +75,21 @@ export function CheckoutView({
   const shippingCents = computeShippingCents(cart.subtotalCents, fulfilment);
   const errors = state.fieldErrors ?? {};
 
+  // Après une erreur, on réaffiche ce que le client avait saisi : React vide
+  // les champs non contrôlés à la fin d'une action.
+  const saisi = state.values;
+
+  // React ne resynchronise `defaultValue` que sur les champs texte : les
+  // boutons radio du point de retrait garderaient leur sélection d'origine.
+  // Changer la clé remonte le formulaire et rétablit tous les champs.
+  const formKey = saisi ? JSON.stringify(saisi) : 'initial';
+
   return (
-    <form action={formAction} className="grid gap-10 lg:grid-cols-[1fr_20rem] lg:gap-14">
+    <form
+      key={formKey}
+      action={formAction}
+      className="grid gap-10 lg:grid-cols-[1fr_20rem] lg:gap-14"
+    >
       {/* Le panier part en identifiants seuls ; prix et stocks sont revérifiés
           côté serveur avant tout paiement. */}
       <input type="hidden" name="lines" value={JSON.stringify(lines)} />
@@ -97,7 +110,14 @@ export function CheckoutView({
           </h2>
 
           <Field label="Nom et prénom" name="customerName" required error={errors.customerName}>
-            {(props) => <input type="text" autoComplete="name" {...props} />}
+            {(props) => (
+              <input
+                type="text"
+                autoComplete="name"
+                defaultValue={saisi?.customerName ?? ''}
+                {...props}
+              />
+            )}
           </Field>
 
           <Field
@@ -107,11 +127,25 @@ export function CheckoutView({
             hint="La confirmation de commande y sera envoyée."
             error={errors.email}
           >
-            {(props) => <input type="email" autoComplete="email" {...props} />}
+            {(props) => (
+              <input
+                type="email"
+                autoComplete="email"
+                defaultValue={saisi?.email ?? ''}
+                {...props}
+              />
+            )}
           </Field>
 
           <Field label="Téléphone" name="phone" error={errors.phone}>
-            {(props) => <input type="tel" autoComplete="tel" {...props} />}
+            {(props) => (
+              <input
+                type="tel"
+                autoComplete="tel"
+                defaultValue={saisi?.phone ?? ''}
+                {...props}
+              />
+            )}
           </Field>
         </section>
 
@@ -154,7 +188,12 @@ export function CheckoutView({
                 error={errors.shippingAddressLine1}
               >
                 {(props) => (
-                  <input type="text" autoComplete="address-line1" {...props} />
+                  <input
+                    type="text"
+                    autoComplete="address-line1"
+                    defaultValue={saisi?.shippingAddressLine1 ?? ''}
+                    {...props}
+                  />
                 )}
               </Field>
 
@@ -165,7 +204,12 @@ export function CheckoutView({
                 error={errors.shippingAddressLine2}
               >
                 {(props) => (
-                  <input type="text" autoComplete="address-line2" {...props} />
+                  <input
+                    type="text"
+                    autoComplete="address-line2"
+                    defaultValue={saisi?.shippingAddressLine2 ?? ''}
+                    {...props}
+                  />
                 )}
               </Field>
 
@@ -182,6 +226,7 @@ export function CheckoutView({
                       inputMode="numeric"
                       autoComplete="postal-code"
                       maxLength={5}
+                      defaultValue={saisi?.shippingPostalCode ?? ''}
                       {...props}
                     />
                   )}
@@ -194,7 +239,12 @@ export function CheckoutView({
                   error={errors.shippingCity}
                 >
                   {(props) => (
-                    <input type="text" autoComplete="address-level2" {...props} />
+                    <input
+                      type="text"
+                      autoComplete="address-level2"
+                      defaultValue={saisi?.shippingCity ?? ''}
+                      {...props}
+                    />
                   )}
                 </Field>
               </div>
@@ -220,7 +270,11 @@ export function CheckoutView({
                         type="radio"
                         name="pickupPointId"
                         value={point.id}
-                        defaultChecked={index === 0}
+                        defaultChecked={
+                          saisi?.pickupPointId
+                            ? saisi.pickupPointId === point.id
+                            : index === 0
+                        }
                         className="mt-1"
                       />
                       <span className="text-sm">

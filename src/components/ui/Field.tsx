@@ -8,13 +8,21 @@ import type { ReactNode } from 'react';
 export function Field({
   label,
   name,
+  fieldId,
   hint,
   error,
   required = false,
   children,
 }: {
   label: string;
+  /** Nom du champ dans le formulaire. */
   name: string;
+  /**
+   * Identifiant HTML, quand le nom ne suffit pas à le rendre unique : c'est le
+   * cas lorsque plusieurs formulaires coexistent sur une même page, chacun
+   * avec un champ « name ».
+   */
+  fieldId?: string;
   hint?: string;
   error?: string;
   required?: boolean;
@@ -27,7 +35,7 @@ export function Field({
     className: string;
   }) => ReactNode;
 }) {
-  const id = `champ-${name}`;
+  const id = `champ-${fieldId ?? name}`;
   const hintId = hint ? `${id}-aide` : undefined;
   const errorId = error ? `${id}-erreur` : undefined;
   const describedBy = [hintId, errorId].filter(Boolean).join(' ') || undefined;

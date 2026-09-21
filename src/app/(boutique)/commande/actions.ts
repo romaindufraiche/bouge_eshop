@@ -15,7 +15,41 @@ export type CheckoutState = {
   fieldErrors?: Record<string, string>;
   /** URL de paiement Stripe vers laquelle rediriger le navigateur. */
   redirectUrl?: string;
+  /**
+   * Coordonnées telles qu'elles ont été saisies, renvoyées au formulaire.
+   * React réinitialise les champs non contrôlés à la fin d'une action : sans
+   * cela, une adresse refusée pour un code postal mal saisi obligerait à tout
+   * retaper, au pire moment du parcours d'achat.
+   */
+  values?: SubmittedCheckoutValues;
 };
+
+export type SubmittedCheckoutValues = {
+  email: string;
+  customerName: string;
+  phone: string;
+  shippingAddressLine1: string;
+  shippingAddressLine2: string;
+  shippingPostalCode: string;
+  shippingCity: string;
+  pickupPointId: string;
+};
+
+/** Relit le formulaire tel quel, pour pouvoir le réafficher à l'identique. */
+function readSubmittedValues(formData: FormData): SubmittedCheckoutValues {
+  const text = (field: string) => String(formData.get(field) ?? '');
+
+  return {
+    email: text('email'),
+    customerName: text('customerName'),
+    phone: text('phone'),
+    shippingAddressLine1: text('shippingAddressLine1'),
+    shippingAddressLine2: text('shippingAddressLine2'),
+    shippingPostalCode: text('shippingPostalCode'),
+    shippingCity: text('shippingCity'),
+    pickupPointId: text('pickupPointId'),
+  };
+}
 
 /**
  * Crée la commande puis la session de paiement Stripe.
@@ -29,11 +63,16 @@ export async function createCheckoutSession(
   formData: FormData,
 ): Promise<CheckoutState> {
   // --- 1. Validation des coordonnées ---------------------------------------
+  const submitted = readSubmittedValues(formData);
+
   let lines: unknown;
   try {
     lines = JSON.parse(String(formData.get('lines') ?? '[]'));
   } catch {
-    return { error: 'Panier illisible. Rechargez la page et réessayez.' };
+    return {
+      error: 'Panier illisible. Rechargez la page et réessayez.',
+      values: submitted,
+    };
   }
 
   const parsed = checkoutSchema.safeParse({
@@ -59,6 +98,7 @@ export async function createCheckoutSession(
     return {
       error: 'Certains champs doivent être corrigés.',
       fieldErrors,
+      values: submitted,
     };
   }
 
@@ -68,13 +108,14 @@ export async function createCheckoutSession(
   const cart = await resolveCart(input.lines);
 
   if (cart.isEmpty) {
-    return { error: 'Votre panier est vide.' };
+    return { error: 'Votre panier est vide.', values: submitted };
   }
 
   if (cart.issues.length > 0) {
     return {
       error:
         'Votre panier a changé depuis votre dernière visite (stock ou disponibilité). Vérifiez le récapitulatif ci-dessous, puis relancez le paiement.',
+      values: submitted,
     };
   }
 
