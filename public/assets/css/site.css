@@ -580,7 +580,20 @@ main { flex: 1; }
 
 /* Les choix de taille et de couleur sont des boutons radio déguisés : le
    formulaire fonctionne sans JavaScript, et reste navigable au clavier. */
-.option input { position: absolute; opacity: 0; width: 0; height: 0; }
+/* Masquage visuel qui conserve l'élément focalisable et présent dans l'arbre
+   d'accessibilité — contrairement à `opacity:0` avec une taille nulle, qui le
+   rend inatteignable pour certaines technologies d'assistance. */
+.option input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
 .option span {
   display: inline-block;
   padding: 0.5rem 1rem;
@@ -736,3 +749,11 @@ dialog {
   color: var(--ink);
 }
 dialog::backdrop { background: rgb(35 35 35 / 0.4); }
+
+/* --- Tunnel de commande ------------------------------------------------------
+   Les champs d'adresse et ceux du point de retrait sont tous les deux dans la
+   page : c'est le CSS qui masque celui qui ne correspond pas au choix. Le
+   tunnel fonctionne donc sans JavaScript. */
+
+form:has(#mode-retrait:checked) .champs-livraison { display: none; }
+form:has(#mode-livraison:checked) .champs-retrait { display: none; }
