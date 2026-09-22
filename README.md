@@ -287,11 +287,37 @@ Le reste du schéma n'a pas besoin d'être touché : il n'utilise volontairement
 aucune fonctionnalité absente de SQLite (pas d'`enum`, pas de liste de
 scalaires), ce qui lui permet de fonctionner sur les deux moteurs.
 
-Puis créer les tables :
+Puis créer les tables, depuis votre poste, en pointant `DATABASE_URL` sur la
+base de production :
 
 ```bash
-npx prisma migrate deploy
+npx prisma db push
 ```
+
+> **Pourquoi `db push` et pas `migrate deploy` ?** Le projet ne contient aucun
+> fichier de migration, et c'est volontaire : une migration générée pour
+> SQLite contient du SQL propre à SQLite, inutilisable sur PostgreSQL. Un même
+> dossier `prisma/migrations` ne peut donc pas servir aux deux moteurs.
+> `db push` compare le schéma à la base et crée ce qui manque, quel que soit
+> le moteur.
+>
+> Une fois le schéma stabilisé sur PostgreSQL, il est recommandé de passer aux
+> migrations pour garder une trace des évolutions : avec `provider =
+> "postgresql"` en place, lancer `npx prisma migrate dev --name init`,
+> versionner le dossier créé, puis utiliser `npx prisma migrate deploy` aux
+> déploiements suivants.
+
+### Hébergement : pourquoi pas GitHub Pages
+
+GitHub Pages ne sert que des fichiers statiques, sans processus serveur. Ce
+site en a besoin pour presque tout : sept fichiers d'actions serveur, deux
+routes d'API (le chiffrage du panier et le webhook Stripe), le middleware qui
+protège `/admin`, et vingt et un fichiers qui interrogent la base. Un export
+statique échoue d'ailleurs à la compilation.
+
+Il faut donc un hébergeur capable d'exécuter Node.js : Vercel, Netlify,
+Cloudflare Workers, Railway, Render, ou n'importe quel serveur avec
+`npm run build && npm run start`.
 
 ### 2. Renseigner les variables d'environnement
 
