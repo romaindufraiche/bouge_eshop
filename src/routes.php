@@ -15,6 +15,11 @@ use Bouge\Controller\HomeController;
 use Bouge\Controller\PageController;
 use Bouge\Controller\ProductController;
 use Bouge\Controller\WebhookController;
+use Bouge\Controller\Admin\AuthController as AdminAuthController;
+use Bouge\Controller\Admin\CategoryController as AdminCategoryController;
+use Bouge\Controller\Admin\DashboardController;
+use Bouge\Controller\Admin\OrderController as AdminOrderController;
+use Bouge\Controller\Admin\ProductController as AdminProductController;
 
 // --- Boutique ----------------------------------------------------------------
 
@@ -46,3 +51,34 @@ $router->get('/commande/confirmation', [CheckoutController::class, 'confirmation
 // Seul endroit où une commande devient « payée » et où le stock est décompté.
 
 $router->post('/webhook/stripe', [WebhookController::class, 'stripe']);
+
+// --- Administration ---------------------------------------------------------
+// Toutes ces pages appellent Auth::require() en première ligne : aucune n'est
+// accessible sans session ouverte.
+
+$router->get('/admin/connexion', [AdminAuthController::class, 'showLogin']);
+$router->post('/admin/connexion', [AdminAuthController::class, 'login']);
+$router->post('/admin/deconnexion', [AdminAuthController::class, 'logout']);
+
+$router->get('/admin', [DashboardController::class, 'index']);
+
+// Les chemins fixes sont déclarés avant `{id}` : sans cela, « nouveau »
+// serait pris pour un identifiant.
+$router->get('/admin/produits', [AdminProductController::class, 'index']);
+$router->get('/admin/produits/nouveau', [AdminProductController::class, 'create']);
+$router->get('/admin/produits/{id}', [AdminProductController::class, 'edit']);
+$router->post('/admin/produits/enregistrer', [AdminProductController::class, 'save']);
+$router->post('/admin/produits/supprimer', [AdminProductController::class, 'delete']);
+$router->post('/admin/produits/photos', [AdminProductController::class, 'uploadImages']);
+$router->post('/admin/produits/photo/supprimer', [AdminProductController::class, 'deleteImage']);
+$router->post('/admin/produits/photo/deplacer', [AdminProductController::class, 'moveImage']);
+$router->post('/admin/produits/photo/texte', [AdminProductController::class, 'updateImageAlt']);
+
+$router->get('/admin/categories', [AdminCategoryController::class, 'index']);
+$router->post('/admin/categories/enregistrer', [AdminCategoryController::class, 'save']);
+$router->post('/admin/categories/supprimer', [AdminCategoryController::class, 'delete']);
+
+$router->get('/admin/commandes', [AdminOrderController::class, 'index']);
+$router->get('/admin/commandes/{id}', [AdminOrderController::class, 'show']);
+$router->post('/admin/commandes/statut', [AdminOrderController::class, 'updateStatus']);
+$router->post('/admin/commandes/note', [AdminOrderController::class, 'updateNote']);

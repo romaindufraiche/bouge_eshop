@@ -677,78 +677,246 @@ textarea[aria-invalid='true'] { border-color: var(--accent); }
 .summary__total { border-top: 1px solid var(--line); padding-top: 0.75rem; margin-top: 0.75rem !important; font-size: 1rem; }
 .summary__total dt { color: var(--ink); }
 
-/* --- 10. Administration ------------------------------------------------------ */
+/* --- 10. Administration ------------------------------------------------------
+   L'administration partage les jetons de la charte mais pas la mise en page de
+   la boutique : barre latérale fixe sur grand écran, tout empilé sur mobile.
+   Rien n'y dépend de JavaScript — les confirmations de suppression utilisent
+   l'élément <details>. */
 
-.admin-header { border-bottom: 1px solid var(--line); }
-.admin-header__bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem; padding: 1rem 0; }
-.admin-header__logo img { height: 1.5rem; width: auto; }
+.admin-shell { min-height: 100vh; }
+
+.admin-side {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem var(--gutter);
+  background: var(--ink);
+  color: var(--cream);
+}
+.admin-side a { color: inherit; }
+.admin-side__logo { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; }
+.admin-side__logo img { height: 1.5rem; width: auto; }
+.admin-side__logo .eyebrow { color: color-mix(in srgb, var(--cream) 60%, transparent); }
+.admin-side__foot { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; }
+.admin-side__foot p { margin: 0; color: color-mix(in srgb, var(--cream) 70%, transparent); }
+/* Le bouton fantôme est dessiné pour le fond crème : sur l'anthracite de la
+   barre latérale il faut inverser ses couleurs, sinon il disparaît. */
+.admin-side .btn--ghost { border-color: color-mix(in srgb, var(--cream) 45%, transparent); color: var(--cream); }
+.admin-side .btn--ghost:hover { background: var(--cream); color: var(--ink); }
+
 .admin-nav ul { display: flex; flex-wrap: wrap; gap: 0.25rem; list-style: none; margin: 0; padding: 0; }
 .admin-nav a {
   display: inline-block;
-  padding: 0.5rem 0.75rem;
-  border-bottom: 2px solid transparent;
+  padding: 0.45rem 0.8rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-control);
   font-size: 0.875rem;
-  color: var(--ink-soft);
+  color: color-mix(in srgb, var(--cream) 75%, transparent);
   text-decoration: none;
 }
-.admin-nav a:hover { color: var(--ink); text-decoration: none; }
-.admin-nav a[aria-current='page'] { border-bottom-color: var(--ink); color: var(--ink); font-weight: 600; }
+.admin-nav a:hover { color: var(--cream); text-decoration: none; }
+.admin-nav a[aria-current='page'] { background: var(--cream); color: var(--ink); font-weight: 600; }
 
-.page-head { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 1rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--line); }
+.admin-main { padding: 2rem var(--gutter) 5rem; max-width: 72rem; }
 
-.stat-cards { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); list-style: none; margin: 0; padding: 0; }
-.stat-card { display: block; padding: 1.25rem; border: 1px solid var(--line); border-radius: var(--radius-surface); text-decoration: none; }
-.stat-card:hover { border-color: var(--ink); text-decoration: none; }
-.stat-card__value { font-size: 1.875rem; font-variant-numeric: tabular-nums; margin-top: 0.5rem; }
-
-.data-list { list-style: none; margin: 1rem 0 0; padding: 0; border-top: 1px solid var(--line); }
-.data-list > li { border-bottom: 1px solid var(--line); }
-.data-list a,
-.data-list .data-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem 1rem; padding: 0.75rem 0; font-size: 0.875rem; text-decoration: none; }
-.data-list a:hover { background: var(--sand); text-decoration: none; }
-.data-list__thumb { width: 3rem; flex: 0 0 auto; aspect-ratio: 1; overflow: hidden; border-radius: var(--radius-small); background: var(--sand); }
-.data-list__thumb img { width: 100%; height: 100%; object-fit: cover; }
-.data-list__main { flex: 1 1 12rem; min-width: 0; }
-.data-list__main strong { display: block; font-weight: 600; }
-
-.toolbar { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: flex-end; margin-top: 2rem; }
-.toolbar .field + .field { margin-top: 0; }
-.toolbar input, .toolbar select { margin-top: 0.4rem; width: auto; min-width: 9rem; }
-
-.admin-section + .admin-section { margin-top: 3rem; }
-
-.variant-row { display: grid; gap: 0.75rem; padding: 0.75rem; border: 1px solid var(--line); border-radius: var(--radius-surface); }
-@media (min-width: 720px) {
-  .variant-row { grid-template-columns: 1fr 1fr 6rem 8rem 3rem; align-items: end; border: 0; padding: 0; }
-}
-.variant-row input { margin-top: 0.25rem; }
-
-.image-row { display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-start; padding: 0.75rem; border: 1px solid var(--line); border-radius: var(--radius-surface); }
-.image-row__thumb { width: 5rem; flex: 0 0 auto; aspect-ratio: 1; overflow: hidden; border-radius: var(--radius-small); background: var(--sand); }
-.image-row__thumb img { width: 100%; height: 100%; object-fit: cover; }
-
-.sticky-actions {
-  position: sticky;
-  bottom: 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  align-items: center;
-  padding: 1rem 0;
-  border-top: 1px solid var(--line);
-  background: var(--cream);
+@media (min-width: 960px) {
+  .admin-shell { display: grid; grid-template-columns: 15rem 1fr; }
+  .admin-side {
+    position: sticky;
+    top: 0;
+    align-self: start;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 2rem;
+    height: 100vh;
+    padding: 2rem 1.25rem;
+  }
+  .admin-side__logo { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+  .admin-nav ul { flex-direction: column; gap: 0.15rem; }
+  .admin-nav a { display: block; }
+  .admin-side__foot { margin-top: auto; flex-direction: column; align-items: flex-start; }
+  .admin-main { padding: 3rem 2.5rem 6rem; }
 }
 
-dialog {
-  margin: auto;
-  width: min(28rem, calc(100vw - 2rem));
+/* En-tête de page ------------------------------------------------------------ */
+
+.admin-head { padding-bottom: 1.5rem; margin-bottom: 2rem; border-bottom: 1px solid var(--line); }
+.admin-head.between { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+.admin-head h1 { margin: 0.25rem 0; }
+.admin-head p { margin: 0; }
+.admin .notice { margin-bottom: 2rem; }
+
+/* Chiffres clés --------------------------------------------------------------- */
+
+.admin-stats { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); }
+.admin-stat {
+  display: block;
+  padding: 1.25rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-surface);
+  text-decoration: none;
+  color: inherit;
+}
+a.admin-stat:hover { border-color: var(--ink); text-decoration: none; }
+.admin-stat strong { display: block; margin-top: 0.5rem; font-size: 1.75rem; font-weight: 600; }
+
+/* Colonnes --------------------------------------------------------------------- */
+
+.admin-columns { display: grid; gap: 2.5rem; margin-top: 2.5rem; }
+@media (min-width: 1100px) {
+  .admin-columns { grid-template-columns: 1fr 1fr; }
+  .admin-columns--aside { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); }
+}
+
+/* Tableaux ---------------------------------------------------------------------
+   Sur mobile le tableau défile horizontalement plutôt que de comprimer les
+   colonnes jusqu'à l'illisible. */
+
+.admin-table { width: 100%; margin-top: 1rem; border-collapse: collapse; }
+
+/* Sous 720 px, les tableaux de liste s'empilent : chaque ligne devient un
+   bloc et chaque cellule porte son intitulé de colonne (data-label), plutôt
+   qu'un tableau qui déborde et cache justement le prix et le stock. Les
+   tableaux de détail, eux, défilent horizontalement. */
+@media (max-width: 719px) {
+  .admin-table:not(.admin-table--stack) { display: block; overflow-x: auto; }
+
+  .admin-table--stack thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); }
+  .admin-table--stack tbody tr {
+    display: block;
+    padding: 1rem 0;
+    border-top: 1px solid var(--line);
+  }
+  .admin-table--stack tbody tr:hover { background: transparent; }
+  .admin-table--stack tbody td { display: flex; gap: 1rem; justify-content: space-between; padding: 0.15rem 0; border: 0 !important; }
+  .admin-table--stack tbody td[data-label]::before {
+    content: attr(data-label);
+    flex: 0 0 auto;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .admin-table--stack tbody td:first-child { padding-bottom: 0.5rem; }
+  .admin-table--stack tbody td.ta-right { text-align: right !important; }
+}
+.admin-table th, .admin-table td { padding: 0.75rem 0.6rem; text-align: left; vertical-align: top; }
+.admin-table thead th {
+  border-bottom: 1px solid var(--ink);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+.admin-table tbody tr + tr td { border-top: 1px solid var(--line); }
+.admin-table tbody tr:hover { background: var(--sand); }
+.admin-table tfoot th, .admin-table tfoot td { border-top: 1px solid var(--line); font-weight: 400; }
+.admin-table td a { text-decoration: none; font-weight: 600; }
+.admin-table td a:hover { text-decoration: underline; }
+.admin-table td a + a { margin-left: 0.75rem; }
+/* Les colonnes chiffrées ne se coupent jamais en plusieurs lignes : sur
+   mobile c'est le tableau qui défile, pas « 11,90 € » qui s'empile. */
+.admin-table td.ta-right, .admin-table td .pill { white-space: nowrap; }
+.ta-right { text-align: right !important; }
+.d-block { display: block; }
+
+.admin-product { display: flex; gap: 0.75rem; align-items: center; }
+.admin-product__media {
+  width: 3rem;
+  flex: 0 0 auto;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: var(--radius-small);
+  background: var(--sand);
+}
+.admin-product__media img { width: 100%; height: 100%; object-fit: cover; }
+
+/* La saisie des déclinaisons reste compacte : quatre champs par ligne. */
+.admin-table--variants input { margin-top: 0; min-width: 6rem; }
+
+/* Filtres ------------------------------------------------------------------------ */
+
+.admin-filters { display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-end; margin-bottom: 1.5rem; }
+.admin-filters .field { margin-top: 0; }
+.admin-filters .field + .field { margin-top: 0; }
+.admin-filters input, .admin-filters select { width: auto; min-width: 11rem; }
+.field--actions { display: flex; align-items: center; gap: 1rem; }
+
+/* Cartes et formulaires ---------------------------------------------------------- */
+
+.admin-card {
   padding: 1.5rem;
-  border: 1px solid var(--ink);
+  margin-top: 2rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-surface);
+  background: var(--white);
+}
+.admin-card h2 { margin: 0 0 1.25rem; }
+.admin-card--danger { border-color: color-mix(in srgb, var(--accent-deep) 40%, var(--line)); }
+
+.admin .field label { display: block; font-size: 0.875rem; font-weight: 600; }
+.field-help { margin-top: 0.35rem; font-size: 0.8125rem; color: var(--ink-soft); }
+.field-row { display: grid; gap: 1.25rem; }
+.field-row + .field-row, .field-row + .field, .field + .field-row { margin-top: 1.25rem; }
+@media (min-width: 720px) {
+  .field-row { grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); }
+  .field-row .field + .field { margin-top: 0; }
+}
+.field-group { margin-top: 1.5rem; padding: 1.25rem; border: 1px solid var(--line); border-radius: var(--radius-surface); }
+.field-group legend { padding: 0 0.5rem; font-size: 0.875rem; font-weight: 600; }
+.field-prefixed { display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem; }
+.field-prefixed input { width: auto; flex: 1 1 12rem; }
+
+.check { display: flex; gap: 0.65rem; align-items: flex-start; font-size: 0.9375rem; cursor: pointer; }
+.check + .check { margin-top: 0.75rem; }
+.check + .field-row { margin-top: 1.5rem; }
+.check input { margin-top: 0.2rem; }
+
+.admin-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 1.25rem; margin-top: 2rem; }
+.admin-form .admin-card:first-of-type { margin-top: 0; }
+
+.btn--sm { padding: 0.35rem 0.9rem; font-size: 0.8125rem; }
+
+/* Confirmation avant suppression ---------------------------------------------------
+   Deux temps sans JavaScript : le bouton rouge n'apparaît qu'après avoir
+   déplié le bloc. Un clic isolé ne peut donc rien supprimer. */
+
+.confirm summary { cursor: pointer; list-style: none; display: inline-block; }
+.confirm summary::-webkit-details-marker { display: none; }
+.confirm[open] > summary { margin-bottom: 0.75rem; }
+.confirm[open] {
+  padding: 0.75rem;
+  border: 1px solid color-mix(in srgb, var(--accent-deep) 40%, var(--line));
   border-radius: var(--radius-surface);
   background: var(--cream);
-  color: var(--ink);
 }
-dialog::backdrop { background: rgb(35 35 35 / 0.4); }
+.confirm--inline[open] { display: block; margin-top: 0.5rem; text-align: left; }
+
+/* Photos ----------------------------------------------------------------------------- */
+
+.admin-photos { display: grid; gap: 1.25rem; grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr)); list-style: none; margin: 0 0 2rem; padding: 0; }
+.admin-photo { padding: 0.75rem; border: 1px solid var(--line); border-radius: var(--radius-surface); }
+.admin-photo > img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: var(--radius-small); background: var(--sand); }
+.admin-photo p { margin: 0.5rem 0; }
+.admin-photo__alt input { margin-top: 0.4rem; margin-bottom: 0.4rem; }
+.admin-photo__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin-top: 0.5rem; }
+.admin-upload { padding-top: 1.5rem; border-top: 1px solid var(--line); }
+.admin-upload button { margin-top: 1rem; }
+input[type='file'] { margin-top: 0.4rem; font-size: 0.875rem; }
+
+/* Connexion ----------------------------------------------------------------------------- */
+
+.admin--blank { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: var(--gutter); }
+.admin-login { width: min(26rem, 100%); }
+.admin-login__card { padding: 2rem; border: 1px solid var(--line); border-radius: var(--radius-surface); background: var(--white); }
+.admin-login__logo { height: 1.75rem; width: auto; margin-bottom: 1.5rem; }
+.admin-login h1 { margin: 0; }
+.admin-login form { margin-top: 1.5rem; }
 
 /* --- Tunnel de commande ------------------------------------------------------
    Les champs d'adresse et ceux du point de retrait sont tous les deux dans la

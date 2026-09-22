@@ -19,10 +19,14 @@ final class Money
         return number_format($cents / 100, 2, ',', ' ') . ' €';
     }
 
-    /** 1490 -> "14.90", valeur d'un champ de formulaire en euros. */
+    /**
+     * 1490 -> "14,90", valeur d'un champ de formulaire en euros.
+     * Virgule et non point : c'est la notation attendue en France, et
+     * `fromInput()` accepte les deux au retour.
+     */
     public static function toInput(int $cents): string
     {
-        return number_format($cents / 100, 2, '.', '');
+        return number_format($cents / 100, 2, ',', '');
     }
 
     /**
