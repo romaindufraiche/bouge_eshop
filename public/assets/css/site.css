@@ -619,6 +619,22 @@ main { flex: 1; }
 .reassurance strong { font-weight: 600; }
 .reassurance span { color: var(--ink-soft); }
 
+/* Repli pour les navigateurs sans `aspect-ratio` (Safari antérieur à 15,
+   Chrome antérieur à 88). Sans cette règle, les cadres d'images s'écrasent à
+   zéro et la page paraît vide. La proportion n'est pas respectée, mais la
+   grille tient debout. */
+@supports not (aspect-ratio: 1 / 1) {
+  .product-card__media,
+  .gallery__main { min-height: 20rem; }
+  .gallery__thumbs a { min-height: 4.5rem; }
+  .apercus img { min-height: 8rem; }
+  .cart-lines__media { min-height: 5rem; }
+  .admin-product__media { min-height: 3rem; }
+  .admin-photo > img { min-height: 12rem; }
+  /* Les blocs carrés posés en style en ligne dans les gabarits. */
+  [style*='aspect-ratio'] { min-height: 16rem; }
+}
+
 /* --- 6. Boutons et pastilles ----------------------------------------------- */
 
 .btn {

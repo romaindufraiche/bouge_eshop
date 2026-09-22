@@ -18,7 +18,10 @@
 .apercu-banniere {
   background: #232323; color: #fffbe8;
   font: 400 0.8125rem/1.5 'Manrope', system-ui, sans-serif;
-  padding: 0.75rem 1.25rem; text-align: center;
+  padding: 0.6rem 1.25rem; text-align: center;
+}
+@media (max-width: 640px) {
+  .apercu-banniere { font-size: 0.75rem; padding: 0.5rem 1rem; }
 }
 .apercu-banniere p { margin: 0 auto; max-width: 52rem; }
 .apercu-banniere strong { color: #fffbe8; }
@@ -35,10 +38,8 @@ form:has([disabled]) { opacity: 0.6; }
 </head>
 <body class="boutique">
 <div class="apercu-banniere">
-  <p><strong>Aperçu statique</strong> — la navigation, elle, fonctionne :
-     menus, catégories, usages, sélections et fiches produits.
-     La recherche, les filtres et le panier ont besoin d'un serveur PHP ;
-     ils sont donc grisés ici, pas cassés.</p>
+  <p><strong>Aperçu statique.</strong> La navigation fonctionne.
+     Recherche, filtres et panier demandent un serveur PHP : ils sont grisés.</p>
 </div>
 
 <a class="sr-only skip-link" href="#contenu">Aller au contenu</a>
