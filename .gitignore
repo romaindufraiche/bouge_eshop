@@ -6,6 +6,11 @@
 !/public/uploads/.gitkeep
 !/public/uploads/.htaccess
 
+# Documentation des bibliothèques tierces : inutile au fonctionnement du site,
+# et le README de Stripe contient un exemple de clé de test qui déclenche
+# l'analyse de secrets de GitHub.
+/vendor/**/*.md
+
 # Fichiers système
 .DS_Store
 Thumbs.db
