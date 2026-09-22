@@ -5,104 +5,119 @@ vêtements. Vente en ligne avec livraison en France ou retrait sur place, et
 une interface d'administration prévue pour être utilisée sans compétence
 technique.
 
+**PHP et MySQL, sans framework ni étape de compilation.** Le site tourne sur
+n'importe quel hébergement mutualisé à quelques euros par mois : on dépose
+les fichiers, on importe la base, c'est en ligne.
+
 ## Sommaire
 
+- [Ce qu'il faut](#ce-quil-faut)
 - [Démarrer en local](#démarrer-en-local)
 - [Configuration](#configuration)
 - [Brancher Stripe](#brancher-stripe)
+- [Mise en ligne sur un hébergement mutualisé](#mise-en-ligne-sur-un-hébergement-mutualisé)
 - [Utiliser l'administration](#utiliser-ladministration)
 - [Direction artistique](#direction-artistique)
 - [Organisation du code](#organisation-du-code)
-- [Mise en ligne sur Vercel](#mise-en-ligne-sur-vercel)
+- [Choix techniques](#choix-techniques)
 - [Points à traiter avant l'ouverture](#points-à-traiter-avant-louverture)
+
+## Ce qu'il faut
+
+| Élément | Version | Remarque |
+| --- | --- | --- |
+| PHP | 8.1 ou plus | Avec `pdo_mysql`, `mbstring` et `curl` |
+| MySQL ou MariaDB | 5.7+ / 10.2+ | Une base, un utilisateur |
+| Apache | avec `mod_rewrite` | Standard chez tous les hébergeurs mutualisés |
+
+Pas de Node.js, pas de compilation, pas de `composer install` sur le serveur :
+le dossier `vendor/` (3,5 Mo, la bibliothèque Stripe) est versionné avec le
+projet, précisément pour que la mise en ligne se résume à un transfert de
+fichiers.
 
 ## Démarrer en local
 
-Il faut Node.js 20 ou plus récent.
-
 ```bash
-npm install
-cp .env.example .env        # puis renseigner les valeurs, voir ci-dessous
-npx prisma db push          # crée la base SQLite prisma/dev.db
-npm run db:seed             # compte admin + catalogue de démonstration
-npm run dev
+# 1. La base
+mysql -u root -p -e "CREATE DATABASE bouge CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+
+# 2. La configuration
+cp config/config.example.php config/config.php
+#    puis renseigner les identifiants de base et 'site_url' => 'http://localhost:8000'
+
+# 3. Les tables et le compte d'administration
+php database/install.php contact@bouge.fr bouge-dev-2026
+
+# 4. Un catalogue de démonstration (facultatif)
+php database/seed.php
+
+# 5. Le serveur de développement
+php -S localhost:8000 -t public dev-server.php
 ```
 
-La boutique répond sur http://localhost:3000 et l'administration sur
-http://localhost:3000/admin.
+La boutique répond sur <http://localhost:8000> et l'administration sur
+<http://localhost:8000/admin>.
 
-### Commandes disponibles
+> L'option `-t public` est indispensable : sans elle, les images et la feuille
+> de style renvoient 404.
 
-| Commande | Effet |
+### Les deux scripts de base
+
+| Script | Ce qu'il fait |
 | --- | --- |
-| `npm run dev` | Serveur de développement |
-| `npm run build` | Génère le client Prisma puis compile le site |
-| `npm run start` | Sert la version compilée |
-| `npm run lint` | Analyse statique du code |
-| `npm run db:push` | Applique le schéma Prisma à la base |
-| `npm run db:seed` | (Re)crée le catalogue de démonstration |
-| `npm run db:studio` | Explorateur de base de données |
-| `npm run db:reset` | Réinitialise complètement la base |
+| `php database/install.php <email> <mot-de-passe>` | **Crée les tables** à partir de `database/schema.sql`, puis le compte d'administration. Le catalogue reste vide. C'est le script d'une vraie installation. |
+| `php database/seed.php [email] [mot-de-passe]` | Remplit un catalogue de démonstration (5 catégories, 14 produits). Les tables doivent déjà exister. |
 
-> `db:seed` vide et recrée le catalogue. Les **commandes ne sont jamais
-> touchées** : elles conservent les libellés et les prix recopiés au moment de
-> l'achat.
+`install.php` **recrée les tables** et efface donc tout le contenu existant,
+commandes comprises : il est fait pour une première installation.
+
+`seed.php` peut être relancé à volonté pour remettre le catalogue de
+démonstration à zéro : les **commandes ne sont jamais touchées**, elles
+conservent les libellés et les prix recopiés au moment de l'achat.
 
 ## Configuration
 
-Toutes les variables sont décrites dans `.env.example`. Les essentielles :
+Deux fichiers, aucune variable d'environnement.
 
-| Variable | Rôle |
+### `config/config.php` — ce qui change d'une installation à l'autre
+
+Copié depuis `config/config.example.php`, **jamais versionné** : il contient
+vos mots de passe.
+
+| Clé | Rôle |
 | --- | --- |
-| `DATABASE_URL` | SQLite en développement, PostgreSQL en production |
-| `NEXT_PUBLIC_SITE_URL` | URL publique, utilisée par Stripe et le référencement |
-| `AUTH_SECRET` | Signe le cookie de session admin — 32 caractères minimum |
-| `ADMIN_EMAIL` / `ADMIN_PASSWORD` | Compte créé par `npm run db:seed` |
-| `STRIPE_SECRET_KEY` | Clé secrète Stripe |
-| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Clé publique Stripe |
-| `STRIPE_WEBHOOK_SECRET` | Secret de signature du webhook |
-| `UPLOAD_DRIVER` | `local` (défaut) ou un service externe |
+| `db.host` / `name` / `user` / `password` | Identifiants donnés par l'hébergeur |
+| `db.port` / `socket` | À laisser vides sauf exigence de l'hébergeur |
+| `site_url` | Adresse publique, sans slash final. Sert aux retours Stripe et au référencement |
+| `stripe.secret_key` / `publishable_key` | Clés du tableau de bord Stripe |
+| `stripe.webhook_secret` | Donné à la création du webhook |
+| `debug` | `true` en développement seulement |
 
-Générer un secret d'authentification :
+> `debug` doit rester à `false` en production : une erreur détaillée affichée
+> au public révèle la structure du site et parfois des identifiants.
 
-```bash
-openssl rand -base64 32
-```
+### `config/shop.php` — les réglages commerciaux
 
-### Réglages commerciaux
-
-Les frais de port, le seuil de livraison offerte et les coordonnées de la
-boutique ne sont pas en base : ils vivent dans `src/lib/shop-config.ts`.
-Modifier une valeur suffit, aucune migration n'est nécessaire.
-
-```ts
-export const SHIPPING = {
-  flatRateCents: 490,    // 4,90 € de frais de port
-  freeAboveCents: 6000,  // offerts à partir de 60 € — mettre null pour désactiver
-  pickupCents: 0,        // le retrait est toujours gratuit
-};
-```
-
-> Ces montants sont une **hypothèse de départ** : le cahier des charges ne
-> fixait pas de grille tarifaire.
+Versionné, car il décrit la boutique et non le serveur : nom, baseline,
+adresse de contact, frais de port (`490` centimes), franco de port
+(`6000` centimes), plafonds du panier, taille maximale des photos.
 
 ## Brancher Stripe
 
-Le paiement est un vrai paiement Stripe Checkout, pas une simulation.
+1. Créer un compte sur [stripe.com](https://stripe.com) et récupérer les clés
+   de test dans « Développeurs » → « Clés API ».
+2. Les reporter dans `config/config.php`.
+3. Créer le point de terminaison dans le tableau de bord Stripe :
+   `https://<votre-domaine>/webhook/stripe`, en écoutant
+   **`checkout.session.completed`**. Le secret `whsec_…` affiché va dans
+   `stripe.webhook_secret`.
 
-1. Récupérer les clés de test sur
-   https://dashboard.stripe.com/test/apikeys et les mettre dans `.env`.
-2. En local, relayer les événements vers l'application :
+En local, le webhook n'est pas joignable depuis Internet ; utilisez la CLI
+Stripe :
 
-   ```bash
-   stripe listen --forward-to localhost:3000/api/stripe/webhook
-   ```
-
-   La commande affiche un secret `whsec_…` à reporter dans
-   `STRIPE_WEBHOOK_SECRET`.
-3. En production, créer le point de terminaison dans le tableau de bord
-   Stripe : `https://<votre-domaine>/api/stripe/webhook`, en écoutant
-   `checkout.session.completed`.
+```bash
+stripe listen --forward-to localhost:8000/webhook/stripe
+```
 
 ### Pourquoi le webhook est indispensable
 
@@ -110,7 +125,8 @@ C'est **le seul endroit** où une commande passe à l'état « payée » et où 
 stock est décompté. Le retour du navigateur sur la page de confirmation ne
 prouve rien : il peut être rejoué, interrompu ou fabriqué. Sans webhook
 configuré, les commandes resteront indéfiniment « en attente de paiement »,
-même après un paiement réellement encaissé.
+même après un paiement réellement encaissé — et l'administration refusera de
+les marquer payées à la main, pour la même raison.
 
 Le traitement est idempotent : Stripe rejoue parfois un même événement, et le
 stock ne doit être décompté qu'une fois.
@@ -120,25 +136,107 @@ stock ne doit être décompté qu'une fois.
 En mode test, utiliser la carte `4242 4242 4242 4242`, n'importe quelle date
 future et n'importe quel cryptogramme.
 
+## Mise en ligne sur un hébergement mutualisé
+
+Testé dans l'esprit des offres courantes : o2switch, OVH, Ionos, Hostinger,
+LWS. Aucune n'a besoin d'un accès SSH, sauf pour lancer le script
+d'installation — et une solution sans SSH est décrite plus bas.
+
+### 1. Créer la base de données
+
+Dans l'espace client de l'hébergeur, rubrique « Bases de données » : créer une
+base **en utf8mb4** et un utilisateur. Noter les quatre valeurs (hôte, nom,
+utilisateur, mot de passe).
+
+### 2. Transférer les fichiers
+
+En FTP (FileZilla) ou par le gestionnaire de fichiers de l'hébergeur.
+
+**Le mieux**, si l'hébergeur permet de choisir la racine du domaine (c'est le
+cas chez o2switch et Hostinger) : déposer tout le projet en dehors de l'espace
+web, puis faire pointer le domaine sur le dossier `public/`. Le code de la
+boutique, la configuration et les gabarits restent alors hors de portée du web.
+
+**Sinon** : déposer tout le projet dans `www/` (ou `public_html/`). Le fichier
+`.htaccess` à la racine du projet redirige vers `public/` et refuse l'accès
+direct à `config/`, `src/`, `templates/`, `database/` et `vendor/`.
+
+### 3. Renseigner la configuration
+
+Copier `config/config.example.php` en `config/config.php`, y mettre les
+identifiants de la base, l'adresse réelle du site, les clés Stripe **de
+production**, et `'debug' => false`.
+
+### 4. Créer les tables et le compte d'administration
+
+Avec un accès SSH :
+
+```bash
+php database/install.php contact@votre-domaine.fr "un mot de passe long"
+```
+
+Sans SSH : importer `database/schema.sql` depuis phpMyAdmin (onglet
+« Importer »), puis créer le compte avec une requête SQL, le mot de passe
+étant haché **sur votre poste** — il ne doit jamais circuler en clair :
+
+```bash
+php -r 'echo password_hash("votre-mot-de-passe", PASSWORD_DEFAULT), PHP_EOL;'
+```
+
+```sql
+INSERT INTO admin_users (email, password_hash, name)
+VALUES ('contact@votre-domaine.fr', '<le hachage obtenu>', 'Administration');
+```
+
+### 5. Droits du dossier des photos
+
+`public/uploads/` doit être accessible en écriture par PHP (permissions `755`,
+ou `775` selon l'hébergeur). C'est le seul dossier dans ce cas.
+
+Il contient un `.htaccess` qui **interdit l'exécution de code** : si un fichier
+`.php` y parvenait malgré les contrôles de type, il ne serait servi qu'en
+texte.
+
+### 6. Vérifier
+
+- La boutique s'affiche, avec ses images et sa feuille de style.
+- `/admin/connexion` accepte le compte créé.
+- Un paiement de test aboutit et la commande apparaît dans l'administration
+  au statut « Payée » — c'est ce qui prouve que le webhook fonctionne.
+
+### Sauvegardes
+
+Deux choses à sauvegarder, et rien d'autre :
+
+1. **La base** (export SQL depuis phpMyAdmin) — le catalogue et les commandes.
+2. **`public/uploads/`** — les photos des produits.
+
+La plupart des hébergeurs proposent une sauvegarde automatique ; vérifier
+qu'elle couvre bien les deux.
+
 ## Utiliser l'administration
 
-`/admin`, accessible après connexion avec le compte créé au `db:seed`.
+`/admin`, accessible après connexion.
 
-- **Tableau de bord** — commandes à traiter, stocks faibles, total encaissé.
+- **Tableau de bord** — commandes à préparer, total encaissé, stocks faibles.
 - **Produits** — recherche, filtre par statut, tri. Le formulaire couvre le
   nom, la description, la catégorie, le prix, une promotion avec dates de
   validité, le stock, les déclinaisons taille/couleur et le référencement.
-- **Photos** — envoi multiple, ordre réglé par les flèches ↑ ↓, texte
-  alternatif modifiable, suppression. La première photo de la liste est celle
-  qui s'affiche dans le catalogue.
-- **Vente et disponibilité** — trois réglages par produit : le mettre en
-  avant en haut de l'accueil, signaler qu'il est disponible en magasin, ou
-  indiquer qu'il est vendu par un revendeur. Dans ce dernier cas, la fiche
-  remplace « Ajouter au panier » par un lien vers le revendeur, n'affiche
-  aucun prix — c'est celui du revendeur qui fait foi — et le serveur refuse
-  de mettre le produit au panier, même si la requête est forgée à la main.
+- **Photos** — envoi multiple, ordre réglé par « Avancer » et « Reculer »,
+  texte alternatif modifiable, suppression. La première photo de la liste est
+  celle qui s'affiche dans le catalogue.
+- **Vente et disponibilité** — trois réglages par produit : le mettre en avant
+  en haut de l'accueil, signaler qu'il est disponible en magasin, ou indiquer
+  qu'il est vendu par un revendeur. Dans ce dernier cas, la fiche remplace
+  « Ajouter au panier » par un lien vers le revendeur, n'affiche aucun prix —
+  c'est celui du revendeur qui fait foi — et le serveur refuse de mettre le
+  produit au panier, même si la requête est forgée à la main.
 - **Catégories** — création et renommage. Une catégorie qui contient encore
   des produits ne peut pas être supprimée : il faut d'abord les déplacer.
+- **Points de retrait** — les adresses proposées au client qui vient chercher
+  sa commande. Sans point actif, seule la livraison est possible. Un point
+  rattaché à des commandes ne peut pas être supprimé, seulement retiré du
+  tunnel : les clients concernés doivent continuer à lire l'adresse.
 - **Commandes** — filtres par statut et par mode de remise, détail complet,
   changement de statut et note interne.
 
@@ -146,10 +244,12 @@ Quelques principes de fonctionnement utiles à connaître :
 
 - Un nouveau produit part toujours en **brouillon**. Il n'apparaît sur la
   boutique qu'une fois passé « En ligne ».
-- Changer le statut d'une commande **ne prévient pas le client** et ne
-  modifie pas le stock.
+- Changer le statut d'une commande **ne prévient pas le client** et ne modifie
+  pas le stock.
+- Le passage à « Payée » n'est jamais manuel : il vient de Stripe.
 - Supprimer un produit ne touche pas aux commandes déjà passées : elles
   gardent le nom et le prix pratiqués au moment de l'achat.
+- Les suppressions demandent toujours une confirmation, en deux temps.
 
 ## Direction artistique
 
@@ -169,28 +269,29 @@ Le site applique la charte officielle
 | Secondaire | Blanc | `#ffffff` |
 
 Trois valeurs dérivées complètent la palette pour des besoins d'interface
-qu'un livret de marque ne couvre pas : `--color-sand` et `--color-line` (du
-crème mêlé de brun café, pour les surfaces et les filets) et
-`--color-accent-deep` (`#a8441b`).
+qu'un livret de marque ne couvre pas : `--sand` et `--line` (du crème mêlé de
+brun café, pour les surfaces et les filets) et `--accent-deep` (`#a8441b`).
 
-Cette dernière mérite une explication : **l'orange vif de la charte plafonne
-à 3,4:1 sur le crème**, ce qui suffit pour un aplat ou un contour mais pas
-pour du texte courant, où le niveau AA exige 4,5:1. Le ton assombri atteint
-5,7:1 en gardant la teinte de la marque. L'orange vif reste donc utilisé pour
-les aplats décoratifs, et sa variante assombrie dès qu'il y a du texte.
+Cette dernière mérite une explication : **l'orange vif de la charte plafonne à
+3,4:1 sur le crème**, ce qui suffit pour un aplat ou un contour mais pas pour
+du texte courant, où le niveau AA exige 4,5:1. Le ton assombri atteint 5,7:1
+en gardant la teinte de la marque. L'orange vif reste donc utilisé pour les
+aplats décoratifs, et sa variante assombrie dès qu'il y a du texte.
+
+Tout est déclaré en jetons CSS en tête de `public/assets/css/site.css` : aucun
+composant ne code une couleur en dur.
 
 ### Typographies
 
-| Usage | Police | Source |
+| Usage | Police | Fichier |
 | --- | --- | --- |
-| Titres | Sun Motter | Fichier de la charte, hébergé avec le site |
-| Sous-titres et corps | Manrope | Google Fonts |
-| Notes manuscrites | Reenie Beanie | Google Fonts |
+| Titres | Sun Motter | `public/assets/fonts/SunMotter.woff2` |
+| Sous-titres et corps | Manrope | `Manrope-400/600/700.woff2` |
+| Notes manuscrites | Reenie Beanie | `ReenieBeanie-400.woff2` |
 
-Sun Motter a été convertie de l'OTF d'origine en WOFF2 (255 Ko → 90 Ko) et
-vit dans `src/fonts/`. Manrope et Reenie Beanie sont téléchargées à la
-compilation par `next/font`, puis servies depuis notre propre domaine :
-aucune requête vers Google côté visiteur.
+Les trois sont **hébergées avec le site**. Aucune requête n'est faite vers
+Google Fonts : c'est plus rapide, et cela évite de transmettre l'adresse IP
+des visiteurs à un tiers — un point régulièrement reproché au RGPD.
 
 > **Particularité de Sun Motter, à connaître avant d'écrire du CSS :** dans
 > cette police, les minuscules accentuées pointent vers le glyphe NON accentué
@@ -200,14 +301,13 @@ aucune requête vers Google côté visiteur.
 > « materiel ». La police ne dessinant de toute façon que des capitales, le
 > rendu est identique, accents en plus.
 
-La police d'affichage est réservée à la boutique, délimitée par l'attribut
-`data-brand` posé dans `ShopChrome`. L'administration garde Manrope pour ses
-titres : elle est dense et lue de près, une police d'affichage grasse y
-nuirait à la lecture.
+La police d'affichage est réservée à la boutique (`body.boutique`).
+L'administration garde Manrope pour ses titres : elle est dense et lue de
+près, une police d'affichage grasse y nuirait à la lecture.
 
 ### Logo et visuels
 
-Les fichiers web sont dans `public/brand/`, redimensionnés depuis les
+Les fichiers web sont dans `public/assets/brand/`, redimensionnés depuis les
 originaux de la charte (jusqu'à 25 000 px de large) :
 
 - `wordmark-anthracite.png` / `wordmark-creme.png` — en-tête et pied de page
@@ -215,16 +315,16 @@ originaux de la charte (jusqu'à 25 000 px de large) :
 - `tampon-*.png`, `monogramme-*.png` — sceau et monogramme
 - `mascotte-*.png` — la grenouille, dans ses trois poses
 
-Le favicon (`src/app/icon.png`) et l'icône iOS (`src/app/apple-icon.png`)
-reprennent le monogramme : le tampon complet, avec son texte circulaire, est
-illisible à 32 px.
+Le favicon (`icone-512.png`) et l'icône iOS (`icone-apple.png`) reprennent le
+monogramme : le tampon complet, avec son texte circulaire, est illisible à
+32 px.
 
 ### Formes
 
 Le logo est très arrondi et le ton de la marque est chaleureux : boutons,
-filtres et badges reprennent cette rondeur en pastille, comme les stickers de
-l'identité. Tout tient dans un jeton — passer `--radius-control` de `9999px`
-à `6px` dans `src/app/globals.css` suffit pour une allure anguleuse.
+filtres et pastilles reprennent cette rondeur, comme les stickers de
+l'identité. Tout tient dans un jeton — passer `--radius-control` de `9999px` à
+`6px` suffit pour une allure anguleuse.
 
 ### Ton
 
@@ -235,114 +335,70 @@ textes du site suivent cette ligne, en restant concrets et sans superlatif.
 ## Organisation du code
 
 ```
-prisma/
-  schema.prisma          Modèle de données, commenté
-  seed.ts                Catalogue de démonstration
+config/
+  config.example.php     Modèle de configuration à copier
+  shop.php               Réglages commerciaux (frais de port, contact…)
+database/
+  schema.sql             Structure des 8 tables, commentée
+  install.php            Installation : tables + compte admin
+  seed.php               Catalogue de démonstration
+public/                  ← seule racine exposée au web
+  index.php              Contrôleur frontal : tout passe par lui
+  .htaccess              Réécriture d'URL, compression, cache
+  assets/                CSS, polices, visuels de marque
+  uploads/               Photos envoyées depuis l'administration
 src/
-  app/
-    (boutique)/          Pages publiques — en-tête, panier, pied de page
-    admin/
-      connexion/         Formulaire de connexion, hors habillage admin
-      (protege)/         Écrans protégés : produits, catégories, commandes
-    api/
-      panier/            Chiffrage du panier côté serveur
-      stripe/webhook/    Confirmation de paiement
-  components/            Composants réutilisables (boutique, admin, UI)
-  lib/                   Accès aux données, prix, panier, authentification
-  middleware.ts          Protection de /admin
+  Controller/            Boutique, panier, commande, webhook
+  Controller/Admin/      Écrans protégés
+  Repository/            Requêtes SQL, une classe par table
+  Support/               Routeur, vues, session, panier, prix, Stripe…
+  routes.php             Table des routes
+templates/
+  layout/                shop, admin, blank
+  boutique/              Pages publiques
+  admin/                 Écrans d'administration
+  partials/              Fragments réutilisés (prix, vignette, panier…)
+vendor/                  Bibliothèque Stripe (versionnée, voir plus haut)
+dev-server.php           Routeur du serveur PHP intégré, développement seul
 ```
 
-Quelques conventions qui expliquent le reste :
+## Choix techniques
+
+Quelques conventions qui expliquent le reste du code.
 
 - **Les montants sont des entiers en centimes**, partout. Aucun calcul en
   virgule flottante, et c'est déjà l'unité attendue par Stripe.
-- **Le navigateur ne transmet jamais de prix.** Le panier ne contient que des
-  identifiants et des quantités ; libellés, prix, promotions et stocks sont
-  relus en base à chaque affichage et avant chaque paiement.
-- **Les modules serveur sont marqués `server-only`.** Les importer depuis un
-  composant client échoue explicitement plutôt que de faire échouer la
-  compilation sur un message obscur.
-- **La direction artistique tient dans `src/app/globals.css`.** Couleurs,
-  typographies et rayons sont des jetons issus de la charte ; aucun composant
-  ne code une valeur en dur. Voir [Direction artistique](#direction-artistique).
+- **Le navigateur ne transmet jamais de prix.** Le panier en session ne
+  contient que des identifiants et des quantités ; libellés, prix, promotions
+  et stocks sont relus en base à chaque affichage et avant chaque paiement.
+- **Toutes les requêtes sont préparées**, avec `ATTR_EMULATE_PREPARES` à
+  `false` : les valeurs ne sont jamais concaténées dans le SQL. Les rares
+  fragments variables (le tri d'une liste) viennent d'une liste fermée.
+- **Tout ce qui s'affiche passe par `e()`**, la fonction d'échappement HTML.
+  Un nom de produit contenant du HTML est affiché, jamais interprété.
+- **Chaque formulaire POST porte un jeton CSRF**, comparé en temps constant.
+  Chaque écran et chaque action de l'administration appellent `Auth::require()`
+  en première ligne : une action déclenchée directement ne passe pas.
+- **Le type des photos est déterminé à partir de leur contenu**, pas de
+  l'en-tête envoyé par le navigateur, et leur nom est réécrit en aléatoire.
+- **Le site fonctionne sans JavaScript.** Menu mobile en case à cocher,
+  galerie par liens `?photo=N`, choix livraison/retrait piloté par le CSS
+  `:has()`, confirmations de suppression en `<details>`. Rien à charger, rien
+  qui casse.
+- **Les statuts sont des `VARCHAR`, pas des `ENUM`**, et leurs valeurs vivent
+  dans `src/Support/Status.php` : ajouter un statut ne demande pas de modifier
+  la structure d'une table.
 
-### Rendu et fraîcheur des pages
+### Pourquoi PHP plutôt que Node.js
 
-Les pages publiques sont statiques et régénérées au maximum toutes les cinq
-minutes, ce qui couvre l'ouverture et la fermeture automatiques des
-promotions datées. L'administration déclenche en plus une régénération
-immédiate à chaque enregistrement : un prix modifié est visible tout de suite.
+Le site a besoin d'un serveur : sessions, paiement, webhook, administration.
+Un export statique (GitHub Pages, Netlify sans fonctions) est donc exclu,
+quelle que soit la technologie.
 
-## Mise en ligne sur Vercel
-
-### 1. Passer sur PostgreSQL
-
-SQLite écrit dans un fichier ; l'hébergement de Vercel n'a pas de disque
-persistant. Il faut une base PostgreSQL (Vercel Postgres, Neon, Supabase…).
-
-Dans `prisma/schema.prisma` :
-
-```prisma
-datasource db {
-  provider = "postgresql"   // au lieu de "sqlite"
-  url      = env("DATABASE_URL")
-}
-```
-
-Le reste du schéma n'a pas besoin d'être touché : il n'utilise volontairement
-aucune fonctionnalité absente de SQLite (pas d'`enum`, pas de liste de
-scalaires), ce qui lui permet de fonctionner sur les deux moteurs.
-
-Puis créer les tables, depuis votre poste, en pointant `DATABASE_URL` sur la
-base de production :
-
-```bash
-npx prisma db push
-```
-
-> **Pourquoi `db push` et pas `migrate deploy` ?** Le projet ne contient aucun
-> fichier de migration, et c'est volontaire : une migration générée pour
-> SQLite contient du SQL propre à SQLite, inutilisable sur PostgreSQL. Un même
-> dossier `prisma/migrations` ne peut donc pas servir aux deux moteurs.
-> `db push` compare le schéma à la base et crée ce qui manque, quel que soit
-> le moteur.
->
-> Une fois le schéma stabilisé sur PostgreSQL, il est recommandé de passer aux
-> migrations pour garder une trace des évolutions : avec `provider =
-> "postgresql"` en place, lancer `npx prisma migrate dev --name init`,
-> versionner le dossier créé, puis utiliser `npx prisma migrate deploy` aux
-> déploiements suivants.
-
-### Hébergement : pourquoi pas GitHub Pages
-
-GitHub Pages ne sert que des fichiers statiques, sans processus serveur. Ce
-site en a besoin pour presque tout : sept fichiers d'actions serveur, deux
-routes d'API (le chiffrage du panier et le webhook Stripe), le middleware qui
-protège `/admin`, et vingt et un fichiers qui interrogent la base. Un export
-statique échoue d'ailleurs à la compilation.
-
-Il faut donc un hébergeur capable d'exécuter Node.js : Vercel, Netlify,
-Cloudflare Workers, Railway, Render, ou n'importe quel serveur avec
-`npm run build && npm run start`.
-
-### 2. Renseigner les variables d'environnement
-
-Toutes celles du `.env`, avec les clés Stripe **de production** et
-`NEXT_PUBLIC_SITE_URL` pointant sur le domaine réel.
-
-### 3. Créer le compte administrateur
-
-`npm run db:seed` crée le compte mais recrée aussi le catalogue de
-démonstration : à n'utiliser qu'au tout premier déploiement.
-
-### 4. Basculer le stockage des photos
-
-Avec `UPLOAD_DRIVER=local`, les photos envoyées depuis l'admin sont écrites
-dans `public/uploads` et **disparaissent à chaque déploiement**. Pour la
-production, implémenter le service choisi dans `src/lib/storage.ts` : les deux
-fonctions `saveUploadedImage` et `deleteStoredImage` sont les seuls points à
-écrire, le reste de l'application n'a pas à changer. Penser à ajouter le
-domaine du service dans `images.remotePatterns` (`next.config.ts`).
+Restait le choix de la plateforme. PHP et MySQL tournent sur l'offre à 3 €
+par mois de n'importe quel hébergeur français, avec phpMyAdmin pour la base et
+un accès FTP pour les fichiers ; il n'y a ni build, ni dépendances à
+installer, ni version de Node à maintenir. C'est ce qui a été retenu.
 
 ## Points à traiter avant l'ouverture
 
@@ -356,17 +412,11 @@ domaine du service dans `images.remotePatterns` (`next.config.ts`).
       Vérifier que la licence l'autorise pour un usage web avant la mise en
       ligne.
 - [ ] **Grille tarifaire de livraison** : vérifier les montants de
-      `src/lib/shop-config.ts`.
-- [ ] **Point de retrait** : l'adresse est celle du jeu de démonstration.
-- [ ] **Courriels de confirmation** : aucun courriel n'est envoyé pour
-      l'instant, ni au client ni à la boutique.
-- [ ] **Stockage externe des photos**, si l'admin doit servir à ajouter des
-      produits après la mise en ligne.
-
-### Avertissement de sécurité connu
-
-`npm audit` signale des vulnérabilités dans `deepmerge-ts`, une dépendance
-transitive du **CLI Prisma**. Ce paquet est une `devDependency` : il sert à
-générer le client et à appliquer les migrations, et n'est jamais exécuté par
-le site déployé. La seule correction proposée par npm est un retour à une
-version antérieure de Prisma.
+      `config/shop.php`.
+- [ ] **Points de retrait** : l'adresse en place est celle du jeu de
+      démonstration.
+- [ ] **Courriels de confirmation** : la boutique n'en envoie aucun. Activer
+      les reçus Stripe (« Paramètres » → « Reçus par e-mail ») couvre le
+      justificatif de paiement ; la confirmation de commande reste à écrire.
+- [ ] **Certificat HTTPS** : indispensable au paiement. Tous les hébergeurs
+      proposent Let's Encrypt gratuitement, souvent en une case à cocher.

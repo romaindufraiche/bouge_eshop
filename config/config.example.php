@@ -25,11 +25,6 @@ return [
     // Sans slash final. Sert aux URL de retour Stripe et aux balises SEO.
     'site_url' => 'https://www.bouge.fr',
 
-    // --- Sécurité -----------------------------------------------------------
-    // Clé secrète utilisée pour signer les sessions. Générez-en une avec :
-    //   php -r "echo bin2hex(random_bytes(32));"
-    'app_key' => 'a-remplacer-par-une-cle-aleatoire-de-64-caracteres',
-
     // --- Stripe -------------------------------------------------------------
     // Clés disponibles sur https://dashboard.stripe.com/apikeys
     'stripe' => [
@@ -40,15 +35,11 @@ return [
         'webhook_secret' => 'whsec_...',
     ],
 
-    // --- Envoi des courriels ------------------------------------------------
-    // Adresse expéditrice des confirmations de commande. Sur la plupart des
-    // hébergements mutualisés, elle doit appartenir à votre domaine.
-    'mail' => [
-        'from_address' => 'contact@bouge.fr',
-        'from_name'    => 'BOUGE.',
-        // Mettre à false pour désactiver complètement l'envoi de courriels.
-        'enabled'      => true,
-    ],
+    // --- Courriels ----------------------------------------------------------
+    // La boutique n'envoie aucun courriel elle-même : c'est Stripe qui
+    // adresse le reçu de paiement au client (à activer dans le tableau de
+    // bord Stripe, « Paramètres » → « Reçus par e-mail »). Vous suivez les
+    // commandes à préparer depuis l'administration.
 
     // --- Affichage des erreurs ----------------------------------------------
     // true en développement seulement. En production, laissez false : une

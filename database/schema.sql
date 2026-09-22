@@ -12,7 +12,7 @@
 --     d'arrondi possible, et c'est déjà l'unité attendue par Stripe.
 --   - Les colonnes de statut sont des VARCHAR et non des ENUM : ajouter une
 --     valeur ne demande alors pas de modifier la structure de la table. Les
---     valeurs autorisées sont listées dans src/Support/Statuts.php.
+--     valeurs autorisées sont listées dans src/Support/Status.php.
 --   - VARCHAR(190) sur les colonnes indexées en UNIQUE : au-delà, un index
 --     utf8mb4 dépasse la limite de 767 octets des anciens MySQL.
 -- ---------------------------------------------------------------------------

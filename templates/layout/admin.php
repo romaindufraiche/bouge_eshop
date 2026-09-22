@@ -26,6 +26,7 @@ $sections = [
     '/admin'            => 'Tableau de bord',
     '/admin/produits'   => 'Produits',
     '/admin/categories' => 'Catégories',
+    '/admin/points-de-retrait' => 'Points de retrait',
     '/admin/commandes'  => 'Commandes',
 ];
 ?>

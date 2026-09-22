@@ -433,6 +433,9 @@ main { flex: 1; }
   background: var(--accent-deep);
   color: var(--white);
 }
+/* Sans cette règle, le survol reprend celui de `.btn` (fond transparent) et
+   le bouton prend l'air d'être désactivé au moment précis où on le vise. */
+.btn--danger:hover { background: var(--ink); border-color: var(--ink); color: var(--cream); }
 
 .btn:disabled,
 .btn[aria-disabled='true'] {

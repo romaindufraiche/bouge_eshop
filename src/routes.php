@@ -19,6 +19,7 @@ use Bouge\Controller\Admin\AuthController as AdminAuthController;
 use Bouge\Controller\Admin\CategoryController as AdminCategoryController;
 use Bouge\Controller\Admin\DashboardController;
 use Bouge\Controller\Admin\OrderController as AdminOrderController;
+use Bouge\Controller\Admin\PickupPointController as AdminPickupPointController;
 use Bouge\Controller\Admin\ProductController as AdminProductController;
 
 // --- Boutique ----------------------------------------------------------------
@@ -77,6 +78,10 @@ $router->post('/admin/produits/photo/texte', [AdminProductController::class, 'up
 $router->get('/admin/categories', [AdminCategoryController::class, 'index']);
 $router->post('/admin/categories/enregistrer', [AdminCategoryController::class, 'save']);
 $router->post('/admin/categories/supprimer', [AdminCategoryController::class, 'delete']);
+
+$router->get('/admin/points-de-retrait', [AdminPickupPointController::class, 'index']);
+$router->post('/admin/points-de-retrait/enregistrer', [AdminPickupPointController::class, 'save']);
+$router->post('/admin/points-de-retrait/supprimer', [AdminPickupPointController::class, 'delete']);
 
 $router->get('/admin/commandes', [AdminOrderController::class, 'index']);
 $router->get('/admin/commandes/{id}', [AdminOrderController::class, 'show']);
