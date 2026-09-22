@@ -23,13 +23,23 @@
 }
 .apercu-banniere p { margin: 0 auto; max-width: 52rem; }
 .apercu-banniere strong { color: #fffbe8; }
+
+/* Les commandes qui ont besoin du serveur sont désactivées : un champ qui
+   ne répond pas passe pour un bug, un champ grisé pour ce qu'il est. */
+.apercu-inerte {
+  margin: 0.5rem 0 0;
+  font-size: 0.75rem;
+  color: #59443a;
+}
+form:has([disabled]) { opacity: 0.6; }
 </style>
 </head>
 <body class="boutique">
 <div class="apercu-banniere">
-  <p><strong>Aperçu statique</strong> — le design et la navigation sont réels.
-     Le panier, le paiement et l'administration ont besoin d'un serveur PHP :
-     ils ne fonctionnent pas ici.</p>
+  <p><strong>Aperçu statique</strong> — la navigation, elle, fonctionne :
+     menus, catégories, usages, sélections et fiches produits.
+     La recherche, les filtres et le panier ont besoin d'un serveur PHP ;
+     ils sont donc grisés ici, pas cassés.</p>
 </div>
 
 <a class="sr-only skip-link" href="#contenu">Aller au contenu</a>
@@ -58,9 +68,9 @@
 
             <form class="recherche" method="get" action="/recherche" role="search">
                 <label class="sr-only" for="recherche">Rechercher un produit</label>
-                <input type="search" id="recherche" name="q" placeholder="Rechercher un produit"
+                <input disabled type="search" id="recherche" name="q" placeholder="Rechercher un produit"
                        value="">
-                <button type="submit">
+                <button disabled type="submit">
                     <span class="sr-only">Rechercher</span>
                     <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor"
                          stroke-width="1.6" aria-hidden="true">
@@ -230,24 +240,25 @@
 
                         
                         <form method="post" action="/panier/ajouter" class="stack-l" style="margin-top:1.5rem">
-                            <input type="hidden" name="_token" value="8057b965327e13f5c0c16ca8091792cfd70494fbcf211d685646296c488d677c">                            <input type="hidden" name="product_id" value="127">
-                            <input type="hidden" name="slug" value="serviette-microfibre">
+                            <input disabled type="hidden" name="_token" value="608b5af76e5fe55d4bd82afd925ce94fd7a75a503fe502411537b9e7914c0542">                            <input disabled type="hidden" name="product_id" value="127">
+                            <input disabled type="hidden" name="slug" value="serviette-microfibre">
 
                             
                             <div class="row">
                                 <label class="t-s">
                                     <span class="muted">Quantité</span>
-                                    <input type="number" name="quantity" value="1" min="1"
+                                    <input disabled type="number" name="quantity" value="1" min="1"
                                            max="30"
                                            style="width:5.5rem;text-align:center;margin-left:.5rem;display:inline-block">
                                 </label>
 
-                                <button type="submit" class="btn btn--accent btn--lg"
+                                <button disabled type="submit" class="btn btn--accent btn--lg"
                                         >
                                     Ajouter au panier                                </button>
                             </div>
 
                                                     </form>
+<p class="apercu-inerte">Inactif dans l'aperçu : demande le serveur PHP.</p>
 
                                                             </div>
 
@@ -394,8 +405,9 @@
 </footer>
 
 <script>
-// Les formulaires (ajout au panier, commande) ont besoin du serveur : on les
-// neutralise plutôt que de laisser le visiteur sur une erreur.
+// Ceinture et bretelles : les champs sont déjà désactivés à la génération,
+// ce garde-fou couvre un envoi déclenché autrement (touche Entrée sur un
+// navigateur permissif, extension…).
 document.addEventListener('submit', function (event) {
   event.preventDefault();
   var b = document.querySelector('.apercu-banniere');

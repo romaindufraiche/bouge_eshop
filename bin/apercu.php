@@ -55,9 +55,10 @@ foreach (['nouveautes', 'promotions', 'en-magasin'] as $selection) {
 
 $banniere = <<<'HTML'
 <div class="apercu-banniere">
-  <p><strong>Aperçu statique</strong> — le design et la navigation sont réels.
-     Le panier, le paiement et l'administration ont besoin d'un serveur PHP :
-     ils ne fonctionnent pas ici.</p>
+  <p><strong>Aperçu statique</strong> — la navigation, elle, fonctionne :
+     menus, catégories, usages, sélections et fiches produits.
+     La recherche, les filtres et le panier ont besoin d'un serveur PHP ;
+     ils sont donc grisés ici, pas cassés.</p>
 </div>
 HTML;
 
@@ -70,13 +71,23 @@ $style = <<<'HTML'
 }
 .apercu-banniere p { margin: 0 auto; max-width: 52rem; }
 .apercu-banniere strong { color: #fffbe8; }
+
+/* Les commandes qui ont besoin du serveur sont désactivées : un champ qui
+   ne répond pas passe pour un bug, un champ grisé pour ce qu'il est. */
+.apercu-inerte {
+  margin: 0.5rem 0 0;
+  font-size: 0.75rem;
+  color: #59443a;
+}
+form:has([disabled]) { opacity: 0.6; }
 </style>
 HTML;
 
 $script = <<<'HTML'
 <script>
-// Les formulaires (ajout au panier, commande) ont besoin du serveur : on les
-// neutralise plutôt que de laisser le visiteur sur une erreur.
+// Ceinture et bretelles : les champs sont déjà désactivés à la génération,
+// ce garde-fou couvre un envoi déclenché autrement (touche Entrée sur un
+// navigateur permissif, extension…).
 document.addEventListener('submit', function (event) {
   event.preventDefault();
   var b = document.querySelector('.apercu-banniere');
@@ -131,6 +142,31 @@ foreach ($pages as $chemin => $fichier) {
     // développement : inutiles ici, et trompeuses si elles restent.
     $html = preg_replace('#\s*<link rel="canonical"[^>]*>#', '', $html) ?? $html;
     $html = str_replace($base . '/assets/', 'assets/', $html);
+
+    // Les commandes qui exigent le serveur sont grisées plutôt que laissées
+    // actives : un filtre qui ne filtre pas ressemble à une panne. Seuls les
+    // champs situés dans un <form> sont touchés — la case qui ouvre le menu
+    // mobile n'en est pas un et doit continuer de fonctionner.
+    $html = preg_replace_callback(
+        '#<form\b.*?</form>#s',
+        static function (array $m): string {
+            $formulaire = preg_replace(
+                '#<(input|select|textarea|button)\b#',
+                '<$1 disabled',
+                $m[0]
+            ) ?? $m[0];
+
+            // La recherche de l'en-tête se passe de mention : une ligne de
+            // texte à côté du champ disloquerait la barre. Le champ grisé
+            // dit déjà ce qu'il faut.
+            if (str_contains($m[0], 'class="recherche"')) {
+                return $formulaire;
+            }
+
+            return $formulaire . "\n<p class=\"apercu-inerte\">Inactif dans l'aperçu : demande le serveur PHP.</p>";
+        },
+        $html
+    ) ?? $html;
 
     $html = str_replace('<body class="boutique">', "<body class=\"boutique\">\n" . $banniere, $html);
     $html = str_replace('</head>', $style . "\n</head>", $html);

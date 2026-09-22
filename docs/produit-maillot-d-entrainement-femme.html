@@ -23,13 +23,23 @@
 }
 .apercu-banniere p { margin: 0 auto; max-width: 52rem; }
 .apercu-banniere strong { color: #fffbe8; }
+
+/* Les commandes qui ont besoin du serveur sont désactivées : un champ qui
+   ne répond pas passe pour un bug, un champ grisé pour ce qu'il est. */
+.apercu-inerte {
+  margin: 0.5rem 0 0;
+  font-size: 0.75rem;
+  color: #59443a;
+}
+form:has([disabled]) { opacity: 0.6; }
 </style>
 </head>
 <body class="boutique">
 <div class="apercu-banniere">
-  <p><strong>Aperçu statique</strong> — le design et la navigation sont réels.
-     Le panier, le paiement et l'administration ont besoin d'un serveur PHP :
-     ils ne fonctionnent pas ici.</p>
+  <p><strong>Aperçu statique</strong> — la navigation, elle, fonctionne :
+     menus, catégories, usages, sélections et fiches produits.
+     La recherche, les filtres et le panier ont besoin d'un serveur PHP ;
+     ils sont donc grisés ici, pas cassés.</p>
 </div>
 
 <a class="sr-only skip-link" href="#contenu">Aller au contenu</a>
@@ -58,9 +68,9 @@
 
             <form class="recherche" method="get" action="/recherche" role="search">
                 <label class="sr-only" for="recherche">Rechercher un produit</label>
-                <input type="search" id="recherche" name="q" placeholder="Rechercher un produit"
+                <input disabled type="search" id="recherche" name="q" placeholder="Rechercher un produit"
                        value="">
-                <button type="submit">
+                <button disabled type="submit">
                     <span class="sr-only">Rechercher</span>
                     <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor"
                          stroke-width="1.6" aria-hidden="true">
@@ -230,34 +240,34 @@
 
                         
                         <form method="post" action="/panier/ajouter" class="stack-l" style="margin-top:1.5rem">
-                            <input type="hidden" name="_token" value="dc55fc7b2b17609c04030226e088b8afcc828ec15446b77b68bfae11cb7041af">                            <input type="hidden" name="product_id" value="125">
-                            <input type="hidden" name="slug" value="maillot-d-entrainement-femme">
+                            <input disabled type="hidden" name="_token" value="e6908f95b42fc22dcae0e44cc36c2fae996705ffb3f53849780ca2d5abed8abc">                            <input disabled type="hidden" name="product_id" value="125">
+                            <input disabled type="hidden" name="slug" value="maillot-d-entrainement-femme">
 
                                                                                             <fieldset class="options">
                                     <legend>Taille</legend>
                                     <div class="options__list">
                                                                                                                                 <label class="option">
-                                                <input type="radio" name="variant_id" value="236"
+                                                <input disabled type="radio" name="variant_id" value="236"
                                                         required>
                                                 <span>36</span>
                                             </label>
                                                                                                                                 <label class="option">
-                                                <input type="radio" name="variant_id" value="237"
+                                                <input disabled type="radio" name="variant_id" value="237"
                                                         required>
                                                 <span>38</span>
                                             </label>
                                                                                                                                 <label class="option">
-                                                <input type="radio" name="variant_id" value="238"
+                                                <input disabled type="radio" name="variant_id" value="238"
                                                         required>
                                                 <span>40</span>
                                             </label>
                                                                                                                                 <label class="option">
-                                                <input type="radio" name="variant_id" value="239"
+                                                <input disabled type="radio" name="variant_id" value="239"
                                                         required>
                                                 <span>42</span>
                                             </label>
                                                                                                                                 <label class="option">
-                                                <input type="radio" name="variant_id" value="240"
+                                                <input disabled type="radio" name="variant_id" value="240"
                                                         required>
                                                 <span>44</span>
                                             </label>
@@ -267,17 +277,18 @@
                             <div class="row">
                                 <label class="t-s">
                                     <span class="muted">Quantité</span>
-                                    <input type="number" name="quantity" value="1" min="1"
+                                    <input disabled type="number" name="quantity" value="1" min="1"
                                            max="42"
                                            style="width:5.5rem;text-align:center;margin-left:.5rem;display:inline-block">
                                 </label>
 
-                                <button type="submit" class="btn btn--accent btn--lg"
+                                <button disabled type="submit" class="btn btn--accent btn--lg"
                                         >
                                     Ajouter au panier                                </button>
                             </div>
 
                                                     </form>
+<p class="apercu-inerte">Inactif dans l'aperçu : demande le serveur PHP.</p>
 
                                                             </div>
 
@@ -424,8 +435,9 @@
 </footer>
 
 <script>
-// Les formulaires (ajout au panier, commande) ont besoin du serveur : on les
-// neutralise plutôt que de laisser le visiteur sur une erreur.
+// Ceinture et bretelles : les champs sont déjà désactivés à la génération,
+// ce garde-fou couvre un envoi déclenché autrement (touche Entrée sur un
+// navigateur permissif, extension…).
 document.addEventListener('submit', function (event) {
   event.preventDefault();
   var b = document.querySelector('.apercu-banniere');
