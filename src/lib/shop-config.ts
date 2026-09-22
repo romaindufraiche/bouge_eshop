@@ -8,7 +8,9 @@
 
 export const SHOP = {
   name: 'BOUGE.',
-  /** Utilisé dans les titres de page : "Bonnet de bain — BOUGE." */
+  /** Baseline officielle de la marque, présente dans le logo. */
+  baseline: 'Sport et bien plus.',
+  /** Ce que vend la boutique. Utilisé dans les titres de page et le référencement. */
   tagline: 'Matériel de natation',
   email: 'contact@bouge.fr',
   /** Laisser vide pour masquer la ligne dans le pied de page. */

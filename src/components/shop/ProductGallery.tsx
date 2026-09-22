@@ -20,7 +20,7 @@ export function ProductGallery({
 
   if (images.length === 0) {
     return (
-      <div className="flex aspect-4/5 items-center justify-center bg-sand text-sm text-ink-soft">
+      <div className="flex aspect-4/5 items-center justify-center rounded-surface bg-sand text-sm text-ink-soft">
         Photo à venir
       </div>
     );
@@ -30,7 +30,7 @@ export function ProductGallery({
 
   return (
     <div>
-      <div className="relative aspect-4/5 overflow-hidden bg-sand">
+      <div className="relative aspect-4/5 overflow-hidden rounded-surface bg-sand">
         <Image
           src={active.url}
           alt={active.alt}
@@ -50,7 +50,7 @@ export function ProductGallery({
                 onClick={() => setActiveIndex(index)}
                 aria-label={`Voir la photo ${index + 1} de ${productName}`}
                 aria-pressed={index === activeIndex}
-                className={`relative block aspect-square w-full overflow-hidden bg-sand ring-offset-2 transition-opacity ${
+                className={`relative block aspect-square w-full overflow-hidden rounded-sm bg-sand ring-offset-2 transition-opacity ${
                   index === activeIndex
                     ? 'ring-1 ring-ink'
                     : 'opacity-70 hover:opacity-100'

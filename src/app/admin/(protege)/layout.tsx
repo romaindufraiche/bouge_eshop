@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import type { ReactNode } from 'react';
@@ -27,8 +28,15 @@ export default async function ProtectedAdminLayout({
         <Container size="wide">
           <div className="flex flex-wrap items-center justify-between gap-3 py-4">
             <div className="flex items-baseline gap-3">
-              <Link href="/admin" className="font-display text-xl tracking-tight">
-                BOUGE.
+              <Link href="/admin">
+                <Image
+                  src="/brand/wordmark-anthracite.png"
+                  alt="BOUGE."
+                  width={720}
+                  height={346}
+                  priority
+                  className="h-6 w-auto"
+                />
               </Link>
               <span className="text-xs uppercase tracking-widest text-ink-soft">
                 Administration

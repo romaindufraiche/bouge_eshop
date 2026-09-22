@@ -3,46 +3,73 @@
 /* ===========================================================================
    BOUGE. — jetons de design
    ---------------------------------------------------------------------------
-   Toute la direction artistique tient dans ce bloc. Pour faire évoluer
-   l'identité (couleurs, rayons, typographies), il suffit de modifier les
-   valeurs ci-dessous : aucun composant ne code une couleur en dur.
+   Valeurs issues de la charte graphique officielle
+   (BOUGE._BRANDGUIDELINESHD.pdf, version 1.0, septembre 2026).
 
-   Valeurs provisoires, issues de la description du brief. À confronter au PDF
-   de charte graphique (dossier Drive BOUGE.) puis à remplacer ici.
+   Toute l'identité tient dans ce bloc : aucun composant ne code une couleur,
+   une police ou un rayon en dur.
    =========================================================================== */
 
 @theme {
-  /* --- Couleurs ---------------------------------------------------------- */
+  /* --- Couleurs primaires (charte, page 21) ------------------------------ */
 
-  /* Fond principal, crème/blanc cassé. */
-  --color-cream: #faf8f4;
-  /* Surfaces légèrement contrastées : cartes produit, encarts. */
-  --color-sand: #efeae2;
-  /* Encre : titres, texte courant, aplats sombres. */
+  /* Noir anthracite — texte, aplats sombres, logo. */
   --color-ink: #232323;
-  /* Texte secondaire, mentions, légendes. */
-  --color-ink-soft: #6b6660;
-  /* Traits de séparation et contours de champs. */
-  --color-line: #ddd7cc;
-  /* Accent unique, réservé aux promotions et aux états d'erreur. */
-  --color-accent: #b4432a;
-  /* Confirmation (commande payée, stock disponible). */
-  --color-success: #2f6b4a;
+  /* Crème — fond principal de la marque. */
+  --color-cream: #fffbe8;
+  /* Orange vif — couleur d'accent : promotions, badges, appels à l'action. */
+  --color-accent: #e26129;
 
-  /* --- Typographie ------------------------------------------------------- */
+  /* --- Couleurs secondaires (charte, page 21) ---------------------------- */
+
+  /* Vert jade — validation, disponibilité. */
+  --color-jade: #439677;
+  /* Brun café — texte secondaire, mentions, légendes. */
+  --color-coffee: #59443a;
+  /* Bleu ciel — informations neutres. */
+  --color-sky: #69acde;
+  --color-white: #ffffff;
+
+  /* --- Couleurs dérivées -------------------------------------------------
+     Absentes de la charte, elles en découlent directement et servent aux
+     besoins d'interface qu'un livret de marque ne couvre pas. */
+
+  /* Texte secondaire : c'est le brun café de la charte.
+     Contraste 8,7:1 sur le crème. */
+  --color-ink-soft: #59443a;
+
+  /* Surfaces légèrement contrastées (cartes, fonds de photo) :
+     crème mêlé de 7 % de brun café. */
+  --color-sand: #f3eedc;
+
+  /* Traits de séparation et contours de champs :
+     crème mêlé de 15 % de brun café. */
+  --color-line: #e6e0ce;
+
+  /* Orange assombri, réservé au TEXTE de petite taille.
+     L'orange vif de la charte plafonne à 3,4:1 sur le crème : suffisant pour
+     un aplat ou un contour, insuffisant pour du texte courant (AA exige
+     4,5:1). Cette variante atteint 5,7:1 en gardant la teinte de la marque. */
+  --color-accent-deep: #a8441b;
+
+  /* --- Typographies (charte, page 24) ------------------------------------
+     Sun Motter  : titres — forte, grasse, expressive
+     Manrope     : sous-titres et corps de texte
+     Reenie Beanie : notes manuscrites, à doser */
 
   --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-heading), Georgia, "Times New Roman", serif;
+  --font-display: var(--font-heading), ui-sans-serif, system-ui, sans-serif;
+  --font-note: var(--font-handwriting), ui-sans-serif, cursive;
 
-  /* --- Géométrie --------------------------------------------------------- */
+  /* --- Géométrie ---------------------------------------------------------
+     Le logo est très arrondi et le ton de la marque est chaleureux : les
+     commandes reprennent cette rondeur en pastille, comme les stickers de
+     l'identité. Pour une allure plus anguleuse, passer --radius-control à
+     6px — c'est le seul endroit à modifier. */
 
-  /* Coins peu arrondis : la marque reste anguleuse. */
-  --radius-none: 0px;
-  --radius-sm: 2px;
-  --radius-md: 3px;
-
-  /* Largeur maximale du contenu. */
-  --spacing-gutter: 1.25rem;
+  --radius-control: 9999px;
+  --radius-surface: 10px;
+  --radius-sm: 6px;
 }
 
 /* ===========================================================================
@@ -70,15 +97,37 @@ body {
    sur les utilitaires Tailwind quelle que soit sa spécificité, et un
    `font-sans` posé sur un titre n'aurait alors aucun effet. */
 @layer base {
-  /* Titres : typographie éditoriale, interlettrage resserré, pas de graisse
-     excessive. */
+  /* Par défaut, les titres sont en Manrope : c'est ce qu'il faut à
+     l'administration, dense et lue de près. */
   h1,
   h2,
-  h3 {
+  h3,
+  h4 {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  /* Côté boutique, les titres passent en Sun Motter, que la charte réserve
+     aux TITRES (page 24). Les intertitres restent en Manrope, sans quoi la
+     page devient illisible à force de graisse. */
+  [data-brand] h1,
+  [data-brand] h2 {
     font-family: var(--font-display);
     font-weight: 400;
-    letter-spacing: -0.02em;
-    text-wrap: balance;
+    /* Sun Motter est déjà très grasse : un interlettrage légèrement ouvert
+       évite que les lettres se touchent dans les grands titres. */
+    letter-spacing: 0.01em;
+    line-height: 1.05;
+
+    /* Mise en majuscules indispensable, pas décorative : dans Sun Motter, les
+       minuscules accentuées pointent vers le glyphe NON accentué (« é » est
+       dessiné comme « e »), alors que les capitales accentuées ont bien le
+       leur. Sans cette règle, « matériel » s'affiche « materiel ». La police
+       ne dessinant de toute façon que des capitales, le rendu est identique,
+       accents en plus. */
+    text-transform: uppercase;
   }
 
   /* Paragraphes : on évite les lignes orphelines en fin de bloc. */
@@ -87,7 +136,7 @@ body {
   }
 }
 
-/* Focus visible et cohérent partout, sans halo arrondi. */
+/* Focus visible et cohérent partout. */
 :focus-visible {
   outline: 2px solid var(--color-ink);
   outline-offset: 2px;

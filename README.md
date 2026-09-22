@@ -11,6 +11,7 @@ technique.
 - [Configuration](#configuration)
 - [Brancher Stripe](#brancher-stripe)
 - [Utiliser l'administration](#utiliser-ladministration)
+- [Direction artistique](#direction-artistique)
 - [Organisation du code](#organisation-du-code)
 - [Mise en ligne sur Vercel](#mise-en-ligne-sur-vercel)
 - [Points à traiter avant l'ouverture](#points-à-traiter-avant-louverture)
@@ -144,6 +145,87 @@ Quelques principes de fonctionnement utiles à connaître :
 - Supprimer un produit ne touche pas aux commandes déjà passées : elles
   gardent le nom et le prix pratiqués au moment de l'achat.
 
+## Direction artistique
+
+Le site applique la charte officielle
+(`BOUGE._BRANDGUIDELINESHD.pdf`, version 1.0, septembre 2026).
+
+### Couleurs
+
+| Rôle | Nom | Hex |
+| --- | --- | --- |
+| Primaire | Noir anthracite | `#232323` |
+| Primaire | Crème | `#fffbe8` |
+| Primaire | Orange vif | `#e26129` |
+| Secondaire | Vert jade | `#439677` |
+| Secondaire | Brun café | `#59443a` |
+| Secondaire | Bleu ciel | `#69acde` |
+| Secondaire | Blanc | `#ffffff` |
+
+Trois valeurs dérivées complètent la palette pour des besoins d'interface
+qu'un livret de marque ne couvre pas : `--color-sand` et `--color-line` (du
+crème mêlé de brun café, pour les surfaces et les filets) et
+`--color-accent-deep` (`#a8441b`).
+
+Cette dernière mérite une explication : **l'orange vif de la charte plafonne
+à 3,4:1 sur le crème**, ce qui suffit pour un aplat ou un contour mais pas
+pour du texte courant, où le niveau AA exige 4,5:1. Le ton assombri atteint
+5,7:1 en gardant la teinte de la marque. L'orange vif reste donc utilisé pour
+les aplats décoratifs, et sa variante assombrie dès qu'il y a du texte.
+
+### Typographies
+
+| Usage | Police | Source |
+| --- | --- | --- |
+| Titres | Sun Motter | Fichier de la charte, hébergé avec le site |
+| Sous-titres et corps | Manrope | Google Fonts |
+| Notes manuscrites | Reenie Beanie | Google Fonts |
+
+Sun Motter a été convertie de l'OTF d'origine en WOFF2 (255 Ko → 90 Ko) et
+vit dans `src/fonts/`. Manrope et Reenie Beanie sont téléchargées à la
+compilation par `next/font`, puis servies depuis notre propre domaine :
+aucune requête vers Google côté visiteur.
+
+> **Particularité de Sun Motter, à connaître avant d'écrire du CSS :** dans
+> cette police, les minuscules accentuées pointent vers le glyphe NON accentué
+> — « é » est dessiné comme « e ». Les capitales accentuées, elles, ont bien le
+> leur. Les titres de la boutique sont donc passés en majuscules par CSS
+> (`text-transform: uppercase`), sans quoi « matériel » s'afficherait
+> « materiel ». La police ne dessinant de toute façon que des capitales, le
+> rendu est identique, accents en plus.
+
+La police d'affichage est réservée à la boutique, délimitée par l'attribut
+`data-brand` posé dans `ShopChrome`. L'administration garde Manrope pour ses
+titres : elle est dense et lue de près, une police d'affichage grasse y
+nuirait à la lecture.
+
+### Logo et visuels
+
+Les fichiers web sont dans `public/brand/`, redimensionnés depuis les
+originaux de la charte (jusqu'à 25 000 px de large) :
+
+- `wordmark-anthracite.png` / `wordmark-creme.png` — en-tête et pied de page
+- `logo-complet-*.png` — logo, mascotte et baseline réunis
+- `tampon-*.png`, `monogramme-*.png` — sceau et monogramme
+- `mascotte-*.png` — la grenouille, dans ses trois poses
+
+Le favicon (`src/app/icon.png`) et l'icône iOS (`src/app/apple-icon.png`)
+reprennent le monogramme : le tampon complet, avec son texte circulaire, est
+illisible à 32 px.
+
+### Formes
+
+Le logo est très arrondi et le ton de la marque est chaleureux : boutons,
+filtres et badges reprennent cette rondeur en pastille, comme les stickers de
+l'identité. Tout tient dans un jeton — passer `--radius-control` de `9999px`
+à `6px` dans `src/app/globals.css` suffit pour une allure anguleuse.
+
+### Ton
+
+La charte décrit une voix « chaleureuse, motivante, avec une pointe d'humour,
+sans jamais être agressive ou corporate », identique pour tous les âges. Les
+textes du site suivent cette ligne, en restant concrets et sans superlatif.
+
 ## Organisation du code
 
 ```
@@ -175,8 +257,8 @@ Quelques conventions qui expliquent le reste :
   composant client échoue explicitement plutôt que de faire échouer la
   compilation sur un message obscur.
 - **La direction artistique tient dans `src/app/globals.css`.** Couleurs,
-  typographies et rayons sont des jetons ; aucun composant ne code une valeur
-  en dur.
+  typographies et rayons sont des jetons issus de la charte ; aucun composant
+  ne code une valeur en dur. Voir [Direction artistique](#direction-artistique).
 
 ### Rendu et fraîcheur des pages
 
@@ -235,10 +317,12 @@ domaine du service dans `images.remotePatterns` (`next.config.ts`).
 - [ ] **Mentions légales et CGV** : ce sont des gabarits, pas des documents
       juridiques validés. Les champs entre crochets sont à remplir et le tout
       à faire relire.
-- [ ] **Direction artistique** : couleurs, typographies et visuels sont
-      provisoires, en attente des fichiers de la charte BOUGE.
 - [ ] **Photos produits** : les visuels de démonstration sont des formes
-      abstraites, à remplacer par de vraies photos.
+      abstraites aux couleurs de la marque, à remplacer par de vraies photos.
+- [ ] **Licence de Sun Motter** : la police est livrée avec la charte et
+      hébergée avec le site, donc téléchargeable par n'importe quel visiteur.
+      Vérifier que la licence l'autorise pour un usage web avant la mise en
+      ligne.
 - [ ] **Grille tarifaire de livraison** : vérifier les montants de
       `src/lib/shop-config.ts`.
 - [ ] **Point de retrait** : l'adresse est celle du jeu de démonstration.

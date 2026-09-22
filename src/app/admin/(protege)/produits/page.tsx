@@ -210,12 +210,12 @@ export default async function AdminProductsPage({ searchParams }: PageProps) {
                   <span className="hidden w-28 shrink-0 text-sm tabular-nums sm:block">
                     {formatPrice(price.cents)}
                     {price.onSale && (
-                      <span className="block text-xs text-accent">en promo</span>
+                      <span className="block text-xs text-accent-deep">en promo</span>
                     )}
                   </span>
 
                   <span className="w-20 shrink-0 text-sm tabular-nums">
-                    <span className={totalStock === 0 ? 'text-accent' : ''}>
+                    <span className={totalStock === 0 ? 'text-accent-deep' : ''}>
                       {totalStock}
                     </span>
                     <span className="block text-xs text-ink-soft">en stock</span>

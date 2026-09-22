@@ -67,7 +67,7 @@ export function Field({
       </div>
 
       {error && (
-        <p id={errorId} className="mt-1.5 text-sm text-accent">
+        <p id={errorId} className="mt-1.5 text-sm text-accent-deep">
           {error}
         </p>
       )}

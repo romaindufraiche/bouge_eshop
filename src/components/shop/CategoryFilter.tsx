@@ -49,7 +49,7 @@ function FilterLink({
     <Link
       href={href}
       aria-current={isActive ? 'page' : undefined}
-      className={`inline-block rounded-sm border px-4 py-2 text-sm transition-colors ${
+      className={`inline-block rounded-control border px-4 py-2 text-sm font-medium transition-colors ${
         isActive
           ? 'border-ink bg-ink text-cream'
           : 'border-line text-ink hover:border-ink'

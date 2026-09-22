@@ -20,7 +20,7 @@ export function CartSummary({
   const totalCents = subtotalCents + (shippingCents ?? 0);
 
   return (
-    <div className="border border-line p-5 sm:p-6">
+    <div className="rounded-surface border border-line p-5 sm:p-6">
       <h2 className="font-sans text-sm font-medium">Récapitulatif</h2>
 
       <dl className="mt-4 space-y-2 text-sm">

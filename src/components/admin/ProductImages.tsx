@@ -72,7 +72,7 @@ export function ProductImages({
         </Button>
 
         {state.error && (
-          <p role="alert" className="text-sm text-accent">
+          <p role="alert" className="text-sm text-accent-deep">
             {state.error}
           </p>
         )}
@@ -154,7 +154,7 @@ export function ProductImages({
                   <input type="hidden" name="imageId" value={image.id} />
                   <button
                     type="submit"
-                    className="px-2 py-1 text-sm text-accent underline underline-offset-4"
+                    className="px-2 py-1 text-sm text-accent-deep underline underline-offset-4"
                   >
                     Supprimer
                   </button>

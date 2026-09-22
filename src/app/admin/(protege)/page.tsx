@@ -241,8 +241,10 @@ function StatusPill({ status }: { status: OrderStatus }) {
 function StockPill({ stock }: { stock: number }) {
   return (
     <span
-      className={`px-2 py-0.5 text-xs tabular-nums ${
-        stock === 0 ? 'bg-accent text-cream' : 'border border-accent text-accent'
+      className={`rounded-control px-2 py-0.5 text-xs font-semibold tabular-nums ${
+        stock === 0
+          ? 'bg-accent-deep text-white'
+          : 'border border-accent-deep text-accent-deep'
       }`}
     >
       {stock === 0 ? 'Épuisé' : `${stock} restant${stock > 1 ? 's' : ''}`}

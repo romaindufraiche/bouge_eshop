@@ -297,7 +297,7 @@ export function CheckoutView({
                 </div>
 
                 {errors.pickupPointId && (
-                  <p className="mt-2 text-sm text-accent">{errors.pickupPointId}</p>
+                  <p className="mt-2 text-sm text-accent-deep">{errors.pickupPointId}</p>
                 )}
               </fieldset>
             </div>
@@ -327,7 +327,7 @@ export function CheckoutView({
           subtotalCents={cart.subtotalCents}
           shippingCents={shippingCents}
         >
-          <Button type="submit" size="lg" className="w-full" disabled={isPending}>
+          <Button type="submit" variant="accent" size="lg" className="w-full" disabled={isPending}>
             {isPending ? 'Redirection…' : 'Payer par carte'}
           </Button>
           <p className="mt-3 text-xs text-ink-soft">

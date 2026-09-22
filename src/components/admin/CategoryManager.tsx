@@ -146,7 +146,7 @@ function CategoryForm({
       {category && <input type="hidden" name="id" value={category.id} />}
 
       {state.error && (
-        <p role="alert" className="text-sm text-accent">
+        <p role="alert" className="text-sm text-accent-deep">
           {state.error}
         </p>
       )}

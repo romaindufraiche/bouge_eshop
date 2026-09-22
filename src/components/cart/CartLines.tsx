@@ -26,7 +26,7 @@ export function CartLines({
         >
           <Link
             href={`/produit/${line.slug}`}
-            className="relative aspect-square w-20 shrink-0 overflow-hidden bg-sand sm:w-24"
+            className="relative aspect-square w-20 shrink-0 overflow-hidden rounded-surface bg-sand sm:w-24"
           >
             {line.imageUrl ? (
               <Image

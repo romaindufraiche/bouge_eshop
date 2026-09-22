@@ -101,7 +101,7 @@ export function VariantsEditor({
               <button
                 type="button"
                 onClick={() => removeRow(index)}
-                className="justify-self-start text-sm text-accent underline underline-offset-4 sm:justify-self-center"
+                className="justify-self-start text-sm text-accent-deep underline underline-offset-4 sm:justify-self-center"
               >
                 <span className="sm:hidden">Retirer cette déclinaison</span>
                 <span className="hidden sm:inline" aria-hidden="true">
@@ -116,7 +116,7 @@ export function VariantsEditor({
         </ul>
       )}
 
-      {error && <p className="mt-3 text-sm text-accent">{error}</p>}
+      {error && <p className="mt-3 text-sm text-accent-deep">{error}</p>}
 
       <button
         type="button"

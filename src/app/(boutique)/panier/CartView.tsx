@@ -48,7 +48,7 @@ export function CartView() {
       <aside className="lg:sticky lg:top-28 lg:self-start">
         <CartSummary subtotalCents={cart.subtotalCents}>
           <div className="space-y-3">
-            <ButtonLink href="/commande" className="w-full" size="lg">
+            <ButtonLink href="/commande" variant="accent" className="w-full" size="lg">
               Commander
             </ButtonLink>
             <ButtonLink href="/boutique" variant="ghost" className="w-full">

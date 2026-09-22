@@ -42,7 +42,7 @@ export function ConfirmButton({
       <button
         type="button"
         onClick={open}
-        className="text-sm text-accent underline underline-offset-4"
+        className="text-sm text-accent-deep underline underline-offset-4"
       >
         {label}
       </button>
@@ -50,7 +50,7 @@ export function ConfirmButton({
       <dialog
         ref={dialogRef}
         onClose={() => setIsOpen(false)}
-        className="m-auto w-[min(28rem,calc(100vw-2rem))] border border-ink bg-cream p-6 text-ink backdrop:bg-ink/40"
+        className="m-auto w-[min(28rem,calc(100vw-2rem))] rounded-surface border border-ink bg-cream p-6 text-ink backdrop:bg-ink/40"
       >
         {/* Le contenu n'est monté que fenêtre ouverte : le bouton de
             confirmation ne peut donc pas être déclenché depuis la page. */}
@@ -63,7 +63,7 @@ export function ConfirmButton({
               <button
                 type="button"
                 onClick={close}
-                className="rounded-sm border border-ink px-4 py-2 text-sm"
+                className="rounded-control border border-ink px-4 py-2 text-sm font-semibold"
               >
                 Annuler
               </button>
@@ -98,7 +98,7 @@ function SubmitButton({
     <button
       type="submit"
       disabled={pending}
-      className="rounded-sm border border-accent bg-accent px-4 py-2 text-sm text-cream disabled:opacity-50"
+      className="rounded-control border border-accent-deep bg-accent-deep px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
     >
       {pending ? 'Suppression…' : label}
     </button>

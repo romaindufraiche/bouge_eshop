@@ -15,20 +15,24 @@ export async function ShopChrome({ children }: { children: ReactNode }) {
   const categories = await getCategories();
 
   return (
+    // `data-brand` délimite la boutique : c'est ce qui déclenche la
+    // typographie d'affichage de la marque, que l'administration n'utilise pas.
     <CartProvider>
-      {/* Permet d'atteindre le contenu directement au clavier. */}
-      <a
-        href="#contenu"
-        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:bg-ink focus:px-4 focus:py-2 focus:text-cream"
-      >
-        Aller au contenu
-      </a>
+      <div data-brand className="flex flex-1 flex-col">
+        {/* Permet d'atteindre le contenu directement au clavier. */}
+        <a
+          href="#contenu"
+          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:bg-ink focus:px-4 focus:py-2 focus:text-cream"
+        >
+          Aller au contenu
+        </a>
 
-      <SiteHeader categories={categories} />
-      <main id="contenu" className="flex-1">
-        {children}
-      </main>
-      <SiteFooter categories={categories} />
+        <SiteHeader categories={categories} />
+        <main id="contenu" className="flex-1">
+          {children}
+        </main>
+        <SiteFooter categories={categories} />
+      </div>
     </CartProvider>
   );
 }

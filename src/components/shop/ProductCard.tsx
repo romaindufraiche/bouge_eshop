@@ -31,7 +31,7 @@ export function ProductCard({
   return (
     <article className="group">
       <Link href={`/produit/${product.slug}`} className="block focus:outline-none">
-        <div className="relative aspect-4/5 overflow-hidden bg-sand">
+        <div className="relative aspect-4/5 overflow-hidden rounded-surface bg-sand">
           {cover ? (
             <Image
               src={cover.url}
@@ -48,7 +48,7 @@ export function ProductCard({
           )}
 
           {price.onSale && (
-            <span className="absolute left-0 top-0 bg-accent px-2.5 py-1 text-xs font-medium tracking-wide text-cream">
+            <span className="absolute left-3 top-3 rounded-control bg-accent-deep px-2.5 py-1 text-xs font-semibold tracking-wide text-white">
               Promo
             </span>
           )}

@@ -24,14 +24,14 @@ export function PriceTag({
 
   return (
     <span className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-      <span className={`${currentSize} tabular-nums text-accent`}>
+      <span className={`${currentSize} font-semibold tabular-nums text-accent-deep`}>
         {formatPrice(price.cents)}
       </span>
       <s className="text-sm tabular-nums text-ink-soft">
         {formatPrice(price.compareAtCents)}
       </s>
       {price.discountPercent !== null && (
-        <span className="border border-accent px-1.5 py-0.5 text-[0.6875rem] font-medium tracking-wide text-accent">
+        <span className="rounded-control bg-accent-deep px-2 py-0.5 text-[0.6875rem] font-semibold tracking-wide text-white">
           −{price.discountPercent} %
         </span>
       )}

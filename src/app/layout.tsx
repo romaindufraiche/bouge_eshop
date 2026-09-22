@@ -1,20 +1,40 @@
 import type { Metadata } from 'next';
-import { Inter, Instrument_Serif } from 'next/font/google';
+import { Manrope, Reenie_Beanie } from 'next/font/google';
+import localFont from 'next/font/local';
 import { SITE_URL } from '@/lib/seo';
 import { SHOP } from '@/lib/shop-config';
 import './globals.css';
 
-// Typographies provisoires, en attente des fichiers du dossier FONTS de la
-// charte. Elles sont exposées en variables CSS : les remplacer ne demande de
-// toucher qu'à ce fichier et à globals.css.
-const body = Inter({
+/**
+ * Les trois typographies de la charte (page 24).
+ *
+ * Sun Motter est une police propriétaire, livrée avec l'identité : elle est
+ * hébergée avec le site. Manrope et Reenie Beanie sont libres et servies par
+ * Google Fonts, que Next.js télécharge à la compilation puis sert depuis notre
+ * domaine — aucune requête vers Google côté visiteur.
+ */
+
+// Titres. Convertie de l'OTF d'origine en WOFF2 (255 Ko -> 90 Ko).
+const sunMotter = localFont({
+  src: '../fonts/SunMotter.woff2',
+  variable: '--font-heading',
+  weight: '400',
+  display: 'swap',
+  // Sun Motter n'a pas d'italique ni de graisses : on évite que le navigateur
+  // en fabrique de synthétiques.
+  adjustFontFallback: false,
+});
+
+// Sous-titres et corps de texte.
+const manrope = Manrope({
   variable: '--font-body',
   subsets: ['latin'],
   display: 'swap',
 });
 
-const heading = Instrument_Serif({
-  variable: '--font-heading',
+// Notes manuscrites, à doser.
+const reenieBeanie = Reenie_Beanie({
+  variable: '--font-handwriting',
   subsets: ['latin'],
   weight: '400',
   display: 'swap',
@@ -47,7 +67,7 @@ export default function RootLayout({
   return (
     <html
       lang="fr"
-      className={`${body.variable} ${heading.variable} h-full antialiased`}
+      className={`${manrope.variable} ${sunMotter.variable} ${reenieBeanie.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">{children}</body>
     </html>

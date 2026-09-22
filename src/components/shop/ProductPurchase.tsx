@@ -150,6 +150,7 @@ export function ProductPurchase({
 
         <Button
           onClick={handleAdd}
+          variant="accent"
           size="lg"
           disabled={needsChoice || isOutOfStock}
           className="flex-1 sm:flex-none"
@@ -171,7 +172,7 @@ export function ProductPurchase({
       )}
 
       {!needsChoice && !isOutOfStock && stock <= 5 && (
-        <p className="text-sm text-accent" role="status">
+        <p className="text-sm text-accent-deep" role="status">
           Plus que {stock} en stock.
         </p>
       )}
@@ -218,7 +219,7 @@ function OptionGroup({
               onClick={() => onSelect(option)}
               disabled={!available}
               aria-pressed={isSelected}
-              className={`rounded-sm border px-4 py-2 text-sm transition-colors ${
+              className={`rounded-control border px-4 py-2 text-sm font-medium transition-colors ${
                 isSelected
                   ? 'border-ink bg-ink text-cream'
                   : 'border-line hover:border-ink'

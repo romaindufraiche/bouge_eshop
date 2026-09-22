@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
@@ -23,13 +24,17 @@ export function SiteHeader({ categories }: { categories: HeaderCategory[] }) {
     <header className="sticky top-0 z-40 border-b border-line bg-cream/95 backdrop-blur-sm">
       <Container size="wide">
         <div className="flex h-16 items-center justify-between gap-4 sm:h-20">
-          <Link
-            href="/"
-            onClick={closeMenu}
-            className="font-display text-xl tracking-tight sm:text-2xl"
-            aria-label={`${SHOP.name} — accueil`}
-          >
-            {SHOP.name}
+          {/* Le wordmark de la charte, pas du texte stylé : Sun Motter ne
+              reproduit pas exactement les courbes dessinées du logo. */}
+          <Link href="/" onClick={closeMenu} className="shrink-0">
+            <Image
+              src="/brand/wordmark-anthracite.png"
+              alt={`${SHOP.name} — accueil`}
+              width={720}
+              height={346}
+              priority
+              className="h-7 w-auto sm:h-8"
+            />
           </Link>
 
           {/* Navigation principale — masquée sur mobile au profit du menu */}
@@ -60,7 +65,7 @@ export function SiteHeader({ categories }: { categories: HeaderCategory[] }) {
               {/* Le compteur n'apparaît qu'après lecture du panier côté
                   navigateur, pour éviter tout écart avec le rendu serveur. */}
               {isReady && itemCount > 0 && (
-                <span className="ml-1.5 inline-flex min-w-5 justify-center bg-ink px-1.5 py-0.5 text-xs tabular-nums text-cream">
+                <span className="ml-1.5 inline-flex min-w-5 justify-center rounded-control bg-accent-deep px-1.5 py-0.5 text-xs font-semibold tabular-nums text-white">
                   {itemCount}
                 </span>
               )}
