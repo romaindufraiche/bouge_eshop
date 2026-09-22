@@ -108,6 +108,10 @@ export default async function EditProductPage({ params, searchParams }: PageProp
           stock: String(product.stock),
           metaTitle: product.metaTitle ?? '',
           metaDescription: product.metaDescription ?? '',
+          featured: product.featured,
+          availableInStore: product.availableInStore,
+          externalUrl: product.externalUrl ?? '',
+          externalLabel: product.externalLabel ?? '',
           variants: product.variants.map((variant) => ({
             id: variant.id,
             size: variant.size ?? '',

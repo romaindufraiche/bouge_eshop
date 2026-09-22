@@ -3,6 +3,7 @@ import { PRODUCT_STATUS } from '@/lib/constants';
 import { prisma } from '@/lib/prisma';
 import { getEffectivePrice, getVariantPrice, formatVariantLabel } from '@/lib/pricing';
 import type { CartLine } from '@/lib/cart';
+import { isSoldExternally } from '@/lib/external';
 import { computeShippingCents } from '@/lib/shop-config';
 
 /**
@@ -37,7 +38,7 @@ export type CartIssue = {
   variantId: string | null;
   /** Libellé connu de l'article concerné, pour un message compréhensible. */
   label: string;
-  reason: 'unavailable' | 'out-of-stock' | 'reduced-quantity';
+  reason: 'unavailable' | 'out-of-stock' | 'reduced-quantity' | 'sold-elsewhere';
   /** Quantité finalement retenue (0 si l'article a été retiré). */
   keptQuantity: number;
 };
@@ -81,6 +82,19 @@ export async function resolveCart(lines: CartLine[]): Promise<ResolvedCart> {
         variantId: line.variantId,
         label: 'Un article',
         reason: 'unavailable',
+        keptQuantity: 0,
+      });
+      continue;
+    }
+
+    // Un produit vendu par un tiers n'a pas de bouton « ajouter au panier ».
+    // Le refus est revérifié ici : l'interface ne suffit pas à l'empêcher.
+    if (isSoldExternally(product)) {
+      issues.push({
+        productId: line.productId,
+        variantId: line.variantId,
+        label: product.name,
+        reason: 'sold-elsewhere',
         keptQuantity: 0,
       });
       continue;

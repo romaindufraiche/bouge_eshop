@@ -86,6 +86,22 @@ model Product {
   /// Dès qu'il existe des variantes, c'est leur stock qui fait foi.
   stock Int @default(0)
 
+  /// Mis en avant en haut de la page d'accueil. Un seul à la fois en
+  /// pratique : la page n'affiche que le plus récent.
+  featured Boolean @default(false)
+
+  /// Produit vendu par un tiers (éditeur, revendeur). Renseigné, la fiche
+  /// renvoie vers ce lien au lieu de proposer l'ajout au panier, et le
+  /// produit ne peut pas être commandé sur le site.
+  externalUrl String?
+
+  /// Nom du revendeur affiché sur le bouton, par exemple « la Fnac ».
+  /// Laissé vide, le nom de domaine du lien est utilisé.
+  externalLabel String?
+
+  /// Également disponible à la boutique, à signaler sur la fiche.
+  availableInStore Boolean @default(false)
+
   /// SEO : surchargent les valeurs calculées si renseignés.
   metaTitle       String?
   metaDescription String?
@@ -99,6 +115,7 @@ model Product {
 
   @@index([categoryId])
   @@index([status])
+  @@index([featured])
   @@map("products")
 }
 

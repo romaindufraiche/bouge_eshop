@@ -66,6 +66,23 @@ export const productSchema = z
     metaTitle: z.string().trim().max(70),
     metaDescription: z.string().trim().max(180),
 
+    /* Cases à cocher : un navigateur n'envoie rien quand elles sont
+       décochées, d'où une chaîne vide plutôt qu'un booléen. */
+    featured: z.string().max(10),
+    availableInStore: z.string().max(10),
+
+    /** Vide = vendu sur cette boutique. */
+    externalUrl: z
+      .string()
+      .trim()
+      .max(500)
+      .refine(
+        (value) =>
+          value === '' || /^https?:\/\/.+\..+/.test(value),
+        { message: 'Lien invalide. Il doit commencer par https:// ' },
+      ),
+    externalLabel: z.string().trim().max(60),
+
     variants: z.array(variantSchema).max(60),
   })
   .refine(
@@ -107,6 +124,16 @@ export const productSchema = z
     {
       message: 'Chaque déclinaison doit avoir au moins une taille ou une couleur.',
       path: ['variants'],
+    },
+  )
+  .refine(
+    // Un produit vendu ailleurs ne passe pas par le panier : ses déclinaisons
+    // ne seraient jamais utilisées et laisseraient croire à une vente en ligne.
+    (data) => data.externalUrl === '' || data.variants.length === 0,
+    {
+      message:
+        'Un produit vendu par un revendeur ne peut pas avoir de déclinaisons : retirez-les, ou videz le lien du revendeur.',
+      path: ['externalUrl'],
     },
   );
 

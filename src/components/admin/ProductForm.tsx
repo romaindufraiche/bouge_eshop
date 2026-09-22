@@ -28,6 +28,10 @@ export type ProductFormValues = {
   stock: string;
   metaTitle: string;
   metaDescription: string;
+  featured: boolean;
+  availableInStore: boolean;
+  externalUrl: string;
+  externalLabel: string;
   variants: VariantDraft[];
 };
 
@@ -54,6 +58,21 @@ export function ProductForm({
   // Le prix promotionnel est replié tant qu'il n'y en a pas : le formulaire
   // reste court pour le cas courant.
   const [hasSale, setHasSale] = useState(values.salePrice !== '');
+
+  // Idem pour la vente par un tiers, qui reste un cas minoritaire.
+  const [venduAilleurs, setVenduAilleurs] = useState(
+    (state.values?.externalUrl ?? values.externalUrl) !== '',
+  );
+
+  // Les cases à cocher reviennent du serveur sous forme de chaîne ('on' ou
+  // vide), alors que les valeurs d'origine sont des booléens : on ramène les
+  // deux au même type avant de les passer au formulaire.
+  const estMisEnAvant = state.values
+    ? state.values.featured !== ''
+    : values.featured;
+  const estEnMagasin = state.values
+    ? state.values.availableInStore !== ''
+    : values.availableInStore;
 
   // React ne resynchronise `defaultValue` que sur les champs texte : un
   // <select> ou un bouton radio garderaient la sélection d'origine et non
@@ -230,6 +249,102 @@ export function ProductForm({
           initialVariants={current.variants}
           error={errors.variants}
         />
+      </section>
+
+      {/* --- Vente et disponibilité ------------------------------------------ */}
+      <section className="space-y-5">
+        <SectionTitle>Vente et disponibilité</SectionTitle>
+
+        <label className="flex items-start gap-3 text-sm">
+          <input
+            type="checkbox"
+            name="featured"
+            defaultChecked={estMisEnAvant}
+            className="mt-1"
+          />
+          <span>
+            <span className="block font-medium">
+              Mettre en avant sur la page d&apos;accueil
+            </span>
+            <span className="mt-0.5 block text-ink-soft">
+              Un grand encart en haut de l&apos;accueil. Un seul produit à la
+              fois : si plusieurs sont cochés, le dernier modifié l&apos;emporte.
+            </span>
+          </span>
+        </label>
+
+        <label className="flex items-start gap-3 text-sm">
+          <input
+            type="checkbox"
+            name="availableInStore"
+            defaultChecked={estEnMagasin}
+            className="mt-1"
+          />
+          <span>
+            <span className="block font-medium">Disponible en magasin</span>
+            <span className="mt-0.5 block text-ink-soft">
+              Affiche une pastille « En magasin » sur la fiche et dans le
+              catalogue.
+            </span>
+          </span>
+        </label>
+
+        <label className="flex items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            checked={venduAilleurs}
+            onChange={(event) => setVenduAilleurs(event.target.checked)}
+          />
+          Ce produit est vendu par un revendeur, pas sur cette boutique
+        </label>
+
+        {venduAilleurs ? (
+          <div className="grid gap-5 border-l-2 border-line pl-5 sm:grid-cols-2">
+            <Field
+              label="Lien vers la page du revendeur"
+              name="externalUrl"
+              required
+              hint="Le bouton « Ajouter au panier » est remplacé par un lien vers cette page."
+              error={errors.externalUrl}
+            >
+              {(props) => (
+                <input
+                  type="url"
+                  placeholder="https://..."
+                  defaultValue={current.externalUrl}
+                  {...props}
+                />
+              )}
+            </Field>
+
+            <Field
+              label="Nom du revendeur"
+              name="externalLabel"
+              hint="Affiché sur le bouton : « Acheter sur la Fnac ». Vide, le nom de domaine est utilisé."
+              error={errors.externalLabel}
+            >
+              {(props) => (
+                <input
+                  type="text"
+                  defaultValue={current.externalLabel}
+                  {...props}
+                />
+              )}
+            </Field>
+
+            <p className="text-sm text-ink-soft sm:col-span-2">
+              Aucun prix n&apos;est affiché pour un produit vendu ailleurs :
+              c&apos;est celui du revendeur qui fait foi, et il peut changer sans
+              que nous le sachions.
+            </p>
+          </div>
+        ) : (
+          /* Champs conservés vides pour qu'un décochage efface bien le lien. */
+          <>
+            <input type="hidden" name="externalUrl" value="" />
+            <input type="hidden" name="externalLabel" value="" />
+          </>
+        )}
       </section>
 
       {/* --- Référencement --------------------------------------------------- */}

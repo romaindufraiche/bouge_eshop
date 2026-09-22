@@ -33,5 +33,7 @@ function describe(issue: CartIssue): string {
       return `${issue.label} est en rupture de stock et a été retiré.`;
     case 'reduced-quantity':
       return `${issue.label} : quantité ramenée à ${issue.keptQuantity}, c'est tout ce qu'il reste.`;
+    case 'sold-elsewhere':
+      return `${issue.label} est vendu par un revendeur : il ne peut pas être commandé ici et a été retiré.`;
   }
 }

@@ -6,9 +6,11 @@ import {
   ProductPurchase,
   type PurchasableVariant,
 } from '@/components/shop/ProductPurchase';
+import { ExternalPurchase } from '@/components/shop/ExternalPurchase';
 import { ProductCard } from '@/components/shop/ProductCard';
 import { Container } from '@/components/ui/Container';
 import { PRODUCT_STATUS } from '@/lib/constants';
+import { isSoldExternally } from '@/lib/external';
 import { prisma } from '@/lib/prisma';
 import { getEffectivePrice, getVariantPrice } from '@/lib/pricing';
 import { getPublishedProductBySlug, getRelatedProducts } from '@/lib/queries';
@@ -82,16 +84,21 @@ export default async function ProductPage({ params }: PageProps) {
     sku: product.id,
     brand: { '@type': 'Brand', name: SHOP.name },
     image: product.images.map((image) => `${SITE_URL}${image.url}`),
-    offers: {
-      '@type': 'Offer',
-      url: `${SITE_URL}/produit/${product.slug}`,
-      priceCurrency: 'EUR',
-      price: (basePrice.cents / 100).toFixed(2),
-      availability:
-        totalStock > 0
-          ? 'https://schema.org/InStock'
-          : 'https://schema.org/OutOfStock',
-    },
+    // Un produit vendu par un tiers n'a pas d'offre de notre part : annoncer
+    // un prix que nous ne maîtrisons pas exposerait à afficher un montant faux
+    // dans les résultats de recherche.
+    offers: isSoldExternally(product)
+      ? undefined
+      : {
+          '@type': 'Offer',
+          url: `${SITE_URL}/produit/${product.slug}`,
+          priceCurrency: 'EUR',
+          price: (basePrice.cents / 100).toFixed(2),
+          availability:
+            totalStock > 0
+              ? 'https://schema.org/InStock'
+              : 'https://schema.org/OutOfStock',
+        },
   };
 
   return (
@@ -137,12 +144,16 @@ export default async function ProductPage({ params }: PageProps) {
               <h1 className="mt-2 text-3xl sm:text-4xl">{product.name}</h1>
 
               <div className="mt-6">
-                <ProductPurchase
-                  productId={product.id}
-                  basePrice={basePrice}
-                  baseStock={product.stock}
-                  variants={variants}
-                />
+                {isSoldExternally(product) ? (
+                  <ExternalPurchase product={product} />
+                ) : (
+                  <ProductPurchase
+                    productId={product.id}
+                    basePrice={basePrice}
+                    baseStock={product.stock}
+                    variants={variants}
+                  />
+                )}
               </div>
 
               <div className="mt-10 border-t border-line pt-6">
@@ -154,14 +165,16 @@ export default async function ProductPage({ params }: PageProps) {
                 </p>
               </div>
 
-              <div className="mt-6 border-t border-line pt-6 text-sm text-ink-soft">
-                <p>
-                  Livraison en France {formatPrice(SHIPPING.flatRateCents)}
-                  {SHIPPING.freeAboveCents !== null &&
-                    `, offerte dès ${formatPrice(SHIPPING.freeAboveCents)}`}
-                  . Retrait sur place sans frais.
-                </p>
-              </div>
+              {!isSoldExternally(product) && (
+                <div className="mt-6 border-t border-line pt-6 text-sm text-ink-soft">
+                  <p>
+                    Livraison en France {formatPrice(SHIPPING.flatRateCents)}
+                    {SHIPPING.freeAboveCents !== null &&
+                      `, offerte dès ${formatPrice(SHIPPING.freeAboveCents)}`}
+                    . Retrait sur place sans frais.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 

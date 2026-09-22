@@ -33,6 +33,10 @@ export type SubmittedProductValues = {
   stock: string;
   metaTitle: string;
   metaDescription: string;
+  featured: string;
+  availableInStore: string;
+  externalUrl: string;
+  externalLabel: string;
   variants: {
     id: string;
     size: string;
@@ -62,6 +66,10 @@ function readSubmittedValues(
     stock: text('stock'),
     metaTitle: text('metaTitle'),
     metaDescription: text('metaDescription'),
+    featured: text('featured'),
+    availableInStore: text('availableInStore'),
+    externalUrl: text('externalUrl'),
+    externalLabel: text('externalLabel'),
     variants: Array.isArray(variants)
       ? variants.map((entry) => {
           const variant = (entry ?? {}) as Record<string, unknown>;
@@ -158,6 +166,10 @@ export async function saveProduct(
     stock: input.stock,
     metaTitle: input.metaTitle || null,
     metaDescription: input.metaDescription || null,
+    featured: input.featured !== '',
+    availableInStore: input.availableInStore !== '',
+    externalUrl: input.externalUrl || null,
+    externalLabel: input.externalLabel || null,
   };
 
   let productId = id;

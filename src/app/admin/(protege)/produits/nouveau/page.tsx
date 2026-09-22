@@ -54,6 +54,10 @@ export default async function NewProductPage() {
           stock: '0',
           metaTitle: '',
           metaDescription: '',
+          featured: false,
+          availableInStore: false,
+          externalUrl: '',
+          externalLabel: '',
           variants: [],
         }}
       />

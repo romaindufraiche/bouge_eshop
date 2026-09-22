@@ -2,11 +2,16 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 export const revalidate = 300;
+import { FeaturedProduct } from '@/components/shop/FeaturedProduct';
 import { ProductCard } from '@/components/shop/ProductCard';
 import { ButtonLink } from '@/components/ui/Button';
 import { Container } from '@/components/ui/Container';
 import { formatPrice } from '@/lib/money';
-import { getCategories, getFeaturedProducts } from '@/lib/queries';
+import {
+  getCategories,
+  getFeaturedProduct,
+  getFeaturedProducts,
+} from '@/lib/queries';
 import { SHIPPING, SHOP } from '@/lib/shop-config';
 
 // Visuels de catégorie provisoires, en attente des photos de la marque.
@@ -15,12 +20,14 @@ const CATEGORY_IMAGES: Record<string, string> = {
   lunettes: '/images/demo/lunettes.svg',
   accessoires: '/images/demo/accessoires.svg',
   vetements: '/images/demo/vetements.svg',
+  livre: '/images/demo/livre.svg',
 };
 
 export default async function HomePage() {
-  const [categories, featured] = await Promise.all([
+  const [categories, featured, miseEnAvant] = await Promise.all([
     getCategories(),
     getFeaturedProducts(8),
+    getFeaturedProduct(),
   ]);
 
   return (
@@ -68,6 +75,9 @@ export default async function HomePage() {
           </div>
         </Container>
       </section>
+
+      {/* --- Produit mis en avant ------------------------------------------ */}
+      {miseEnAvant && <FeaturedProduct product={miseEnAvant} />}
 
       {/* --- Repères pratiques, sans superlatif ---------------------------- */}
       <section className="border-b border-line">
@@ -150,11 +160,13 @@ export default async function HomePage() {
             </div>
 
             <ul className="mt-8 grid grid-cols-2 gap-x-5 gap-y-10 lg:grid-cols-4">
-              {featured.map((product, index) => (
-                <li key={product.id}>
-                  <ProductCard product={product} priority={index < 4} />
-                </li>
-              ))}
+              {featured
+                .filter((product) => product.id !== miseEnAvant?.id)
+                .map((product, index) => (
+                  <li key={product.id}>
+                    <ProductCard product={product} priority={index < 4} />
+                  </li>
+                ))}
             </ul>
           </Container>
         </section>

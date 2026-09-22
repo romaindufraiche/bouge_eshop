@@ -1,12 +1,22 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { PriceTag } from '@/components/shop/PriceTag';
+import { isSoldExternally, sellerName } from '@/lib/external';
 import { getEffectivePrice } from '@/lib/pricing';
 import type { Product, ProductImage } from '@/lib/prisma';
 
 export type ProductCardData = Pick<
   Product,
-  'id' | 'name' | 'slug' | 'priceCents' | 'salePriceCents' | 'saleStartsAt' | 'saleEndsAt'
+  | 'id'
+  | 'name'
+  | 'slug'
+  | 'priceCents'
+  | 'salePriceCents'
+  | 'saleStartsAt'
+  | 'saleEndsAt'
+  | 'externalUrl'
+  | 'externalLabel'
+  | 'availableInStore'
 > & {
   images: Pick<ProductImage, 'url' | 'alt'>[];
   category: { name: string } | null;
@@ -27,6 +37,7 @@ export function ProductCard({
 }) {
   const price = getEffectivePrice(product);
   const cover = product.images[0];
+  const externe = isSoldExternally(product);
 
   return (
     <article className="group">
@@ -47,9 +58,15 @@ export function ProductCard({
             </div>
           )}
 
-          {price.onSale && (
+          {price.onSale && !externe && (
             <span className="absolute left-3 top-3 rounded-control bg-accent-deep px-2.5 py-1 text-xs font-semibold tracking-wide text-white">
               Promo
+            </span>
+          )}
+
+          {product.availableInStore && (
+            <span className="absolute right-3 top-3 rounded-control bg-ink px-2.5 py-1 text-xs font-semibold tracking-wide text-cream">
+              En magasin
             </span>
           )}
         </div>
@@ -63,7 +80,15 @@ export function ProductCard({
           <h3 className="text-base leading-snug group-hover:underline group-hover:underline-offset-4">
             {product.name}
           </h3>
-          <PriceTag price={price} size="sm" />
+          {/* Pas de prix pour un produit vendu ailleurs : il est fixé par le
+              revendeur et nous n'en avons pas la maîtrise. */}
+          {externe ? (
+            <p className="text-sm text-ink-soft">
+              Vendu sur {sellerName(product)}
+            </p>
+          ) : (
+            <PriceTag price={price} size="sm" />
+          )}
         </div>
       </Link>
     </article>

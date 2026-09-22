@@ -18,6 +18,9 @@ const productCardSelect = {
   salePriceCents: true,
   saleStartsAt: true,
   saleEndsAt: true,
+  externalUrl: true,
+  externalLabel: true,
+  availableInStore: true,
   category: { select: { name: true, slug: true } },
   images: {
     select: { url: true, alt: true },
@@ -116,6 +119,28 @@ export async function getRelatedProducts(
     orderBy: { createdAt: 'desc' },
     take: limit,
     select: productCardSelect,
+  });
+}
+
+/**
+ * Produit mis en avant en haut de la page d'accueil.
+ * Si plusieurs sont cochés dans l'admin, seul le plus récent est retenu :
+ * une mise en avant qui en affiche trois n'en est plus une.
+ */
+export async function getFeaturedProduct() {
+  return prisma.product.findFirst({
+    where: { status: PRODUCT_STATUS.PUBLISHED, featured: true },
+    orderBy: { updatedAt: 'desc' },
+    select: {
+      ...productCardSelect,
+      description: true,
+      stock: true,
+      images: {
+        select: { url: true, alt: true },
+        orderBy: { position: 'asc' },
+        take: 1,
+      },
+    },
   });
 }
 

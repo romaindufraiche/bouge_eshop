@@ -35,6 +35,13 @@ type SeedProduct = {
   metaDescription: string;
   image: string;
   variants?: SeedVariant[];
+  /** Mis en avant en haut de la page d'accueil. */
+  featured?: boolean;
+  /** Vendu par un tiers : la fiche renvoie vers ce lien. */
+  externalUrl?: string;
+  externalLabel?: string;
+  /** Également disponible à la boutique. */
+  availableInStore?: boolean;
 };
 
 const CATEGORIES: {
@@ -54,6 +61,7 @@ const CATEGORIES: {
         description:
           "Silicone épais, sans couture. Il tient en place sur les virages et ne tire pas les cheveux à l'enfilage. Taille unique adulte.",
         priceCents: 1490,
+        availableInStore: true,
         salePriceCents: 1190,
         saleEndsAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 21),
         metaDescription:
@@ -104,6 +112,7 @@ const CATEGORIES: {
         description:
           "Joints en silicone souple, champ de vision large, traitement anti-buée. Le modèle à prendre si vous nagez plusieurs fois par semaine. Pont nasal interchangeable, trois tailles fournies.",
         priceCents: 2490,
+        availableInStore: true,
         metaDescription:
           "Lunettes de natation d'entraînement, joints silicone souple et traitement anti-buée. Pont nasal ajustable.",
         image: '/images/demo/lunettes.svg',
@@ -242,6 +251,35 @@ const CATEGORIES: {
       },
     ],
   },
+  {
+    name: 'Livre',
+    description: "Le livre de Melvin Maillot, fondateur de la marque.",
+    image: '/images/demo/livre.svg',
+    products: [
+      {
+        // Seul article réel du catalogue : il n'est pas vendu ici mais par la
+        // Fnac, et disponible à la boutique.
+        //
+        // La description reste à compléter : la fiche Fnac refuse la lecture
+        // automatisée (HTTP 403) et la page de l'éditeur ne publie ni résumé
+        // ni prix. Rien n'a donc été repris, plutôt que d'inventer.
+        name: 'Corps et esprit',
+        description:
+          "Le livre de Melvin Maillot, fondateur de BOUGE.\n\nRésumé à compléter depuis l'administration : ni la fiche du revendeur ni celle de l'éditeur ne le publient.",
+        // Prix non affiché pour un produit vendu ailleurs : celui du
+        // revendeur fait foi et peut changer sans que nous le sachions.
+        priceCents: 0,
+        metaDescription:
+          'Corps et esprit, le livre de Melvin Maillot. Vendu par la Fnac et disponible en magasin.',
+        image: '/images/demo/livre.svg',
+        featured: true,
+        externalUrl:
+          'https://www.fnac.com/a23070255/Melvin-Maillot-Corps-et-esprit',
+        externalLabel: 'la Fnac',
+        availableInStore: true,
+      },
+    ],
+  },
 ];
 
 async function main() {
@@ -295,6 +333,10 @@ async function main() {
           saleEndsAt: product.saleEndsAt ?? null,
           status: 'PUBLISHED',
           stock: product.stock ?? 0,
+          featured: product.featured ?? false,
+          externalUrl: product.externalUrl ?? null,
+          externalLabel: product.externalLabel ?? null,
+          availableInStore: product.availableInStore ?? false,
           metaDescription: product.metaDescription,
           images: {
             create: [

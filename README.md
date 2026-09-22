@@ -131,6 +131,12 @@ future et n'importe quel cryptogramme.
 - **Photos** — envoi multiple, ordre réglé par les flèches ↑ ↓, texte
   alternatif modifiable, suppression. La première photo de la liste est celle
   qui s'affiche dans le catalogue.
+- **Vente et disponibilité** — trois réglages par produit : le mettre en
+  avant en haut de l'accueil, signaler qu'il est disponible en magasin, ou
+  indiquer qu'il est vendu par un revendeur. Dans ce dernier cas, la fiche
+  remplace « Ajouter au panier » par un lien vers le revendeur, n'affiche
+  aucun prix — c'est celui du revendeur qui fait foi — et le serveur refuse
+  de mettre le produit au panier, même si la requête est forgée à la main.
 - **Catégories** — création et renommage. Une catégorie qui contient encore
   des produits ne peut pas être supprimée : il faut d'abord les déplacer.
 - **Commandes** — filtres par statut et par mode de remise, détail complet,
