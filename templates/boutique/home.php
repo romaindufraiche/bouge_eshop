@@ -46,7 +46,7 @@ $freeAbove = $shop['shipping']['free_above_cents'];
                      mouvement, jamais pressée (charte, page 27). */ ?>
             <div style="display:grid;place-items:center;aspect-ratio:1;border-radius:var(--radius-surface);background:var(--sand)">
                 <img src="<?= e(asset('/assets/brand/mascotte-course.png')) ?>"
-                     alt="La mascotte de BOUGE., une grenouille en mouvement, serviette sur l'épaule"
+                     alt="La mascotte de BOUGE, une grenouille en mouvement, serviette sur l'épaule"
                      width="720" height="720" style="width:80%;height:auto">
             </div>
         </div>
