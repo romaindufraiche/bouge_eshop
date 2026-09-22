@@ -21,6 +21,7 @@ use Bouge\Repository\AdminUserRepository;
 use Bouge\Support\Database;
 use Bouge\Support\Slug;
 use Bouge\Support\Status;
+use Bouge\Support\Usage;
 
 require dirname(__DIR__) . '/src/autoload.php';
 
@@ -53,6 +54,7 @@ $catalogue = [
         'products' => [
             [
                 'name' => 'Bonnet silicone uni',
+                'usages' => ['entrainement', 'competition'],
                 'description' => "Silicone épais, sans couture. Il tient en place sur les virages et ne tire pas les cheveux à l'enfilage. Taille unique adulte.",
                 'price' => 1490, 'sale' => 1190, 'sale_ends' => $plusTard(21),
                 'in_store' => true,
@@ -61,6 +63,7 @@ $catalogue = [
             ],
             [
                 'name' => 'Bonnet tissu maille',
+                'usages' => ['entrainement', 'loisir'],
                 'description' => "Polyester maillé, plus souple que le silicone. Moins étanche, mais confortable sur les longues séances. Se sèche en quelques minutes.",
                 'price' => 1990,
                 'meta' => 'Bonnet de bain en tissu polyester maillé, souple et respirant pour les longues séances.',
@@ -68,6 +71,7 @@ $catalogue = [
             ],
             [
                 'name' => 'Bonnet longue chevelure',
+                'usages' => ['entrainement', 'loisir'],
                 'description' => "Volume intérieur augmenté pour les cheveux longs ou attachés. Silicone souple, bords renforcés.",
                 'price' => 1790,
                 'meta' => 'Bonnet de bain silicone à volume augmenté, conçu pour les cheveux longs.',
@@ -82,6 +86,7 @@ $catalogue = [
         'products' => [
             [
                 'name' => "Lunettes d'entraînement",
+                'usages' => ['entrainement', 'loisir'],
                 'description' => "Joints en silicone souple, champ de vision large, traitement anti-buée. Le modèle à prendre si vous nagez plusieurs fois par semaine. Pont nasal interchangeable, trois tailles fournies.",
                 'price' => 2490, 'in_store' => true,
                 'meta' => "Lunettes de natation d'entraînement, joints silicone souple et traitement anti-buée.",
@@ -89,6 +94,7 @@ $catalogue = [
             ],
             [
                 'name' => 'Lunettes miroir compétition',
+                'usages' => ['competition', 'eau-libre'],
                 'description' => "Profil bas, joints fins, verres miroir pour le bassin extérieur. Elles marquent le contour des yeux : à réserver aux séries et aux courses, pas aux deux heures d'entraînement.",
                 'price' => 3990,
                 'meta' => 'Lunettes de natation compétition à verres miroir et profil bas, pour bassin extérieur.',
@@ -96,6 +102,7 @@ $catalogue = [
             ],
             [
                 'name' => 'Lunettes junior',
+                'usages' => ['apprentissage', 'loisir'],
                 'description' => "Format réduit pour les 6-12 ans. Sangle double, boucles à réglage rapide que l'enfant manipule seul.",
                 'price' => 1890,
                 'meta' => 'Lunettes de natation junior 6-12 ans, sangle double et réglage rapide.',
@@ -110,12 +117,14 @@ $catalogue = [
         'products' => [
             [
                 'name' => 'Pull-buoy',
+                'usages' => ['entrainement'],
                 'description' => "Mousse EVA haute densité, forme sablier. Bloque les jambes et reporte le travail sur les bras. Se coince entre les cuisses ou les chevilles selon l'exercice.",
                 'price' => 2190, 'stock' => 35,
                 'meta' => 'Pull-buoy en mousse EVA haute densité pour le travail des bras en natation.',
             ],
             [
                 'name' => 'Plaquettes de traction',
+                'usages' => ['entrainement', 'competition'],
                 'description' => "Surface perforée pour sentir l'appui sans forcer sur l'épaule. Sangles silicone amovibles. Commencez par la taille en dessous de votre intuition.",
                 'price' => 2690,
                 'meta' => 'Plaquettes de natation perforées avec sangles silicone, pour le travail de traction.',
@@ -123,12 +132,14 @@ $catalogue = [
             ],
             [
                 'name' => 'Pince-nez',
+                'usages' => ['entrainement', 'apprentissage'],
                 'description' => "Silicone souple sur armature métal, se déforme puis reprend sa forme. Indispensable en dos et en travail de coulée.",
                 'price' => 690, 'stock' => 60,
                 'meta' => 'Pince-nez de natation en silicone souple sur armature métal.',
             ],
             [
                 'name' => 'Sac filet',
+                'usages' => ['entrainement', 'competition', 'loisir'],
                 'description' => "Maille large : le matériel sèche dedans, l'eau s'évacue. Contient une paire de palmes, un pull-buoy et des plaquettes.",
                 'price' => 1690, 'stock' => 28,
                 'meta' => 'Sac filet à maille large pour transporter et faire sécher le matériel de natation.',
@@ -142,6 +153,7 @@ $catalogue = [
         'products' => [
             [
                 'name' => "Maillot d'entraînement femme",
+                'usages' => ['entrainement', 'loisir'],
                 'description' => "Polyester résistant au chlore, dos nageur. Il garde sa tenue après des centaines de séances là où un maillot classique se détend en un trimestre.",
                 'price' => 4990,
                 'meta' => 'Maillot de bain une pièce femme en polyester résistant au chlore, dos nageur.',
@@ -149,6 +161,7 @@ $catalogue = [
             ],
             [
                 'name' => 'Jammer homme',
+                'usages' => ['entrainement', 'competition'],
                 'description' => "Coupe mi-cuisse, taille élastiquée avec cordon. Polyester résistant au chlore, coutures plates.",
                 'price' => 4490, 'sale' => 3590, 'sale_ends' => $plusTard(14),
                 'meta' => 'Jammer de natation homme en polyester résistant au chlore, coupe mi-cuisse.',
@@ -156,6 +169,7 @@ $catalogue = [
             ],
             [
                 'name' => 'Serviette microfibre',
+                'usages' => ['entrainement', 'loisir', 'eau-libre'],
                 'description' => "Absorbe trois fois son poids, sèche en une heure et tient dans une poche de sac. 80 × 130 cm, étui fourni.",
                 'price' => 2990, 'stock' => 30,
                 'meta' => 'Serviette de natation en microfibre 80 × 130 cm, séchage rapide, étui fourni.',
@@ -175,6 +189,7 @@ $catalogue = [
                 // Résumé, caractéristiques, prix et visuels proviennent de la
                 // page de l'éditeur (dashbook.fr/book/corps-et-esprit).
                 'name' => 'Corps et esprit',
+                'usages' => ['loisir'],
                 // Une ligne par paragraphe : la fiche conserve les retours
                 // à la ligne tels quels, une coupure ici en produirait une à
                 // l'écran, au milieu d'une phrase.
@@ -239,8 +254,8 @@ foreach ($catalogue as $position => $category) {
             'INSERT INTO products
                (name, slug, description, category_id, price_cents, sale_price_cents,
                 sale_ends_at, status, stock, featured, external_url, external_label,
-                available_in_store, meta_description)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                available_in_store, usages, meta_description)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
             [
                 $product['name'],
                 Slug::make($product['name']),
@@ -255,6 +270,7 @@ foreach ($catalogue as $position => $category) {
                 $product['external_url'] ?? null,
                 $product['external_label'] ?? null,
                 !empty($product['in_store']) ? 1 : 0,
+                Usage::toStorage($product['usages'] ?? []),
                 $product['meta'],
             ]
         );

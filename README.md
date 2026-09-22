@@ -22,6 +22,7 @@ les fichiers, on importe la base, c'est en ligne.
 - [Configuration](#configuration)
 - [Brancher Stripe](#brancher-stripe)
 - [Mise en ligne sur un hébergement mutualisé](#mise-en-ligne-sur-un-hébergement-mutualisé)
+- [Structure du site](#structure-du-site)
 - [Aperçu statique sur GitHub Pages](#aperçu-statique-sur-github-pages)
 - [Utiliser l'administration](#utiliser-ladministration)
 - [Direction artistique](#direction-artistique)
@@ -74,6 +75,13 @@ La boutique répond sur <http://localhost:8000> et l'administration sur
 | --- | --- |
 | `php database/install.php <email> <mot-de-passe>` | **Crée les tables** à partir de `database/schema.sql`, puis le compte d'administration. Le catalogue reste vide. C'est le script d'une vraie installation. |
 | `php database/seed.php [email] [mot-de-passe]` | Remplit un catalogue de démonstration (5 catégories, 14 produits). Les tables doivent déjà exister. |
+
+Sur une base **déjà installée**, les évolutions du schéma sont dans
+`database/migrations/`, à jouer dans l'ordre :
+
+```bash
+mysql -u UTILISATEUR -p NOM_DE_LA_BASE < database/migrations/001-usages.sql
+```
 
 `install.php` **recrée les tables** et efface donc tout le contenu existant,
 commandes comprises : il est fait pour une première installation.
@@ -249,6 +257,45 @@ php -S localhost:8000 -t public dev-server.php &
 php bin/apercu.php                             # réécrit docs/
 ```
 
+## Structure du site
+
+L'arborescence reprend celle des marques de natation (Speedo, Arena), adaptée
+à un catalogue de quelques dizaines d'articles : **trois portes d'entrée vers
+les mêmes produits**, chacune avec sa propre adresse.
+
+| Entrée | Adresse | À quoi elle répond |
+| --- | --- | --- |
+| Par catégorie | `/boutique/{categorie}` | « Il me faut un bonnet » |
+| Par usage | `/usage/{usage}` | « Je viens pour m'entraîner » |
+| Par raccourci | `/boutique/selection/{nouveautes\|promotions\|en-magasin}` | « Montrez-moi ce qui est nouveau » |
+| Par recherche | `/recherche?q=…` | « Je cherche des lunettes junior » |
+
+Les filtres se cumulent en paramètres d'URL — `/usage/competition?categorie=lunettes&tri=prix-asc`
+— si bien qu'une sélection se partage, se met en favori et se recharge telle
+quelle. Tout se fait en GET, sans JavaScript.
+
+### Les usages
+
+C'est l'axe que les deux marques mettent en avant, parce qu'un nageur sait
+d'abord ce qu'il vient faire : **Entraînement, Compétition, Loisir et
+bien-être, Eau libre et triathlon, Apprentissage**. Un produit peut en servir
+plusieurs ; les cases se cochent sur sa fiche dans l'administration.
+
+Les valeurs autorisées sont dans `src/Support/Usage.php` — en ajouter un
+revient à ajouter une ligne, sans toucher à la base : la colonne `usages`
+stocke la liste entre virgules.
+
+### Ce qui n'a pas été repris
+
+Speedo et Arena organisent d'abord par **Femme / Homme / Enfant**. Avec une
+quinzaine d'articles, chacune de ces pages en contiendrait un ou deux : un
+rayon vide donne l'impression d'une boutique vide. L'axe reste disponible le
+jour où le catalogue le justifie — le genre deviendrait alors un filtre de
+plus, sur le modèle des usages.
+
+Leurs pages de gammes (Fastskin, Biofuse…) supposent de même des familles de
+produits qui n'existent pas encore ici.
+
 ## Utiliser l'administration
 
 `/admin`, accessible après connexion.
@@ -257,6 +304,9 @@ php bin/apercu.php                             # réécrit docs/
 - **Produits** — recherche, filtre par statut, tri. Le formulaire couvre le
   nom, la description, la catégorie, le prix, une promotion avec dates de
   validité, le stock, les déclinaisons taille/couleur et le référencement.
+- **Usages** — à quoi sert le produit : entraînement, compétition, loisir,
+  eau libre, apprentissage. Ces cases décident des pages sur lesquelles il
+  apparaît et du filtre du catalogue.
 - **Photos** — envoi multiple, ordre réglé par « Avancer » et « Reculer »,
   texte alternatif modifiable, suppression. La première photo de la liste est
   celle qui s'affiche dans le catalogue.

@@ -17,6 +17,7 @@ declare(strict_types=1);
 
 use Bouge\Support\Database;
 use Bouge\Support\Status;
+use Bouge\Support\Usage;
 
 require dirname(__DIR__) . '/src/autoload.php';
 
@@ -42,6 +43,14 @@ foreach (Database::all('SELECT slug FROM categories ORDER BY position ASC') as $
 
 foreach (Database::all('SELECT slug FROM products WHERE status = ?', [Status::PRODUCT_PUBLISHED]) as $produit) {
     $pages['/produit/' . $produit['slug']] = 'produit-' . $produit['slug'] . '.html';
+}
+
+foreach (array_keys(Usage::all()) as $usage) {
+    $pages['/usage/' . $usage] = 'usage-' . $usage . '.html';
+}
+
+foreach (['nouveautes', 'promotions', 'en-magasin'] as $selection) {
+    $pages['/boutique/selection/' . $selection] = 'selection-' . $selection . '.html';
 }
 
 $banniere = <<<'HTML'

@@ -9,6 +9,7 @@
  */
 
 use Bouge\Support\Money;
+use Bouge\Support\Usage;
 use Bouge\Support\Pricing;
 use Bouge\Support\View;
 
@@ -166,6 +167,30 @@ $freeAbove = $shop['shipping']['free_above_cents'];
                     Carte bancaire via Stripe. Aucune donnée de paiement ne passe par nos serveurs.
                 </p>
             </li>
+        </ul>
+    </div>
+</section>
+
+<?php /* Entrée par l'usage, avant l'entrée par le rayon : un nageur sait
+         d'abord ce qu'il vient faire, pas dans quelle catégorie ranger son
+         besoin. C'est l'axe que Speedo et Arena mettent en avant. */ ?>
+<section class="section section--line-bottom">
+    <div class="wrap">
+        <div class="between">
+            <h2 class="t-l">Vous venez pour quoi ?</h2>
+            <a class="link-quiet t-s" href="/boutique">Tout le matériel</a>
+        </div>
+
+        <ul class="usages">
+            <?php foreach (Usage::all() as $slug => $libelle): ?>
+                <li>
+                    <a href="/usage/<?= e($slug) ?>">
+                        <span class="usages__titre"><?= e($libelle) ?></span>
+                        <span class="t-s muted"><?= e(Usage::descriptions()[$slug] ?? '') ?></span>
+                        <span class="usages__fleche" aria-hidden="true">→</span>
+                    </a>
+                </li>
+            <?php endforeach; ?>
         </ul>
     </div>
 </section>

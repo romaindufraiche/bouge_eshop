@@ -16,6 +16,7 @@
 use Bouge\Support\Csrf;
 use Bouge\Support\Money;
 use Bouge\Support\Status;
+use Bouge\Support\Usage;
 
 $isNew = $product === null;
 $id = $isNew ? 0 : (int) $product['id'];
@@ -241,6 +242,33 @@ $saleValue = $field(
             Trois lignes vides sont toujours proposées. Enregistrez pour en obtenir
             trois nouvelles.
         </p>
+    </section>
+
+    <section class="admin-card">
+        <h2 class="t-m">Usages</h2>
+        <p class="field-help">
+            À quoi sert ce produit ? Ces cases décident des pages sur lesquelles
+            il apparaît (« Entraînement », « Compétition »…) et du filtre du
+            catalogue. Un produit peut en cocher plusieurs.
+        </p>
+
+        <?php
+        // Après une erreur de validation, on réaffiche ce qui venait d'être
+        // coché plutôt que ce qui est enregistré.
+        $usagesCoches = $resubmitted
+            ? array_map('strval', (array) ($_POST['usages'] ?? []))
+            : Usage::toList($product['usages'] ?? null);
+        ?>
+
+        <div class="cases">
+            <?php foreach (Usage::all() as $slug => $libelle): ?>
+                <label class="check">
+                    <input type="checkbox" name="usages[]" value="<?= e($slug) ?>"
+                        <?= in_array($slug, $usagesCoches, true) ? ' checked' : '' ?>>
+                    <span><?= e($libelle) ?></span>
+                </label>
+            <?php endforeach; ?>
+        </div>
     </section>
 
     <section class="admin-card">

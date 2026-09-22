@@ -3,14 +3,14 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Plaquettes de traction — BOUGE Club</title>
-            <meta name="description" content="Plaquettes de natation perforées avec sangles silicone, pour le travail de traction.">
+    <title>Apprentissage — le matériel — BOUGE Club</title>
+            <meta name="description" content="Pour les premières longueurs, sans se battre avec son matériel.">
     
     <meta property="og:type" content="website">
     <meta property="og:locale" content="fr_FR">
     <meta property="og:site_name" content="BOUGE Club">
-    <meta property="og:title" content="Plaquettes de traction — BOUGE Club">
-            <meta property="og:description" content="Plaquettes de natation perforées avec sangles silicone, pour le travail de traction.">
+    <meta property="og:title" content="Apprentissage — le matériel — BOUGE Club">
+            <meta property="og:description" content="Pour les premières longueurs, sans se battre avec son matériel.">
     
     <link rel="icon" href="assets/brand/icone-512.png" type="image/png">
     <link rel="apple-touch-icon" href="assets/brand/icone-apple.png">
@@ -197,127 +197,95 @@
 
 <main id="contenu">
     
-    <script type="application/ld+json">{"@context":"https://schema.org","@type":"Product","name":"Plaquettes de traction","description":"Surface perforée pour sentir l'appui sans forcer sur l'épaule. Sangles silicone amovibles. Commencez par la taille en dessous de votre intuition.","sku":"122","brand":{"@type":"Brand","name":"BOUGE Club"},"image":["assets/images/demo/accessoires.svg"],"offers":{"@type":"Offer","url":"http://localhost:8000/produit/plaquettes-de-traction","priceCurrency":"EUR","price":"26.90","availability":"https://schema.org/InStock"}}</script>
-
-<div class="wrap">
+    <div class="wrap">
     <div class="section">
         <nav aria-label="Fil d'Ariane">
             <ol class="breadcrumb">
-                <li><a href="boutique.html">Boutique</a></li>
+                <li><a href="index.html">Accueil</a></li>
                 <li aria-hidden="true">/</li>
-                <li><a href="categorie-accessoires.html">Accessoires</a></li>
-                <li aria-hidden="true">/</li>
-                <li aria-current="page">Plaquettes de traction</li>
-            </ol>
+                                    <li><a href="boutique.html">Boutique</a></li>
+                    <li aria-hidden="true">/</li>
+                    <li aria-current="page">Apprentissage</li>
+                            </ol>
         </nav>
 
-        <div class="grid grid--split" style="margin-top:2rem;align-items:start">
-            <div>
-                <div class="gallery__main">
-                                            <img src="assets/images/demo/accessoires.svg" alt="Plaquettes de traction — Accessoires" width="800" height="1000">
-                                    </div>
+        <header style="margin-top:1.5rem">
+            <h1 class="t-xl">Apprentissage</h1>
 
-                            </div>
+                            <p class="muted" style="margin-top:.75rem;max-width:42rem">Pour les premières longueurs, sans se battre avec son matériel.</p>
+                    </header>
 
-            <div>
-                <p class="eyebrow">Accessoires</p>
-                <h1 class="t-xl" style="margin-top:.5rem">Plaquettes de traction</h1>
-
-                <div style="margin-top:1.5rem">
-                                            <span class="price price--lg">
-    <span class="price__now">26,90 €</span>
-    </span>
-
-                        
-                        <form method="post" action="/panier/ajouter" class="stack-l" style="margin-top:1.5rem">
-                            <input type="hidden" name="_token" value="be64ef5f01af19da5f21d0d4cec570cb13496624597683fed4700cf11f5a262e">                            <input type="hidden" name="product_id" value="122">
-                            <input type="hidden" name="slug" value="plaquettes-de-traction">
-
-                                                                                            <fieldset class="options">
-                                    <legend>Taille</legend>
-                                    <div class="options__list">
-                                                                                                                                <label class="option">
-                                                <input type="radio" name="variant_id" value="233"
-                                                        required>
-                                                <span>S</span>
-                                            </label>
-                                                                                                                                <label class="option">
-                                                <input type="radio" name="variant_id" value="234"
-                                                        required>
-                                                <span>M</span>
-                                            </label>
-                                                                                                                                <label class="option">
-                                                <input type="radio" name="variant_id" value="235"
-                                                        required>
-                                                <span>L</span>
-                                            </label>
-                                                                            </div>
-                                </fieldset>
-                            
-                            <div class="row">
-                                <label class="t-s">
-                                    <span class="muted">Quantité</span>
-                                    <input type="number" name="quantity" value="1" min="1"
-                                           max="45"
-                                           style="width:5.5rem;text-align:center;margin-left:.5rem;display:inline-block">
-                                </label>
-
-                                <button type="submit" class="btn btn--accent btn--lg"
-                                        >
-                                    Ajouter au panier                                </button>
-                            </div>
-
-                                                    </form>
-
-                                                            </div>
-
-                <div class="divider" style="margin-top:2.5rem;padding-top:1.5rem">
-                    <h2 class="t-s">Description</h2>
-                                        <p class="muted" style="margin-top:.5rem;white-space:pre-line">Surface perforée pour sentir l&#039;appui sans forcer sur l&#039;épaule. Sangles silicone amovibles. Commencez par la taille en dessous de votre intuition.</p>
+                <form class="filtres" method="get" action="/usage/apprentissage" style="margin-top:2rem">
+            
+                            <div class="field">
+                    <label for="filtre-categorie">Catégorie</label>
+                    <select id="filtre-categorie" name="categorie">
+                        <option value="">Toutes</option>
+                                                    <option value="bonnets">
+                                Bonnets                            </option>
+                                                    <option value="lunettes">
+                                Lunettes                            </option>
+                                                    <option value="accessoires">
+                                Accessoires                            </option>
+                                                    <option value="vetements">
+                                Vêtements                            </option>
+                                                    <option value="livre">
+                                Livre                            </option>
+                                            </select>
                 </div>
-
-                                <ul class="reassurance">
-                                            <li>
-                            <span aria-hidden="true">→</span>
-                            <span><strong>Livraison en France 4,90 €</strong>, offerte dès 60,00 €.
-                                Expédition sous 48 h ouvrées.</span>
-                        </li>
-                        <li>
-                            <span aria-hidden="true">→</span>
-                            <span><strong>Retrait sans frais</strong> au concept store, dès que la commande est prête.</span>
-                        </li>
-                        <li>
-                            <span aria-hidden="true">→</span>
-                            <span><strong>Paiement sécurisé</strong> par Stripe. Aucune donnée bancaire ne passe par nos serveurs.</span>
-                        </li>
-                                        <li>
-                        <span aria-hidden="true">→</span>
-                        <span>Une hésitation sur la taille ou le modèle ?
-                            <a href="mailto:contact@bouge.fr">Écrivez-nous</a>, on répond vite.</span>
-                    </li>
-                </ul>
+            
+            
+            <div class="field">
+                <label for="filtre-tri">Trier par</label>
+                <select id="filtre-tri" name="tri">
+                                            <option value="nouveautes" selected>
+                            Nouveautés                        </option>
+                                            <option value="prix-asc">
+                            Prix croissant                        </option>
+                                            <option value="prix-desc">
+                            Prix décroissant                        </option>
+                                            <option value="nom">
+                            Nom (A → Z)                        </option>
+                                    </select>
             </div>
-        </div>
 
-                    <section class="divider" style="margin-top:5rem;padding-top:3rem">
-                <h2 class="t-l">À voir aussi</h2>
-                <div style="margin-top:2rem">
-                        <ul class="product-grid">
+            <div class="filtres__cases">
+                                    <label class="inline-check">
+                        <input type="checkbox" name="dispo" value="magasin">
+                        <span>Disponible en magasin</span>
+                    </label>
+                
+                                    <label class="inline-check">
+                        <input type="checkbox" name="promo" value="1">
+                        <span>En promotion</span>
+                    </label>
+                            </div>
+
+            <div class="filtres__actions">
+                <button class="btn btn--ghost" type="submit">Afficher</button>
+                            </div>
+        </form>
+
+        <p class="t-s muted" style="margin-top:1.5rem" role="status">
+            2 articles        </p>
+
+        <div style="margin-top:1rem">
+                                <ul class="product-grid">
                     <li><article class="product-card">
-    <a href="produit-pull-buoy.html">
+    <a href="produit-lunettes-junior.html">
         <div class="product-card__media">
-                            <img src="assets/images/demo/accessoires.svg" alt="Pull-buoy — Accessoires" loading="lazy" width="800" height="1000">
+                            <img src="assets/images/demo/lunettes.svg" alt="Lunettes junior — Lunettes" loading="lazy" width="800" height="1000">
             
             
                     </div>
 
         <div class="product-card__body">
-                            <p class="eyebrow">Accessoires</p>
+                            <p class="eyebrow">Lunettes</p>
             
-            <h3 class="product-card__name">Pull-buoy</h3>
+            <h3 class="product-card__name">Lunettes junior</h3>
 
                             <span class="price">
-    <span class="price__now">21,90 €</span>
+    <span class="price__now">18,90 €</span>
     </span>
                     </div>
     </a>
@@ -343,30 +311,35 @@
     </a>
 </article>
 </li>
-                    <li><article class="product-card">
-    <a href="produit-sac-filet.html">
-        <div class="product-card__media">
-                            <img src="assets/images/demo/accessoires.svg" alt="Sac filet — Accessoires" loading="lazy" width="800" height="1000">
-            
-            
-                    </div>
-
-        <div class="product-card__body">
-                            <p class="eyebrow">Accessoires</p>
-            
-            <h3 class="product-card__name">Sac filet</h3>
-
-                            <span class="price">
-    <span class="price__now">16,90 €</span>
-    </span>
-                    </div>
-    </a>
-</article>
-</li>
             </ul>
-                </div>
-            </section>
-            </div>
+                    </div>
+
+                <section class="divider" style="margin-top:4rem;padding-top:2.5rem">
+            <h2 class="t-s">Chercher par usage</h2>
+            <ul class="filters" style="margin-top:1rem">
+                                    <li>
+                        <a href="usage-entrainement.html">
+                            Entraînement                        </a>
+                    </li>
+                                    <li>
+                        <a href="usage-competition.html">
+                            Compétition                        </a>
+                    </li>
+                                    <li>
+                        <a href="usage-loisir.html">
+                            Loisir et bien-être                        </a>
+                    </li>
+                                    <li>
+                        <a href="usage-eau-libre.html">
+                            Eau libre et triathlon                        </a>
+                    </li>
+                                    <li>
+                        <a href="usage-apprentissage.html" aria-current="page">
+                            Apprentissage                        </a>
+                    </li>
+                            </ul>
+        </section>
+    </div>
 </div>
 </main>
 

@@ -12,7 +12,9 @@
 
 use Bouge\Repository\CategoryRepository;
 use Bouge\Support\Cart;
+use Bouge\Support\Money;
 use Bouge\Support\Session;
+use Bouge\Support\Usage;
 use Bouge\Support\View;
 
 $categories = (new CategoryRepository())->all();
@@ -54,6 +56,22 @@ $flash = Session::takeFlash('shop');
 
 <a class="sr-only skip-link" href="#contenu">Aller au contenu</a>
 
+<?php /* --- En-tête -----------------------------------------------------------
+     Trois étages, comme sur les sites des marques de natation : un bandeau
+     de réassurance, la barre principale (logo, recherche, panier), puis la
+     navigation. Le menu déroulant s'ouvre au survol ET au focus clavier, le
+     menu mobile par une case à cocher : rien ici n'a besoin de JavaScript. */ ?>
+<div class="bandeau">
+    <div class="wrap">
+        <ul>
+            <li>Livraison <?= e(Money::format((int) $shop['shipping']['flat_rate_cents'])) ?> en France<?php
+                if ($shop['shipping']['free_above_cents'] !== null): ?>, offerte dès <?= e(Money::format((int) $shop['shipping']['free_above_cents'])) ?><?php endif; ?></li>
+            <li>Retrait sans frais au concept store</li>
+            <li>Paiement sécurisé par Stripe</li>
+        </ul>
+    </div>
+</div>
+
 <header class="site-header">
     <div class="wrap">
         <div class="site-header__bar">
@@ -64,16 +82,19 @@ $flash = Session::takeFlash('shop');
                 <?= View::partial('partials/logo', ['shop' => $shop]) ?>
             </div>
 
-            <nav class="site-nav site-nav--desktop" aria-label="Navigation principale">
-                <ul>
-                    <li><a href="/boutique">Tout le matériel</a></li>
-                    <?php foreach ($categories as $category): ?>
-                        <li>
-                            <a href="/boutique/<?= e($category['slug']) ?>"><?= e($category['name']) ?></a>
-                        </li>
-                    <?php endforeach; ?>
-                </ul>
-            </nav>
+            <form class="recherche" method="get" action="/recherche" role="search">
+                <label class="sr-only" for="recherche">Rechercher un produit</label>
+                <input type="search" id="recherche" name="q" placeholder="Rechercher un produit"
+                       value="<?= e((string) ($_GET['q'] ?? '')) ?>">
+                <button type="submit">
+                    <span class="sr-only">Rechercher</span>
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor"
+                         stroke-width="1.6" aria-hidden="true">
+                        <circle cx="8" cy="8" r="5.5"/>
+                        <line x1="12" y1="12" x2="16.5" y2="16.5"/>
+                    </svg>
+                </button>
+            </form>
 
             <div class="row">
                 <a class="cart-link" href="/panier">
@@ -98,15 +119,111 @@ $flash = Session::takeFlash('shop');
         </div>
     </div>
 
+    <nav class="site-nav site-nav--desktop" aria-label="Navigation principale">
+        <div class="wrap">
+            <ul>
+                <li class="menu">
+                    <a href="/boutique" class="menu__entree">
+                        Tout le matériel
+                        <span class="menu__fleche" aria-hidden="true">▾</span>
+                    </a>
+
+                    <?php /* Le panneau reprend les colonnes des sites de
+                             natation : le type de produit, l'usage, les
+                             raccourcis. Il reste dans le flux du document,
+                             donc accessible au clavier et lisible sans CSS. */ ?>
+                    <div class="menu__panneau">
+                        <div class="wrap menu__colonnes">
+                            <div>
+                                <p class="eyebrow">Par catégorie</p>
+                                <ul>
+                                    <?php foreach ($categories as $category): ?>
+                                        <li><a href="/boutique/<?= e($category['slug']) ?>"><?= e($category['name']) ?></a></li>
+                                    <?php endforeach; ?>
+                                    <li><a href="/boutique"><strong>Tout voir</strong></a></li>
+                                </ul>
+                            </div>
+
+                            <div>
+                                <p class="eyebrow">Par usage</p>
+                                <ul>
+                                    <?php foreach (Usage::all() as $slug => $libelle): ?>
+                                        <li><a href="/usage/<?= e($slug) ?>"><?= e($libelle) ?></a></li>
+                                    <?php endforeach; ?>
+                                </ul>
+                            </div>
+
+                            <div>
+                                <p class="eyebrow">Raccourcis</p>
+                                <ul>
+                                    <li><a href="/boutique/selection/nouveautes">Nouveautés</a></li>
+                                    <li><a href="/boutique/selection/promotions">Promotions</a></li>
+                                    <li><a href="/boutique/selection/en-magasin">Disponible en magasin</a></li>
+                                    <li><a href="/livraison">Livraison et retrait</a></li>
+                                </ul>
+                            </div>
+
+                            <?php /* Un rappel visuel du livre : c'est le produit
+                                     que la marque met en avant. */ ?>
+                            <div class="menu__mise-en-avant">
+                                <p class="eyebrow">Le livre</p>
+                                <a href="/produit/corps-et-esprit">
+                                    <img src="<?= e(asset('/assets/images/livre/couverture.jpg')) ?>"
+                                         alt="" width="1000" height="1417" loading="lazy">
+                                    <span>Corps et esprit
+                                        <span class="muted t-xs d-block">Ce que la natation m'a appris sur la vie</span>
+                                    </span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+
+                <?php /* Les trois usages les plus courants sont sortis du menu :
+                         c'est la question que se pose le nageur en arrivant. */ ?>
+                <li><a href="/usage/<?= e(Usage::TRAINING) ?>"><?= e(Usage::label(Usage::TRAINING)) ?></a></li>
+                <li><a href="/usage/<?= e(Usage::COMPETITION) ?>"><?= e(Usage::label(Usage::COMPETITION)) ?></a></li>
+                <li><a href="/usage/<?= e(Usage::LEISURE) ?>"><?= e(Usage::label(Usage::LEISURE)) ?></a></li>
+                <li><a href="/boutique/selection/promotions" class="lien-promo">Promotions</a></li>
+                <li><a href="/produit/corps-et-esprit">Le livre</a></li>
+            </ul>
+        </div>
+    </nav>
+
     <input type="checkbox" id="menu-toggle">
     <nav class="site-nav site-nav--mobile" aria-label="Navigation mobile">
         <div class="wrap">
-            <ul>
-                <li><a href="/boutique">Tout le matériel</a></li>
-                <?php foreach ($categories as $category): ?>
-                    <li><a href="/boutique/<?= e($category['slug']) ?>"><?= e($category['name']) ?></a></li>
-                <?php endforeach; ?>
-            </ul>
+            <?php /* Sur mobile, chaque groupe est un bloc dépliable : la liste
+                     complète tiendrait sur trois écrans. */ ?>
+            <details open>
+                <summary>Par catégorie</summary>
+                <ul>
+                    <li><a href="/boutique">Tout le matériel</a></li>
+                    <?php foreach ($categories as $category): ?>
+                        <li><a href="/boutique/<?= e($category['slug']) ?>"><?= e($category['name']) ?></a></li>
+                    <?php endforeach; ?>
+                </ul>
+            </details>
+
+            <details>
+                <summary>Par usage</summary>
+                <ul>
+                    <?php foreach (Usage::all() as $slug => $libelle): ?>
+                        <li><a href="/usage/<?= e($slug) ?>"><?= e($libelle) ?></a></li>
+                    <?php endforeach; ?>
+                </ul>
+            </details>
+
+            <details>
+                <summary>Raccourcis</summary>
+                <ul>
+                    <li><a href="/boutique/selection/nouveautes">Nouveautés</a></li>
+                    <li><a href="/boutique/selection/promotions">Promotions</a></li>
+                    <li><a href="/boutique/selection/en-magasin">Disponible en magasin</a></li>
+                    <li><a href="/produit/corps-et-esprit">Le livre</a></li>
+                    <li><a href="/livraison">Livraison et retrait</a></li>
+                </ul>
+            </details>
         </div>
     </nav>
 </header>
@@ -123,41 +240,52 @@ $flash = Session::takeFlash('shop');
 
 <footer class="site-footer">
     <div class="wrap">
+        <?php /* Quatre colonnes comme chez les marques de natation : ce qu'on
+                 vend, comment s'y retrouver, les réponses aux questions, et
+                 comment nous joindre. */ ?>
         <div class="grid grid--4" style="padding:3.5rem 0">
             <div>
                 <div class="site-footer__logo">
                     <?= View::partial('partials/logo', ['shop' => $shop, 'ton' => 'creme']) ?>
                 </div>
-                <p class="t-s" style="margin-top:1rem;opacity:.7"><?= e($shop['tagline']) ?></p>
+                <p class="t-s" style="margin-top:1rem;opacity:.7">
+                    La boutique en ligne du concept store BOUGE.<br><?= e($shop['tagline']) ?>.
+                </p>
             </div>
 
-            <nav aria-label="Catégories">
-                <h2 class="eyebrow">Catalogue</h2>
+            <nav aria-label="Boutique">
+                <h2 class="eyebrow">Boutique</h2>
                 <ul class="t-s">
+                    <li><a href="/boutique">Tout le matériel</a></li>
                     <?php foreach ($categories as $category): ?>
                         <li><a href="/boutique/<?= e($category['slug']) ?>"><?= e($category['name']) ?></a></li>
                     <?php endforeach; ?>
                 </ul>
             </nav>
 
-            <nav aria-label="Informations">
-                <h2 class="eyebrow">Informations</h2>
+            <nav aria-label="Par usage">
+                <h2 class="eyebrow">Par usage</h2>
                 <ul class="t-s">
-                    <li><a href="/livraison">Livraison et retrait</a></li>
-                    <li><a href="/cgv">Conditions générales de vente</a></li>
-                    <li><a href="/mentions-legales">Mentions légales</a></li>
+                    <?php foreach (Usage::all() as $slug => $libelle): ?>
+                        <li><a href="/usage/<?= e($slug) ?>"><?= e($libelle) ?></a></li>
+                    <?php endforeach; ?>
+                    <li><a href="/boutique/selection/promotions">Promotions</a></li>
                 </ul>
             </nav>
 
-            <div>
-                <h2 class="eyebrow">Contact</h2>
+            <nav aria-label="Aide et informations">
+                <h2 class="eyebrow">Aide</h2>
                 <ul class="t-s">
-                    <li><a href="mailto:<?= e($shop['email']) ?>"><?= e($shop['email']) ?></a></li>
-                    <?php if ($shop['phone'] !== ''): ?>
-                        <li><?= e($shop['phone']) ?></li>
-                    <?php endif; ?>
+                    <li><a href="/livraison">Livraison et retrait</a></li>
+                    <li><a href="/boutique/selection/en-magasin">Disponible en magasin</a></li>
+                    <li><a href="mailto:<?= e($shop['email']) ?>">Nous écrire</a></li>
+                    <li><a href="/cgv">Conditions générales de vente</a></li>
+                    <li><a href="/mentions-legales">Mentions légales</a></li>
                 </ul>
-            </div>
+                <?php if ($shop['phone'] !== ''): ?>
+                    <p class="t-s" style="margin-top:.75rem;opacity:.7"><?= e($shop['phone']) ?></p>
+                <?php endif; ?>
+            </nav>
         </div>
 
         <div class="site-footer__bottom">

@@ -34,6 +34,16 @@
 
 <a class="sr-only skip-link" href="#contenu">Aller au contenu</a>
 
+<div class="bandeau">
+    <div class="wrap">
+        <ul>
+            <li>Livraison 4,90 € en France, offerte dès 60,00 €</li>
+            <li>Retrait sans frais au concept store</li>
+            <li>Paiement sécurisé par Stripe</li>
+        </ul>
+    </div>
+</div>
+
 <header class="site-header">
     <div class="wrap">
         <div class="site-header__bar">
@@ -46,26 +56,19 @@
 </a>
             </div>
 
-            <nav class="site-nav site-nav--desktop" aria-label="Navigation principale">
-                <ul>
-                    <li><a href="boutique.html">Tout le matériel</a></li>
-                                            <li>
-                            <a href="categorie-bonnets.html">Bonnets</a>
-                        </li>
-                                            <li>
-                            <a href="categorie-lunettes.html">Lunettes</a>
-                        </li>
-                                            <li>
-                            <a href="categorie-accessoires.html">Accessoires</a>
-                        </li>
-                                            <li>
-                            <a href="categorie-vetements.html">Vêtements</a>
-                        </li>
-                                            <li>
-                            <a href="categorie-livre.html">Livre</a>
-                        </li>
-                                    </ul>
-            </nav>
+            <form class="recherche" method="get" action="/recherche" role="search">
+                <label class="sr-only" for="recherche">Rechercher un produit</label>
+                <input type="search" id="recherche" name="q" placeholder="Rechercher un produit"
+                       value="">
+                <button type="submit">
+                    <span class="sr-only">Rechercher</span>
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor"
+                         stroke-width="1.6" aria-hidden="true">
+                        <circle cx="8" cy="8" r="5.5"/>
+                        <line x1="12" y1="12" x2="16.5" y2="16.5"/>
+                    </svg>
+                </button>
+            </form>
 
             <div class="row">
                 <a class="cart-link" href="panier.html">
@@ -85,17 +88,109 @@
         </div>
     </div>
 
+    <nav class="site-nav site-nav--desktop" aria-label="Navigation principale">
+        <div class="wrap">
+            <ul>
+                <li class="menu">
+                    <a href="boutique.html" class="menu__entree">
+                        Tout le matériel
+                        <span class="menu__fleche" aria-hidden="true">▾</span>
+                    </a>
+
+                                        <div class="menu__panneau">
+                        <div class="wrap menu__colonnes">
+                            <div>
+                                <p class="eyebrow">Par catégorie</p>
+                                <ul>
+                                                                            <li><a href="categorie-bonnets.html">Bonnets</a></li>
+                                                                            <li><a href="categorie-lunettes.html">Lunettes</a></li>
+                                                                            <li><a href="categorie-accessoires.html">Accessoires</a></li>
+                                                                            <li><a href="categorie-vetements.html">Vêtements</a></li>
+                                                                            <li><a href="categorie-livre.html">Livre</a></li>
+                                                                        <li><a href="boutique.html"><strong>Tout voir</strong></a></li>
+                                </ul>
+                            </div>
+
+                            <div>
+                                <p class="eyebrow">Par usage</p>
+                                <ul>
+                                                                            <li><a href="usage-entrainement.html">Entraînement</a></li>
+                                                                            <li><a href="usage-competition.html">Compétition</a></li>
+                                                                            <li><a href="usage-loisir.html">Loisir et bien-être</a></li>
+                                                                            <li><a href="usage-eau-libre.html">Eau libre et triathlon</a></li>
+                                                                            <li><a href="usage-apprentissage.html">Apprentissage</a></li>
+                                                                    </ul>
+                            </div>
+
+                            <div>
+                                <p class="eyebrow">Raccourcis</p>
+                                <ul>
+                                    <li><a href="selection-nouveautes.html">Nouveautés</a></li>
+                                    <li><a href="selection-promotions.html">Promotions</a></li>
+                                    <li><a href="selection-en-magasin.html">Disponible en magasin</a></li>
+                                    <li><a href="livraison.html">Livraison et retrait</a></li>
+                                </ul>
+                            </div>
+
+                                                        <div class="menu__mise-en-avant">
+                                <p class="eyebrow">Le livre</p>
+                                <a href="produit-corps-et-esprit.html">
+                                    <img src="assets/images/livre/couverture.jpg"
+                                         alt="" width="1000" height="1417" loading="lazy">
+                                    <span>Corps et esprit
+                                        <span class="muted t-xs d-block">Ce que la natation m'a appris sur la vie</span>
+                                    </span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+
+                                <li><a href="usage-entrainement.html">Entraînement</a></li>
+                <li><a href="usage-competition.html">Compétition</a></li>
+                <li><a href="usage-loisir.html">Loisir et bien-être</a></li>
+                <li><a href="selection-promotions.html" class="lien-promo">Promotions</a></li>
+                <li><a href="produit-corps-et-esprit.html">Le livre</a></li>
+            </ul>
+        </div>
+    </nav>
+
     <input type="checkbox" id="menu-toggle">
     <nav class="site-nav site-nav--mobile" aria-label="Navigation mobile">
         <div class="wrap">
-            <ul>
-                <li><a href="boutique.html">Tout le matériel</a></li>
-                                    <li><a href="categorie-bonnets.html">Bonnets</a></li>
-                                    <li><a href="categorie-lunettes.html">Lunettes</a></li>
-                                    <li><a href="categorie-accessoires.html">Accessoires</a></li>
-                                    <li><a href="categorie-vetements.html">Vêtements</a></li>
-                                    <li><a href="categorie-livre.html">Livre</a></li>
-                            </ul>
+                        <details open>
+                <summary>Par catégorie</summary>
+                <ul>
+                    <li><a href="boutique.html">Tout le matériel</a></li>
+                                            <li><a href="categorie-bonnets.html">Bonnets</a></li>
+                                            <li><a href="categorie-lunettes.html">Lunettes</a></li>
+                                            <li><a href="categorie-accessoires.html">Accessoires</a></li>
+                                            <li><a href="categorie-vetements.html">Vêtements</a></li>
+                                            <li><a href="categorie-livre.html">Livre</a></li>
+                                    </ul>
+            </details>
+
+            <details>
+                <summary>Par usage</summary>
+                <ul>
+                                            <li><a href="usage-entrainement.html">Entraînement</a></li>
+                                            <li><a href="usage-competition.html">Compétition</a></li>
+                                            <li><a href="usage-loisir.html">Loisir et bien-être</a></li>
+                                            <li><a href="usage-eau-libre.html">Eau libre et triathlon</a></li>
+                                            <li><a href="usage-apprentissage.html">Apprentissage</a></li>
+                                    </ul>
+            </details>
+
+            <details>
+                <summary>Raccourcis</summary>
+                <ul>
+                    <li><a href="selection-nouveautes.html">Nouveautés</a></li>
+                    <li><a href="selection-promotions.html">Promotions</a></li>
+                    <li><a href="selection-en-magasin.html">Disponible en magasin</a></li>
+                    <li><a href="produit-corps-et-esprit.html">Le livre</a></li>
+                    <li><a href="livraison.html">Livraison et retrait</a></li>
+                </ul>
+            </details>
         </div>
     </nav>
 </header>
@@ -104,42 +199,92 @@
     
     <div class="wrap">
     <div class="section">
-        <h1 class="t-xl">Tout le matériel</h1>
-
-                    <p class="muted" style="margin-top:.75rem">
-                14 produits en ligne.
-            </p>
-        
-                <nav aria-label="Filtrer par catégorie" style="margin-top:2rem">
-            <ul class="filters">
-                <li>
-                    <a href="boutique.html" aria-current="page">Tout</a>
-                </li>
-                                    <li>
-                        <a href="categorie-bonnets.html"
-                           >Bonnets</a>
-                    </li>
-                                    <li>
-                        <a href="categorie-lunettes.html"
-                           >Lunettes</a>
-                    </li>
-                                    <li>
-                        <a href="categorie-accessoires.html"
-                           >Accessoires</a>
-                    </li>
-                                    <li>
-                        <a href="categorie-vetements.html"
-                           >Vêtements</a>
-                    </li>
-                                    <li>
-                        <a href="categorie-livre.html"
-                           >Livre</a>
-                    </li>
-                            </ul>
+        <nav aria-label="Fil d'Ariane">
+            <ol class="breadcrumb">
+                <li><a href="index.html">Accueil</a></li>
+                <li aria-hidden="true">/</li>
+                                    <li aria-current="page">Boutique</li>
+                            </ol>
         </nav>
 
-        <div style="margin-top:3rem">
-                <ul class="product-grid">
+        <header style="margin-top:1.5rem">
+            <h1 class="t-xl">Tout le matériel</h1>
+
+                            <p class="muted" style="margin-top:.75rem;max-width:42rem">Bonnets, lunettes, accessoires et textile, choisis pour tenir la distance.</p>
+                    </header>
+
+                <form class="filtres" method="get" action="/boutique" style="margin-top:2rem">
+            
+                            <div class="field">
+                    <label for="filtre-categorie">Catégorie</label>
+                    <select id="filtre-categorie" name="categorie">
+                        <option value="">Toutes</option>
+                                                    <option value="bonnets">
+                                Bonnets                            </option>
+                                                    <option value="lunettes">
+                                Lunettes                            </option>
+                                                    <option value="accessoires">
+                                Accessoires                            </option>
+                                                    <option value="vetements">
+                                Vêtements                            </option>
+                                                    <option value="livre">
+                                Livre                            </option>
+                                            </select>
+                </div>
+            
+                            <div class="field">
+                    <label for="filtre-usage">Usage</label>
+                    <select id="filtre-usage" name="usage">
+                        <option value="">Tous</option>
+                                                    <option value="entrainement">
+                                Entraînement                            </option>
+                                                    <option value="competition">
+                                Compétition                            </option>
+                                                    <option value="loisir">
+                                Loisir et bien-être                            </option>
+                                                    <option value="eau-libre">
+                                Eau libre et triathlon                            </option>
+                                                    <option value="apprentissage">
+                                Apprentissage                            </option>
+                                            </select>
+                </div>
+            
+            <div class="field">
+                <label for="filtre-tri">Trier par</label>
+                <select id="filtre-tri" name="tri">
+                                            <option value="nouveautes" selected>
+                            Nouveautés                        </option>
+                                            <option value="prix-asc">
+                            Prix croissant                        </option>
+                                            <option value="prix-desc">
+                            Prix décroissant                        </option>
+                                            <option value="nom">
+                            Nom (A → Z)                        </option>
+                                    </select>
+            </div>
+
+            <div class="filtres__cases">
+                                    <label class="inline-check">
+                        <input type="checkbox" name="dispo" value="magasin">
+                        <span>Disponible en magasin</span>
+                    </label>
+                
+                                    <label class="inline-check">
+                        <input type="checkbox" name="promo" value="1">
+                        <span>En promotion</span>
+                    </label>
+                            </div>
+
+            <div class="filtres__actions">
+                <button class="btn btn--ghost" type="submit">Afficher</button>
+                            </div>
+        </form>
+
+        <p class="t-s muted" style="margin-top:1.5rem" role="status">
+            14 articles        </p>
+
+        <div style="margin-top:1rem">
+                                <ul class="product-grid">
                     <li><article class="product-card">
     <a href="produit-plaquettes-de-traction.html">
         <div class="product-card__media">
@@ -431,14 +576,40 @@
 </article>
 </li>
             </ul>
-        </div>
+                    </div>
+
+                <section class="divider" style="margin-top:4rem;padding-top:2.5rem">
+            <h2 class="t-s">Chercher par usage</h2>
+            <ul class="filters" style="margin-top:1rem">
+                                    <li>
+                        <a href="usage-entrainement.html">
+                            Entraînement                        </a>
+                    </li>
+                                    <li>
+                        <a href="usage-competition.html">
+                            Compétition                        </a>
+                    </li>
+                                    <li>
+                        <a href="usage-loisir.html">
+                            Loisir et bien-être                        </a>
+                    </li>
+                                    <li>
+                        <a href="usage-eau-libre.html">
+                            Eau libre et triathlon                        </a>
+                    </li>
+                                    <li>
+                        <a href="usage-apprentissage.html">
+                            Apprentissage                        </a>
+                    </li>
+                            </ul>
+        </section>
     </div>
 </div>
 </main>
 
 <footer class="site-footer">
     <div class="wrap">
-        <div class="grid grid--4" style="padding:3.5rem 0">
+                <div class="grid grid--4" style="padding:3.5rem 0">
             <div>
                 <div class="site-footer__logo">
                     <a class="marque marque--creme" href="index.html">
@@ -448,12 +619,15 @@
     <span class="sr-only">BOUGE Club — accueil</span>
 </a>
                 </div>
-                <p class="t-s" style="margin-top:1rem;opacity:.7">Matériel de natation</p>
+                <p class="t-s" style="margin-top:1rem;opacity:.7">
+                    La boutique en ligne du concept store BOUGE.<br>Matériel de natation.
+                </p>
             </div>
 
-            <nav aria-label="Catégories">
-                <h2 class="eyebrow">Catalogue</h2>
+            <nav aria-label="Boutique">
+                <h2 class="eyebrow">Boutique</h2>
                 <ul class="t-s">
+                    <li><a href="boutique.html">Tout le matériel</a></li>
                                             <li><a href="categorie-bonnets.html">Bonnets</a></li>
                                             <li><a href="categorie-lunettes.html">Lunettes</a></li>
                                             <li><a href="categorie-accessoires.html">Accessoires</a></li>
@@ -462,21 +636,28 @@
                                     </ul>
             </nav>
 
-            <nav aria-label="Informations">
-                <h2 class="eyebrow">Informations</h2>
+            <nav aria-label="Par usage">
+                <h2 class="eyebrow">Par usage</h2>
                 <ul class="t-s">
-                    <li><a href="livraison.html">Livraison et retrait</a></li>
-                    <li><a href="cgv.html">Conditions générales de vente</a></li>
-                    <li><a href="mentions-legales.html">Mentions légales</a></li>
+                                            <li><a href="usage-entrainement.html">Entraînement</a></li>
+                                            <li><a href="usage-competition.html">Compétition</a></li>
+                                            <li><a href="usage-loisir.html">Loisir et bien-être</a></li>
+                                            <li><a href="usage-eau-libre.html">Eau libre et triathlon</a></li>
+                                            <li><a href="usage-apprentissage.html">Apprentissage</a></li>
+                                        <li><a href="selection-promotions.html">Promotions</a></li>
                 </ul>
             </nav>
 
-            <div>
-                <h2 class="eyebrow">Contact</h2>
+            <nav aria-label="Aide et informations">
+                <h2 class="eyebrow">Aide</h2>
                 <ul class="t-s">
-                    <li><a href="mailto:contact@bouge.fr">contact@bouge.fr</a></li>
-                                    </ul>
-            </div>
+                    <li><a href="livraison.html">Livraison et retrait</a></li>
+                    <li><a href="selection-en-magasin.html">Disponible en magasin</a></li>
+                    <li><a href="mailto:contact@bouge.fr">Nous écrire</a></li>
+                    <li><a href="cgv.html">Conditions générales de vente</a></li>
+                    <li><a href="mentions-legales.html">Mentions légales</a></li>
+                </ul>
+                            </nav>
         </div>
 
         <div class="site-footer__bottom">

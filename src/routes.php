@@ -26,7 +26,12 @@ use Bouge\Controller\Admin\ProductController as AdminProductController;
 
 $router->get('/', [HomeController::class, 'index']);
 $router->get('/boutique', [CatalogueController::class, 'index']);
+$router->get('/recherche', [CatalogueController::class, 'search']);
+// Les chemins fixes passent avant `{slug}`, sans quoi « selection » serait
+// pris pour une catégorie.
+$router->get('/boutique/selection/{slug}', [CatalogueController::class, 'shortcut']);
 $router->get('/boutique/{slug}', [CatalogueController::class, 'category']);
+$router->get('/usage/{slug}', [CatalogueController::class, 'usage']);
 $router->get('/produit/{slug}', [ProductController::class, 'show']);
 
 // --- Pages éditoriales --------------------------------------------------------

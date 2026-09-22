@@ -13,6 +13,7 @@
      3. Base
      4. Mise en page
      5. En-tête et pied de page
+    5 bis. Bandeau, méga-menu, recherche, filtres
      6. Boutons et pastilles
      7. Produits
      8. Formulaires
@@ -346,27 +347,13 @@ main { flex: 1; }
 }
 .marque--creme { color: var(--cream); }
 
-.site-nav ul {
-  display: flex;
-  align-items: center;
-  gap: 1.75rem;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  font-size: 0.9375rem;
-}
-
+/* La mise en ligne des listes ne vise que la barre principale : les colonnes
+   du panneau déroulant, elles, s'empilent (voir section 5 bis). */
 .site-nav a { text-decoration: none; }
 .site-nav a:hover,
 .site-nav a[aria-current='page'] { text-decoration: underline; }
 
 .site-nav--mobile { display: none; border-top: 1px solid var(--line); }
-.site-nav--mobile ul { flex-direction: column; align-items: stretch; gap: 0; padding: 0.5rem 0; }
-.site-nav--mobile a {
-  display: block;
-  padding: 0.75rem 0;
-  border-bottom: 1px solid color-mix(in srgb, var(--line) 60%, transparent);
-}
 
 .burger {
   display: none;
@@ -424,6 +411,213 @@ main { flex: 1; }
   color: color-mix(in srgb, var(--cream) 60%, transparent);
 }
 .site-footer__bottom .note { color: color-mix(in srgb, var(--cream) 80%, transparent); }
+
+/* --- 5 bis. Bandeau, méga-menu, recherche -------------------------------------
+   L'architecture reprend celle des sites de natation : un bandeau de
+   réassurance, une barre logo / recherche / panier, puis une navigation à
+   deux axes — le type de produit et l'usage. Le panneau déroulant s'ouvre au
+   survol et au focus clavier, sans JavaScript. */
+
+.bandeau {
+  background: var(--ink);
+  color: var(--cream);
+  font-size: 0.75rem;
+}
+.bandeau ul {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem 2rem;
+  list-style: none;
+  margin: 0;
+  padding: 0.5rem 0;
+}
+/* Sur mobile, seule la promesse la plus utile reste : les trois tiendraient
+   sur trois lignes et repousseraient le contenu. */
+@media (max-width: 640px) {
+  .bandeau li + li { display: none; }
+}
+
+.recherche {
+  display: flex;
+  align-items: center;
+  flex: 1 1 14rem;
+  max-width: 24rem;
+  margin: 0 1.5rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-control);
+  background: var(--white);
+  overflow: hidden;
+}
+.recherche input[type='search'] {
+  flex: 1 1 auto;
+  margin: 0;
+  padding: 0.5rem 0.9rem;
+  border: 0;
+  background: transparent;
+  font-size: 0.875rem;
+}
+.recherche input[type='search']:focus { outline: none; }
+.recherche:focus-within { border-color: var(--ink); }
+.recherche button {
+  display: grid;
+  place-items: center;
+  padding: 0.5rem 0.9rem;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+}
+@media (max-width: 899px) {
+  /* La recherche passe sur sa propre ligne : côte à côte avec le logo et le
+     panier, elle n'aurait plus la largeur d'un mot. La barre autorise donc le
+     retour à la ligne, mais le groupe panier + menu, lui, reste d'un bloc. */
+  .site-header__bar { flex-wrap: wrap; padding-bottom: 0.75rem; }
+  .site-header__bar .row { flex-wrap: nowrap; }
+  .recherche { order: 3; flex: 1 0 100%; max-width: none; margin: 0; }
+}
+
+/* Navigation principale ---------------------------------------------------------- */
+
+.site-nav--desktop { border-top: 1px solid var(--line); }
+.site-nav--desktop > .wrap > ul {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 1.75rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.site-nav--desktop > .wrap > ul > li > a {
+  display: inline-block;
+  padding: 0.7rem 0;
+  font-size: 0.875rem;
+  border-bottom: 2px solid transparent;
+}
+.site-nav--desktop > .wrap > ul > li > a:hover,
+.site-nav--desktop > .wrap > ul > li > a[aria-current='page'] {
+  border-bottom-color: var(--ink);
+  text-decoration: none;
+}
+.lien-promo { color: var(--accent-deep); font-weight: 600; }
+
+/* Panneau déroulant ---------------------------------------------------------------
+   `visibility` plutôt que `display` : la transition reste possible et le
+   contenu demeure atteignable au clavier tant qu'il a le focus. */
+
+.menu { position: static; }
+.menu__fleche { font-size: 0.7em; opacity: 0.6; }
+.menu__panneau {
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(-0.35rem);
+  transition: opacity 0.15s, transform 0.15s, visibility 0.15s;
+  background: var(--cream);
+  border-bottom: 1px solid var(--line);
+  box-shadow: 0 1rem 2rem rgb(35 35 35 / 0.08);
+}
+.menu:hover .menu__panneau,
+.menu:focus-within .menu__panneau {
+  visibility: visible;
+  opacity: 1;
+  transform: none;
+}
+.menu__colonnes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(0, 14rem);
+  gap: 2.5rem;
+  padding: 2rem 0 2.5rem;
+}
+.menu__colonnes ul { list-style: none; margin: 0.75rem 0 0; padding: 0; }
+.menu__colonnes li + li { margin-top: 0.5rem; }
+.menu__colonnes a { font-size: 0.875rem; text-decoration: none; }
+.menu__colonnes a:hover { text-decoration: underline; }
+.menu__mise-en-avant a { display: block; margin-top: 0.75rem; }
+.menu__mise-en-avant img {
+  /* La couverture est montrée entière : recadrée, elle perdrait son titre. */
+  width: 100%;
+  height: 10rem;
+  object-fit: contain;
+  padding: 0.5rem;
+  border-radius: var(--radius-small);
+  margin-bottom: 0.5rem;
+  background: var(--sand);
+}
+
+@media (max-width: 899px) {
+  .site-nav--desktop { display: none; }
+}
+
+/* Menu mobile ---------------------------------------------------------------------- */
+
+.site-nav--mobile details { border-bottom: 1px solid var(--line); }
+.site-nav--mobile summary {
+  padding: 0.85rem 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+}
+.site-nav--mobile summary::-webkit-details-marker { display: none; }
+.site-nav--mobile summary::after { content: ' +'; opacity: 0.5; }
+.site-nav--mobile details[open] summary::after { content: ' –'; }
+.site-nav--mobile ul { list-style: none; margin: 0; padding: 0 0 0.75rem; }
+.site-nav--mobile li a { display: block; padding: 0.5rem 0 0.5rem 0.75rem; font-size: 0.9375rem; }
+
+/* Filtres du catalogue --------------------------------------------------------------
+   Une barre horizontale qui s'empile sur mobile, plutôt qu'un tiroir latéral :
+   avec quelques dizaines d'articles, le tiroir coûterait un clic pour rien. */
+
+.filtres {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 1.25rem;
+  align-items: flex-end;
+  padding: 1.25rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-surface);
+  background: var(--sand);
+}
+.filtres .field { margin-top: 0; }
+.filtres .field + .field { margin-top: 0; }
+.filtres label { font-size: 0.8125rem; font-weight: 600; }
+.filtres select { width: auto; min-width: 11rem; margin-top: 0.35rem; background: var(--white); }
+.filtres__cases { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; padding-bottom: 0.6rem; }
+.filtres__actions { display: flex; align-items: center; gap: 1rem; margin-left: auto; padding-bottom: 0.1rem; }
+@media (max-width: 640px) {
+  .filtres { flex-direction: column; align-items: stretch; }
+  .filtres select { width: 100%; }
+  .filtres__actions { margin-left: 0; }
+}
+
+.vide {
+  padding: 3rem 1.5rem;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius-surface);
+  text-align: center;
+}
+.vide p + p { margin-top: 0.5rem; }
+
+/* Réassurance de la fiche produit ------------------------------------------------- */
+
+.reassurance {
+  display: grid;
+  gap: 0.75rem;
+  list-style: none;
+  margin: 1.5rem 0 0;
+  padding: 1.25rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-surface);
+  font-size: 0.875rem;
+}
+.reassurance li { display: flex; gap: 0.65rem; align-items: flex-start; }
+.reassurance strong { font-weight: 600; }
+.reassurance span { color: var(--ink-soft); }
 
 /* --- 6. Boutons et pastilles ----------------------------------------------- */
 
@@ -653,6 +847,32 @@ main { flex: 1; }
 .option input:checked + span { background: var(--ink); border-color: var(--ink); color: var(--cream); }
 .option input:focus-visible + span { outline: 2px solid var(--ink); outline-offset: 2px; }
 .option input:disabled + span { opacity: 0.45; text-decoration: line-through; cursor: not-allowed; }
+
+/* Entrées par usage de l'accueil ------------------------------------------------- */
+
+.usages {
+  display: grid;
+  gap: 1rem;
+  /* 13 rem : les cinq usages tiennent sur une ligne en grand écran plutôt
+     que d'en laisser un seul sur la suivante. */
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  list-style: none;
+  margin: 2rem 0 0;
+  padding: 0;
+}
+.usages a {
+  display: grid;
+  gap: 0.35rem;
+  height: 100%;
+  padding: 1.25rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-surface);
+  text-decoration: none;
+  transition: border-color 0.15s, background-color 0.15s;
+}
+.usages a:hover { border-color: var(--ink); background: var(--sand); text-decoration: none; }
+.usages__titre { font-weight: 600; font-size: 1.0625rem; }
+.usages__fleche { margin-top: auto; padding-top: 0.5rem; color: var(--accent-deep); }
 
 /* Mise en avant de l'accueil -----------------------------------------------------
    Le produit mis en avant est aujourd'hui un livre : sa couverture est une
@@ -962,6 +1182,9 @@ a.admin-stat:hover { border-color: var(--ink); text-decoration: none; }
 .field-group legend { padding: 0 0.5rem; font-size: 0.875rem; font-weight: 600; }
 .field-prefixed { display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem; }
 .field-prefixed input { width: auto; flex: 1 1 12rem; }
+
+.cases { display: grid; gap: 0.75rem; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); }
+.cases .check + .check { margin-top: 0; }
 
 .check { display: flex; gap: 0.65rem; align-items: flex-start; font-size: 0.9375rem; cursor: pointer; }
 .check + .check { margin-top: 0.75rem; }

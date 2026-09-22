@@ -34,6 +34,16 @@
 
 <a class="sr-only skip-link" href="#contenu">Aller au contenu</a>
 
+<div class="bandeau">
+    <div class="wrap">
+        <ul>
+            <li>Livraison 4,90 € en France, offerte dès 60,00 €</li>
+            <li>Retrait sans frais au concept store</li>
+            <li>Paiement sécurisé par Stripe</li>
+        </ul>
+    </div>
+</div>
+
 <header class="site-header">
     <div class="wrap">
         <div class="site-header__bar">
@@ -46,26 +56,19 @@
 </a>
             </div>
 
-            <nav class="site-nav site-nav--desktop" aria-label="Navigation principale">
-                <ul>
-                    <li><a href="boutique.html">Tout le matériel</a></li>
-                                            <li>
-                            <a href="categorie-bonnets.html">Bonnets</a>
-                        </li>
-                                            <li>
-                            <a href="categorie-lunettes.html">Lunettes</a>
-                        </li>
-                                            <li>
-                            <a href="categorie-accessoires.html">Accessoires</a>
-                        </li>
-                                            <li>
-                            <a href="categorie-vetements.html">Vêtements</a>
-                        </li>
-                                            <li>
-                            <a href="categorie-livre.html">Livre</a>
-                        </li>
-                                    </ul>
-            </nav>
+            <form class="recherche" method="get" action="/recherche" role="search">
+                <label class="sr-only" for="recherche">Rechercher un produit</label>
+                <input type="search" id="recherche" name="q" placeholder="Rechercher un produit"
+                       value="">
+                <button type="submit">
+                    <span class="sr-only">Rechercher</span>
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor"
+                         stroke-width="1.6" aria-hidden="true">
+                        <circle cx="8" cy="8" r="5.5"/>
+                        <line x1="12" y1="12" x2="16.5" y2="16.5"/>
+                    </svg>
+                </button>
+            </form>
 
             <div class="row">
                 <a class="cart-link" href="panier.html">
@@ -85,17 +88,109 @@
         </div>
     </div>
 
+    <nav class="site-nav site-nav--desktop" aria-label="Navigation principale">
+        <div class="wrap">
+            <ul>
+                <li class="menu">
+                    <a href="boutique.html" class="menu__entree">
+                        Tout le matériel
+                        <span class="menu__fleche" aria-hidden="true">▾</span>
+                    </a>
+
+                                        <div class="menu__panneau">
+                        <div class="wrap menu__colonnes">
+                            <div>
+                                <p class="eyebrow">Par catégorie</p>
+                                <ul>
+                                                                            <li><a href="categorie-bonnets.html">Bonnets</a></li>
+                                                                            <li><a href="categorie-lunettes.html">Lunettes</a></li>
+                                                                            <li><a href="categorie-accessoires.html">Accessoires</a></li>
+                                                                            <li><a href="categorie-vetements.html">Vêtements</a></li>
+                                                                            <li><a href="categorie-livre.html">Livre</a></li>
+                                                                        <li><a href="boutique.html"><strong>Tout voir</strong></a></li>
+                                </ul>
+                            </div>
+
+                            <div>
+                                <p class="eyebrow">Par usage</p>
+                                <ul>
+                                                                            <li><a href="usage-entrainement.html">Entraînement</a></li>
+                                                                            <li><a href="usage-competition.html">Compétition</a></li>
+                                                                            <li><a href="usage-loisir.html">Loisir et bien-être</a></li>
+                                                                            <li><a href="usage-eau-libre.html">Eau libre et triathlon</a></li>
+                                                                            <li><a href="usage-apprentissage.html">Apprentissage</a></li>
+                                                                    </ul>
+                            </div>
+
+                            <div>
+                                <p class="eyebrow">Raccourcis</p>
+                                <ul>
+                                    <li><a href="selection-nouveautes.html">Nouveautés</a></li>
+                                    <li><a href="selection-promotions.html">Promotions</a></li>
+                                    <li><a href="selection-en-magasin.html">Disponible en magasin</a></li>
+                                    <li><a href="livraison.html">Livraison et retrait</a></li>
+                                </ul>
+                            </div>
+
+                                                        <div class="menu__mise-en-avant">
+                                <p class="eyebrow">Le livre</p>
+                                <a href="produit-corps-et-esprit.html">
+                                    <img src="assets/images/livre/couverture.jpg"
+                                         alt="" width="1000" height="1417" loading="lazy">
+                                    <span>Corps et esprit
+                                        <span class="muted t-xs d-block">Ce que la natation m'a appris sur la vie</span>
+                                    </span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+
+                                <li><a href="usage-entrainement.html">Entraînement</a></li>
+                <li><a href="usage-competition.html">Compétition</a></li>
+                <li><a href="usage-loisir.html">Loisir et bien-être</a></li>
+                <li><a href="selection-promotions.html" class="lien-promo">Promotions</a></li>
+                <li><a href="produit-corps-et-esprit.html">Le livre</a></li>
+            </ul>
+        </div>
+    </nav>
+
     <input type="checkbox" id="menu-toggle">
     <nav class="site-nav site-nav--mobile" aria-label="Navigation mobile">
         <div class="wrap">
-            <ul>
-                <li><a href="boutique.html">Tout le matériel</a></li>
-                                    <li><a href="categorie-bonnets.html">Bonnets</a></li>
-                                    <li><a href="categorie-lunettes.html">Lunettes</a></li>
-                                    <li><a href="categorie-accessoires.html">Accessoires</a></li>
-                                    <li><a href="categorie-vetements.html">Vêtements</a></li>
-                                    <li><a href="categorie-livre.html">Livre</a></li>
-                            </ul>
+                        <details open>
+                <summary>Par catégorie</summary>
+                <ul>
+                    <li><a href="boutique.html">Tout le matériel</a></li>
+                                            <li><a href="categorie-bonnets.html">Bonnets</a></li>
+                                            <li><a href="categorie-lunettes.html">Lunettes</a></li>
+                                            <li><a href="categorie-accessoires.html">Accessoires</a></li>
+                                            <li><a href="categorie-vetements.html">Vêtements</a></li>
+                                            <li><a href="categorie-livre.html">Livre</a></li>
+                                    </ul>
+            </details>
+
+            <details>
+                <summary>Par usage</summary>
+                <ul>
+                                            <li><a href="usage-entrainement.html">Entraînement</a></li>
+                                            <li><a href="usage-competition.html">Compétition</a></li>
+                                            <li><a href="usage-loisir.html">Loisir et bien-être</a></li>
+                                            <li><a href="usage-eau-libre.html">Eau libre et triathlon</a></li>
+                                            <li><a href="usage-apprentissage.html">Apprentissage</a></li>
+                                    </ul>
+            </details>
+
+            <details>
+                <summary>Raccourcis</summary>
+                <ul>
+                    <li><a href="selection-nouveautes.html">Nouveautés</a></li>
+                    <li><a href="selection-promotions.html">Promotions</a></li>
+                    <li><a href="selection-en-magasin.html">Disponible en magasin</a></li>
+                    <li><a href="produit-corps-et-esprit.html">Le livre</a></li>
+                    <li><a href="livraison.html">Livraison et retrait</a></li>
+                </ul>
+            </details>
         </div>
     </nav>
 </header>
@@ -209,6 +304,53 @@
                 </p>
             </li>
         </ul>
+    </div>
+</section>
+
+<section class="section section--line-bottom">
+    <div class="wrap">
+        <div class="between">
+            <h2 class="t-l">Vous venez pour quoi ?</h2>
+            <a class="link-quiet t-s" href="boutique.html">Tout le matériel</a>
+        </div>
+
+        <ul class="usages">
+                            <li>
+                    <a href="usage-entrainement.html">
+                        <span class="usages__titre">Entraînement</span>
+                        <span class="t-s muted">Ce qui encaisse les séries, le chlore et les allers-retours au bassin.</span>
+                        <span class="usages__fleche" aria-hidden="true">→</span>
+                    </a>
+                </li>
+                            <li>
+                    <a href="usage-competition.html">
+                        <span class="usages__titre">Compétition</span>
+                        <span class="t-s muted">Le matériel des jours de course : léger, rapide, sans rien qui dépasse.</span>
+                        <span class="usages__fleche" aria-hidden="true">→</span>
+                    </a>
+                </li>
+                            <li>
+                    <a href="usage-loisir.html">
+                        <span class="usages__titre">Loisir et bien-être</span>
+                        <span class="t-s muted">Pour nager à son rythme, longer la ligne d&#039;eau et sortir détendu.</span>
+                        <span class="usages__fleche" aria-hidden="true">→</span>
+                    </a>
+                </li>
+                            <li>
+                    <a href="usage-eau-libre.html">
+                        <span class="usages__titre">Eau libre et triathlon</span>
+                        <span class="t-s muted">Lac, mer, triathlon : visibilité, tenue et confort sur la distance.</span>
+                        <span class="usages__fleche" aria-hidden="true">→</span>
+                    </a>
+                </li>
+                            <li>
+                    <a href="usage-apprentissage.html">
+                        <span class="usages__titre">Apprentissage</span>
+                        <span class="t-s muted">Pour les premières longueurs, sans se battre avec son matériel.</span>
+                        <span class="usages__fleche" aria-hidden="true">→</span>
+                    </a>
+                </li>
+                    </ul>
     </div>
 </section>
 
@@ -331,6 +473,107 @@
 </article>
 </li>
                     <li><article class="product-card">
+    <a href="produit-plaquettes-de-traction.html">
+        <div class="product-card__media">
+                            <img src="assets/images/demo/accessoires.svg" alt="Plaquettes de traction — Accessoires" loading="lazy" width="800" height="1000">
+            
+            
+                    </div>
+
+        <div class="product-card__body">
+                            <p class="eyebrow">Accessoires</p>
+            
+            <h3 class="product-card__name">Plaquettes de traction</h3>
+
+                            <span class="price">
+    <span class="price__now">26,90 €</span>
+    </span>
+                    </div>
+    </a>
+</article>
+</li>
+                    <li><article class="product-card">
+    <a href="produit-lunettes-d-entrainement.html">
+        <div class="product-card__media">
+                            <img src="assets/images/demo/lunettes.svg" alt="Lunettes d&#039;entraînement — Lunettes" loading="lazy" width="800" height="1000">
+            
+            
+                            <span class="pill pill--ink product-card__badge product-card__badge--right">En magasin</span>
+                    </div>
+
+        <div class="product-card__body">
+                            <p class="eyebrow">Lunettes</p>
+            
+            <h3 class="product-card__name">Lunettes d&#039;entraînement</h3>
+
+                            <span class="price">
+    <span class="price__now">24,90 €</span>
+    </span>
+                    </div>
+    </a>
+</article>
+</li>
+                    <li><article class="product-card">
+    <a href="produit-pince-nez.html">
+        <div class="product-card__media">
+                            <img src="assets/images/demo/accessoires.svg" alt="Pince-nez — Accessoires" loading="lazy" width="800" height="1000">
+            
+            
+                    </div>
+
+        <div class="product-card__body">
+                            <p class="eyebrow">Accessoires</p>
+            
+            <h3 class="product-card__name">Pince-nez</h3>
+
+                            <span class="price">
+    <span class="price__now">6,90 €</span>
+    </span>
+                    </div>
+    </a>
+</article>
+</li>
+                    <li><article class="product-card">
+    <a href="produit-serviette-microfibre.html">
+        <div class="product-card__media">
+                            <img src="assets/images/demo/vetements.svg" alt="Serviette microfibre — Vêtements" loading="lazy" width="800" height="1000">
+            
+            
+                    </div>
+
+        <div class="product-card__body">
+                            <p class="eyebrow">Vêtements</p>
+            
+            <h3 class="product-card__name">Serviette microfibre</h3>
+
+                            <span class="price">
+    <span class="price__now">29,90 €</span>
+    </span>
+                    </div>
+    </a>
+</article>
+</li>
+                    <li><article class="product-card">
+    <a href="produit-lunettes-miroir-competition.html">
+        <div class="product-card__media">
+                            <img src="assets/images/demo/lunettes.svg" alt="Lunettes miroir compétition — Lunettes" loading="lazy" width="800" height="1000">
+            
+            
+                    </div>
+
+        <div class="product-card__body">
+                            <p class="eyebrow">Lunettes</p>
+            
+            <h3 class="product-card__name">Lunettes miroir compétition</h3>
+
+                            <span class="price">
+    <span class="price__now">39,90 €</span>
+    </span>
+                    </div>
+    </a>
+</article>
+</li>
+                    <li><article class="product-card">
     <a href="produit-sac-filet.html">
         <div class="product-card__media">
                             <img src="assets/images/demo/accessoires.svg" alt="Sac filet — Accessoires" loading="lazy" width="800" height="1000">
@@ -345,86 +588,6 @@
 
                             <span class="price">
     <span class="price__now">16,90 €</span>
-    </span>
-                    </div>
-    </a>
-</article>
-</li>
-                    <li><article class="product-card">
-    <a href="produit-bonnet-tissu-maille.html">
-        <div class="product-card__media">
-                            <img src="assets/images/demo/bonnets.svg" alt="Bonnet tissu maille — Bonnets" loading="lazy" width="800" height="1000">
-            
-            
-                    </div>
-
-        <div class="product-card__body">
-                            <p class="eyebrow">Bonnets</p>
-            
-            <h3 class="product-card__name">Bonnet tissu maille</h3>
-
-                            <span class="price">
-    <span class="price__now">19,90 €</span>
-    </span>
-                    </div>
-    </a>
-</article>
-</li>
-                    <li><article class="product-card">
-    <a href="produit-lunettes-junior.html">
-        <div class="product-card__media">
-                            <img src="assets/images/demo/lunettes.svg" alt="Lunettes junior — Lunettes" loading="lazy" width="800" height="1000">
-            
-            
-                    </div>
-
-        <div class="product-card__body">
-                            <p class="eyebrow">Lunettes</p>
-            
-            <h3 class="product-card__name">Lunettes junior</h3>
-
-                            <span class="price">
-    <span class="price__now">18,90 €</span>
-    </span>
-                    </div>
-    </a>
-</article>
-</li>
-                    <li><article class="product-card">
-    <a href="produit-maillot-d-entrainement-femme.html">
-        <div class="product-card__media">
-                            <img src="assets/images/demo/vetements.svg" alt="Maillot d&#039;entraînement femme — Vêtements" loading="lazy" width="800" height="1000">
-            
-            
-                    </div>
-
-        <div class="product-card__body">
-                            <p class="eyebrow">Vêtements</p>
-            
-            <h3 class="product-card__name">Maillot d&#039;entraînement femme</h3>
-
-                            <span class="price">
-    <span class="price__now">49,90 €</span>
-    </span>
-                    </div>
-    </a>
-</article>
-</li>
-                    <li><article class="product-card">
-    <a href="produit-bonnet-longue-chevelure.html">
-        <div class="product-card__media">
-                            <img src="assets/images/demo/bonnets.svg" alt="Bonnet longue chevelure — Bonnets" loading="lazy" width="800" height="1000">
-            
-            
-                    </div>
-
-        <div class="product-card__body">
-                            <p class="eyebrow">Bonnets</p>
-            
-            <h3 class="product-card__name">Bonnet longue chevelure</h3>
-
-                            <span class="price">
-    <span class="price__now">17,90 €</span>
     </span>
                     </div>
     </a>
@@ -451,7 +614,7 @@
 
 <footer class="site-footer">
     <div class="wrap">
-        <div class="grid grid--4" style="padding:3.5rem 0">
+                <div class="grid grid--4" style="padding:3.5rem 0">
             <div>
                 <div class="site-footer__logo">
                     <a class="marque marque--creme" href="index.html">
@@ -461,12 +624,15 @@
     <span class="sr-only">BOUGE Club — accueil</span>
 </a>
                 </div>
-                <p class="t-s" style="margin-top:1rem;opacity:.7">Matériel de natation</p>
+                <p class="t-s" style="margin-top:1rem;opacity:.7">
+                    La boutique en ligne du concept store BOUGE.<br>Matériel de natation.
+                </p>
             </div>
 
-            <nav aria-label="Catégories">
-                <h2 class="eyebrow">Catalogue</h2>
+            <nav aria-label="Boutique">
+                <h2 class="eyebrow">Boutique</h2>
                 <ul class="t-s">
+                    <li><a href="boutique.html">Tout le matériel</a></li>
                                             <li><a href="categorie-bonnets.html">Bonnets</a></li>
                                             <li><a href="categorie-lunettes.html">Lunettes</a></li>
                                             <li><a href="categorie-accessoires.html">Accessoires</a></li>
@@ -475,21 +641,28 @@
                                     </ul>
             </nav>
 
-            <nav aria-label="Informations">
-                <h2 class="eyebrow">Informations</h2>
+            <nav aria-label="Par usage">
+                <h2 class="eyebrow">Par usage</h2>
                 <ul class="t-s">
-                    <li><a href="livraison.html">Livraison et retrait</a></li>
-                    <li><a href="cgv.html">Conditions générales de vente</a></li>
-                    <li><a href="mentions-legales.html">Mentions légales</a></li>
+                                            <li><a href="usage-entrainement.html">Entraînement</a></li>
+                                            <li><a href="usage-competition.html">Compétition</a></li>
+                                            <li><a href="usage-loisir.html">Loisir et bien-être</a></li>
+                                            <li><a href="usage-eau-libre.html">Eau libre et triathlon</a></li>
+                                            <li><a href="usage-apprentissage.html">Apprentissage</a></li>
+                                        <li><a href="selection-promotions.html">Promotions</a></li>
                 </ul>
             </nav>
 
-            <div>
-                <h2 class="eyebrow">Contact</h2>
+            <nav aria-label="Aide et informations">
+                <h2 class="eyebrow">Aide</h2>
                 <ul class="t-s">
-                    <li><a href="mailto:contact@bouge.fr">contact@bouge.fr</a></li>
-                                    </ul>
-            </div>
+                    <li><a href="livraison.html">Livraison et retrait</a></li>
+                    <li><a href="selection-en-magasin.html">Disponible en magasin</a></li>
+                    <li><a href="mailto:contact@bouge.fr">Nous écrire</a></li>
+                    <li><a href="cgv.html">Conditions générales de vente</a></li>
+                    <li><a href="mentions-legales.html">Mentions légales</a></li>
+                </ul>
+                            </nav>
         </div>
 
         <div class="site-footer__bottom">

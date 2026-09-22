@@ -202,14 +202,44 @@ if (!$external) {
                     <p class="muted" style="margin-top:.5rem;white-space:pre-line"><?= e($product['description']) ?></p>
                 </div>
 
-                <?php if (!$external): ?>
-                    <div class="divider t-s muted" style="margin-top:1.5rem;padding-top:1.5rem">
-                        <p>
-                            Livraison en France <?= e(Money::format($flatRate)) ?><?php if ($freeAbove !== null): ?>, offerte dès <?= e(Money::format((int) $freeAbove)) ?><?php endif; ?>.
-                            Retrait sur place sans frais.
-                        </p>
-                    </div>
-                <?php endif; ?>
+                <?php /* Les questions que se pose l'acheteur au moment de
+                         décider : quand, comment, et que faire si ça ne va
+                         pas. Elles sont répondues ici, pas trois pages plus
+                         loin. */ ?>
+                <ul class="reassurance">
+                    <?php if (!$external): ?>
+                        <li>
+                            <span aria-hidden="true">→</span>
+                            <span><strong>Livraison en France <?= e(Money::format($flatRate)) ?></strong><?php
+                                if ($freeAbove !== null): ?>, offerte dès <?= e(Money::format((int) $freeAbove)) ?><?php endif; ?>.
+                                Expédition sous 48 h ouvrées.</span>
+                        </li>
+                        <li>
+                            <span aria-hidden="true">→</span>
+                            <span><strong>Retrait sans frais</strong> au concept store, dès que la commande est prête.</span>
+                        </li>
+                        <li>
+                            <span aria-hidden="true">→</span>
+                            <span><strong>Paiement sécurisé</strong> par Stripe. Aucune donnée bancaire ne passe par nos serveurs.</span>
+                        </li>
+                    <?php else: ?>
+                        <li>
+                            <span aria-hidden="true">→</span>
+                            <span><strong>Vendu par <?= e($seller) ?></strong> : livraison, paiement et retours suivent ses conditions.</span>
+                        </li>
+                        <?php if (!empty($product['available_in_store'])): ?>
+                            <li>
+                                <span aria-hidden="true">→</span>
+                                <span><strong>Au concept store</strong>, à feuilleter et à emporter sans frais de port.</span>
+                            </li>
+                        <?php endif; ?>
+                    <?php endif; ?>
+                    <li>
+                        <span aria-hidden="true">→</span>
+                        <span>Une hésitation sur la taille ou le modèle ?
+                            <a href="mailto:<?= e($shop['email']) ?>">Écrivez-nous</a>, on répond vite.</span>
+                    </li>
+                </ul>
             </div>
         </div>
 

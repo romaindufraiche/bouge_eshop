@@ -11,6 +11,7 @@ use Bouge\Support\Database;
 use Bouge\Support\Money;
 use Bouge\Support\Session;
 use Bouge\Support\Status;
+use Bouge\Support\Usage;
 use Bouge\Support\Uploads;
 use Bouge\Support\Validator;
 use Bouge\Support\View;
@@ -174,6 +175,9 @@ final class ProductController
             'external_url'       => $externalUrl ?: null,
             'external_label'     => $validator->value('external_label') ?: null,
             'available_in_store' => isset($_POST['available_in_store']) ? 1 : 0,
+            // Usages cochés dans le formulaire ; les valeurs inconnues sont
+            // écartées par Usage::toStorage().
+            'usages'             => Usage::toStorage((array) ($_POST['usages'] ?? [])),
             'meta_title'         => $validator->value('meta_title') ?: null,
             'meta_description'   => $validator->value('meta_description') ?: null,
         ];

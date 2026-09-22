@@ -7,6 +7,7 @@ namespace Bouge\Repository;
 use Bouge\Support\Database;
 use Bouge\Support\Slug;
 use Bouge\Support\Status;
+use Bouge\Support\Usage;
 
 /**
  * Accès aux produits.
@@ -29,18 +30,88 @@ final class ProductRepository
      */
     public function published(?int $categoryId = null): array
     {
+        return $this->browse($categoryId === null ? [] : ['category_id' => $categoryId]);
+    }
+
+    /** Tris proposés au visiteur, et leur traduction en SQL. */
+    public const SORTS = [
+        'nouveautes' => 'Nouveautés',
+        'prix-asc'   => 'Prix croissant',
+        'prix-desc'  => 'Prix décroissant',
+        'nom'        => 'Nom (A → Z)',
+    ];
+
+    /**
+     * Catalogue public : filtres cumulables et tri.
+     *
+     * Les valeurs viennent de l'URL : chacune est comparée à une liste fermée
+     * ou passée en paramètre lié, jamais concaténée dans la requête.
+     *
+     * @param array{category_id?: int, usage?: string, search?: string,
+     *              on_sale?: bool, in_store?: bool, new_since_days?: int} $filtres
+     * @return array<int, array<string, mixed>>
+     */
+    public function browse(array $filtres = [], string $tri = 'nouveautes', int $limite = 0): array
+    {
         $sql = 'SELECT ' . self::CARD_FIELDS . '
                 FROM products p
                 JOIN categories c ON c.id = p.category_id
                 WHERE p.status = ?';
         $params = [Status::PRODUCT_PUBLISHED];
 
-        if ($categoryId !== null) {
+        if (isset($filtres['category_id'])) {
             $sql .= ' AND p.category_id = ?';
-            $params[] = $categoryId;
+            $params[] = (int) $filtres['category_id'];
         }
 
-        $sql .= ' ORDER BY p.created_at DESC';
+        if (isset($filtres['usage']) && Usage::exists($filtres['usage'])) {
+            // Les virgules encadrantes empêchent qu'un usage en attrape un
+            // autre dont le nom le contiendrait.
+            $sql .= ' AND p.usages LIKE ?';
+            $params[] = '%,' . $filtres['usage'] . ',%';
+        }
+
+        if (isset($filtres['search']) && $filtres['search'] !== '') {
+            // Le nom d'abord, la description ensuite : une recherche sur
+            // « bonnet » doit trouver les bonnets avant un produit dont la
+            // description cite le mot en passant. Les caractères % et _ saisis
+            // sont échappés pour être cherchés tels quels.
+            $motif = '%' . str_replace(['%', '_'], ['\%', '\_'], $filtres['search']) . '%';
+            $sql .= ' AND (p.name LIKE ? OR p.description LIKE ? OR c.name LIKE ?)';
+            $params[] = $motif;
+            $params[] = $motif;
+            $params[] = $motif;
+        }
+
+        if (!empty($filtres['on_sale'])) {
+            // Promotion réellement en cours : un prix promo dont les dates
+            // sont passées n'en est plus une.
+            $sql .= " AND p.sale_price_cents IS NOT NULL
+                      AND p.sale_price_cents < p.price_cents
+                      AND (p.sale_starts_at IS NULL OR p.sale_starts_at <= CURDATE())
+                      AND (p.sale_ends_at IS NULL OR p.sale_ends_at >= CURDATE())";
+        }
+
+        if (!empty($filtres['in_store'])) {
+            $sql .= ' AND p.available_in_store = 1';
+        }
+
+        if (!empty($filtres['new_since_days'])) {
+            $sql .= ' AND p.created_at >= DATE_SUB(NOW(), INTERVAL ? DAY)';
+            $params[] = (int) $filtres['new_since_days'];
+        }
+
+        // Le tri vient d'une liste fermée, jamais de la requête telle quelle.
+        $sql .= ' ORDER BY ' . match ($tri) {
+            'prix-asc'  => 'COALESCE(p.sale_price_cents, p.price_cents) ASC',
+            'prix-desc' => 'COALESCE(p.sale_price_cents, p.price_cents) DESC',
+            'nom'       => 'p.name ASC',
+            default     => 'p.created_at DESC',
+        };
+
+        if ($limite > 0) {
+            $sql .= ' LIMIT ' . (int) $limite;
+        }
 
         return $this->withCovers(Database::all($sql, $params));
     }

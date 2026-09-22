@@ -92,6 +92,12 @@ CREATE TABLE `products` (
   -- Également disponible à la boutique physique.
   `available_in_store` TINYINT(1) NOT NULL DEFAULT 0,
 
+  -- Usages auxquels le produit répond : entraînement, compétition, loisir…
+  -- Liste de valeurs séparées ET encadrées par des virgules
+  -- (« ,entrainement,loisir, ») pour qu'un LIKE '%,loisir,%' ne puisse pas
+  -- attraper un autre usage. Valeurs autorisées : src/Support/Usage.php.
+  `usages`           VARCHAR(190) DEFAULT NULL,
+
   `meta_title`       VARCHAR(70) DEFAULT NULL,
   `meta_description` VARCHAR(180) DEFAULT NULL,
   `created_at`       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
