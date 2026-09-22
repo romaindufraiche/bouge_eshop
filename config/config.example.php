@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Configuration de la boutique BOUGE.
+ * Configuration de la boutique BOUGE Club.
  *
  * Copiez ce fichier en `config/config.php` et renseignez vos valeurs.
  * `config.php` n'est jamais versionné : il contient vos mots de passe.

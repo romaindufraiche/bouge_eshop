@@ -8,7 +8,12 @@
  */
 
 return [
-    'name'     => 'BOUGE.',
+    // BOUGE est le concept store ; BOUGE Club est sa boutique en ligne.
+    // Le mot « Club » est composé dans une autre typographie que le logo :
+    // voir la règle .club dans public/assets/css/site.css.
+    'name'      => 'BOUGE Club',
+    'name_mark' => 'BOUGE',
+    'name_suffix' => 'Club',
     // Baseline officielle de la marque, présente dans le logo.
     'baseline' => 'Sport et bien plus.',
     // Ce que vend la boutique, pour les titres de page et le référencement.

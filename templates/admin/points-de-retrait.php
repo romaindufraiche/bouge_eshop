@@ -116,7 +116,7 @@ $isActive = $resubmitted
             <div class="field">
                 <label for="name">Nom</label>
                 <input type="text" id="name" name="name" value="<?= e($value('name')) ?>"
-                       maxlength="120" placeholder="Boutique BOUGE." required>
+                       maxlength="120" placeholder="Le concept store BOUGE" required>
                 <?php if (isset($errors['name'])): ?>
                     <p class="field-error"><?= e($errors['name']) ?></p>
                 <?php endif; ?>

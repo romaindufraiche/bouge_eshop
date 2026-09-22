@@ -17,7 +17,7 @@ final class CatalogueController
 
         return View::render('boutique/catalogue', [
             'title'       => 'Tout le matériel de natation',
-            'description' => "L'ensemble du catalogue BOUGE. : bonnets, lunettes, accessoires "
+            'description' => "L'ensemble du catalogue BOUGE Club : bonnets, lunettes, accessoires "
                 . 'et vêtements de natation. Livraison en France ou retrait sur place.',
             'canonical'   => '/boutique',
             'categories'  => (new CategoryRepository())->all(),

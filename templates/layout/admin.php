@@ -14,6 +14,7 @@
 use Bouge\Support\Auth;
 use Bouge\Support\Csrf;
 use Bouge\Support\Session;
+use Bouge\Support\View;
 
 $user = Auth::user();
 $flash = Session::takeFlash('admin');
@@ -46,11 +47,10 @@ $sections = [
 
 <div class="admin-shell">
     <aside class="admin-side">
-        <a class="admin-side__logo" href="/admin">
-            <img src="<?= e(asset('/assets/brand/wordmark-creme.png')) ?>"
-                 alt="<?= e($shop['name']) ?>" width="720" height="346">
+        <div class="admin-side__logo">
+            <?= View::partial('partials/logo', ['shop' => $shop, 'ton' => 'creme', 'lien' => '/admin']) ?>
             <span class="eyebrow">Administration</span>
-        </a>
+        </div>
 
         <nav class="admin-nav" aria-label="Sections de l'administration">
             <ul>

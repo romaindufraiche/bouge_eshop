@@ -304,7 +304,47 @@ main { flex: 1; }
   min-height: 4rem;
 }
 
-.site-header__logo img { height: 1.75rem; width: auto; }
+.site-header__logo .marque__logo { height: 1.75rem; }
+
+/* --- Verrou de marque ---------------------------------------------------------
+   BOUGE est le concept store, BOUGE Club la boutique en ligne. Le logo dessiné
+   reste intact ; « Club » s'y adosse en Manrope, capitales espacées, à une
+   taille qui ne lui dispute pas la vedette. Le filet vertical marque la
+   jonction sans imiter un logo composé d'un seul tenant. */
+
+.marque {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  text-decoration: none;
+  color: var(--ink);
+}
+.marque:hover { text-decoration: none; }
+.marque__logo { width: auto; display: block; }
+.marque__club {
+  position: relative;
+  padding-left: 0.65rem;
+  font-family: 'Manrope', system-ui, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  line-height: 1;
+  /* Le mot est décalé d'un cheveu vers le bas : le wordmark dessiné a une
+     ligne de base optique plus basse que celle du texte. */
+  transform: translateY(0.1em);
+}
+.marque__club::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: -0.15em;
+  bottom: -0.15em;
+  width: 1px;
+  background: currentColor;
+  opacity: 0.35;
+}
+.marque--creme { color: var(--cream); }
 
 .site-nav ul {
   display: flex;
@@ -368,7 +408,7 @@ main { flex: 1; }
 
 .site-footer a { text-decoration: none; }
 .site-footer a:hover { text-decoration: underline; }
-.site-footer__logo { height: 2.25rem; width: auto; }
+.site-footer__logo .marque__logo { height: 2.25rem; }
 .site-footer ul { list-style: none; margin: 0.75rem 0 0; padding: 0; }
 .site-footer li + li { margin-top: 0.5rem; }
 .site-footer .eyebrow { color: color-mix(in srgb, var(--cream) 60%, transparent); }
@@ -549,11 +589,15 @@ main { flex: 1; }
   border-radius: var(--radius-surface);
   background: var(--sand);
 }
-.gallery__main img { width: 100%; height: 100%; object-fit: cover; }
+/* `contain` et non `cover` : le catalogue mêle des photos d'objets et des
+   images composées — une couverture de livre, une double page. Les recadrer
+   couperait un titre ou un visage. Le cadre garde donc l'image entière, le
+   fond sable comblant ce qui reste. */
+.gallery__main img { width: 100%; height: 100%; object-fit: contain; padding: 1rem; }
 
 .gallery__thumbs {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(4.5rem, 1fr));
   gap: 0.75rem;
   list-style: none;
   margin: 0.75rem 0 0;
@@ -609,6 +653,50 @@ main { flex: 1; }
 .option input:checked + span { background: var(--ink); border-color: var(--ink); color: var(--cream); }
 .option input:focus-visible + span { outline: 2px solid var(--ink); outline-offset: 2px; }
 .option input:disabled + span { opacity: 0.45; text-decoration: line-through; cursor: not-allowed; }
+
+/* Mise en avant de l'accueil -----------------------------------------------------
+   Le produit mis en avant est aujourd'hui un livre : sa couverture est une
+   image composée, pas une photo d'objet. Elle est donc présentée entière, en
+   format portrait, jamais recadrée au carré. */
+
+.mise-en-avant { display: grid; gap: 2.5rem; align-items: center; }
+@media (min-width: 900px) {
+  .mise-en-avant { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 3.5rem; }
+}
+.mise-en-avant__visuel { display: grid; place-items: center; }
+.mise-en-avant__visuel img {
+  width: 100%;
+  max-width: 22rem;
+  height: auto;
+  border-radius: var(--radius-small);
+  /* Une ombre portée discrète décolle la couverture du fond sable et
+     suggère l'objet imprimé. */
+  box-shadow: 0 1.5rem 3rem rgb(35 35 35 / 0.18);
+}
+.mise-en-avant__texte p { max-width: 34rem; }
+
+.apercus {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+  list-style: none;
+  margin: 2.5rem 0 0;
+  padding: 0;
+}
+.apercus a {
+  display: block;
+  overflow: hidden;
+  border-radius: var(--radius-small);
+  background: var(--cream);
+}
+.apercus img {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  transition: transform 0.4s;
+}
+.apercus a:hover img { transform: scale(1.04); }
 
 /* --- 8. Formulaires --------------------------------------------------------- */
 
@@ -700,7 +788,7 @@ textarea[aria-invalid='true'] { border-color: var(--accent); }
 }
 .admin-side a { color: inherit; }
 .admin-side__logo { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; }
-.admin-side__logo img { height: 1.5rem; width: auto; }
+.admin-side__logo .marque__logo { height: 1.5rem; }
 .admin-side__logo .eyebrow { color: color-mix(in srgb, var(--cream) 60%, transparent); }
 .admin-side__foot { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; }
 .admin-side__foot p { margin: 0; color: color-mix(in srgb, var(--cream) 70%, transparent); }
@@ -917,7 +1005,8 @@ input[type='file'] { margin-top: 0.4rem; font-size: 0.875rem; }
 .admin--blank { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: var(--gutter); }
 .admin-login { width: min(26rem, 100%); }
 .admin-login__card { padding: 2rem; border: 1px solid var(--line); border-radius: var(--radius-surface); background: var(--white); }
-.admin-login__logo { height: 1.75rem; width: auto; margin-bottom: 1.5rem; }
+.admin-login__logo { margin-bottom: 1.5rem; }
+.admin-login__logo .marque__logo { height: 1.75rem; }
 .admin-login h1 { margin: 0; }
 .admin-login form { margin-top: 1.5rem; }
 

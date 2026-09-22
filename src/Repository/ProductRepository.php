@@ -89,7 +89,17 @@ final class ProductRepository
             return null;
         }
 
-        return $this->withCovers([$row])[0];
+        $product = $this->withCovers([$row])[0];
+
+        // Quelques visuels en plus de la couverture : la mise en avant de
+        // l'accueil en montre un aperçu, sans charger toute la galerie.
+        $product['images'] = Database::all(
+            'SELECT url, alt FROM product_images WHERE product_id = ?
+             ORDER BY position ASC, id ASC LIMIT 5',
+            [(int) $product['id']]
+        );
+
+        return $product;
     }
 
     /**

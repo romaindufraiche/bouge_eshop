@@ -30,7 +30,17 @@ final class AdminUserRepository
         $email = mb_strtolower(trim($email));
 
         if ($this->findByEmail($email) !== null) {
-            Database::run('UPDATE admin_users SET password_hash = ? WHERE email = ?', [$hash, $email]);
+            // Le nom n'est mis à jour que s'il est fourni : un appel qui ne
+            // sert qu'à changer le mot de passe ne doit pas effacer le nom
+            // saisi depuis l'administration.
+            if ($name !== null) {
+                Database::run(
+                    'UPDATE admin_users SET password_hash = ?, name = ? WHERE email = ?',
+                    [$hash, $name, $email]
+                );
+            } else {
+                Database::run('UPDATE admin_users SET password_hash = ? WHERE email = ?', [$hash, $email]);
+            }
 
             return;
         }

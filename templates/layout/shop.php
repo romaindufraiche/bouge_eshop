@@ -13,6 +13,7 @@
 use Bouge\Repository\CategoryRepository;
 use Bouge\Support\Cart;
 use Bouge\Support\Session;
+use Bouge\Support\View;
 
 $categories = (new CategoryRepository())->all();
 $cartCount = Cart::count();
@@ -57,11 +58,11 @@ $flash = Session::takeFlash('shop');
     <div class="wrap">
         <div class="site-header__bar">
             <?php /* Le wordmark de la charte, pas du texte stylé : Sun Motter
-                     ne reproduit pas les courbes dessinées du logo. */ ?>
-            <a class="site-header__logo" href="/">
-                <img src="<?= e(asset('/assets/brand/wordmark-anthracite.png')) ?>"
-                     alt="<?= e($shop['name']) ?> — accueil" width="720" height="346">
-            </a>
+                     ne reproduit pas les courbes dessinées du logo. Le mot
+                     « Club » lui est adossé dans une autre typographie. */ ?>
+            <div class="site-header__logo">
+                <?= View::partial('partials/logo', ['shop' => $shop]) ?>
+            </div>
 
             <nav class="site-nav site-nav--desktop" aria-label="Navigation principale">
                 <ul>
@@ -124,9 +125,9 @@ $flash = Session::takeFlash('shop');
     <div class="wrap">
         <div class="grid grid--4" style="padding:3.5rem 0">
             <div>
-                <img class="site-footer__logo"
-                     src="<?= e(asset('/assets/brand/wordmark-creme.png')) ?>"
-                     alt="<?= e($shop['name']) ?>" width="720" height="346">
+                <div class="site-footer__logo">
+                    <?= View::partial('partials/logo', ['shop' => $shop, 'ton' => 'creme']) ?>
+                </div>
                 <p class="t-s" style="margin-top:1rem;opacity:.7"><?= e($shop['tagline']) ?></p>
             </div>
 

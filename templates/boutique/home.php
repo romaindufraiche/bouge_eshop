@@ -18,7 +18,8 @@ $categoryImages = [
     'lunettes'    => '/assets/images/demo/lunettes.svg',
     'accessoires' => '/assets/images/demo/accessoires.svg',
     'vetements'   => '/assets/images/demo/vetements.svg',
-    'livre'       => '/assets/images/demo/livre.svg',
+    // Le livre a sa vraie couverture ; le reste attend les photos de la marque.
+    'livre'       => '/assets/images/livre/couverture.jpg',
 ];
 
 $flatRate = (int) $shop['shipping']['flat_rate_cents'];
@@ -57,24 +58,50 @@ $freeAbove = $shop['shipping']['free_above_cents'];
     $highlightPrice = Pricing::effective($highlighted);
     $highlightExternal = ($highlighted['external_url'] ?? null) !== null && $highlighted['external_url'] !== '';
     $seller = $highlighted['external_label'] ?: (parse_url((string) $highlighted['external_url'], PHP_URL_HOST) ?: 'le revendeur');
+
+    // La description s'ouvre sur une phrase d'accroche, puis le corps du
+    // texte : on isole la première ligne pour la composer plus grand, et on
+    // ne reprend ici que le premier paragraphe — la fiche porte le reste.
+    $lignes = preg_split('/\R/', trim((string) $highlighted['description'])) ?: [];
+    $accroche = trim($lignes[0] ?? '');
+    $suite = trim(implode("\n", array_slice($lignes, 1)));
+    $suite = trim((string) (preg_split('/\n\s*\n/', $suite)[0] ?? ''));
+
+    // Visuels d'intérieur : la couverture est déjà montrée en grand.
+    $apercus = array_slice($highlighted['images'] ?? [], 1, 3);
     ?>
     <section class="section section--sand section--line-bottom">
         <div class="wrap">
-            <div class="grid grid--split">
-                <div style="aspect-ratio:1;overflow:hidden;border-radius:var(--radius-surface);background:var(--cream)">
+            <div class="mise-en-avant">
+                <?php /* La couverture est montrée entière, jamais recadrée :
+                         c'est une image composée, pas une photo de produit. */ ?>
+                <div class="mise-en-avant__visuel">
                     <?php if (($highlighted['cover'] ?? null) !== null): ?>
-                        <img src="<?= e($highlighted['cover']['url']) ?>" alt="<?= e($highlighted['cover']['alt']) ?>"
-                             width="800" height="1000" style="width:100%;height:100%;object-fit:cover">
+                        <img src="<?= e($highlighted['cover']['url']) ?>"
+                             alt="<?= e($highlighted['cover']['alt']) ?>"
+                             width="1000" height="1417">
                     <?php endif; ?>
                 </div>
 
-                <div>
+                <div class="mise-en-avant__texte">
                     <p class="eyebrow" style="color:var(--accent-deep)">La sélection du moment</p>
                     <h2 class="t-l" style="margin-top:.75rem"><?= e($highlighted['name']) ?></h2>
-                    <p class="muted" style="margin-top:1.25rem;max-width:30rem;white-space:pre-line"><?= e($highlighted['description']) ?></p>
+
+                    <?php if ($accroche !== ''): ?>
+                        <p class="t-m" style="margin-top:1rem"><?= e($accroche) ?></p>
+                    <?php endif; ?>
+
+                    <?php if ($suite !== ''): ?>
+                        <p class="muted" style="margin-top:1rem"><?= e($suite) ?></p>
+                    <?php endif; ?>
 
                     <div class="row" style="margin-top:1.5rem">
-                        <?php if ($highlightExternal): ?>
+                        <?php if ($highlightExternal && $highlightPrice->cents > 0): ?>
+                            <?php /* Prix public de l'éditeur : il situe le livre,
+                                     mais ce n'est pas nous qui l'encaissons. */ ?>
+                            <?= View::partial('partials/price', ['price' => $highlightPrice, 'size' => 'lg']) ?>
+                            <span class="t-s muted">prix éditeur</span>
+                        <?php elseif ($highlightExternal): ?>
                             <p class="muted">Vendu sur <?= e($seller) ?></p>
                         <?php else: ?>
                             <?= View::partial('partials/price', ['price' => $highlightPrice, 'size' => 'lg']) ?>
@@ -89,16 +116,31 @@ $freeAbove = $shop['shipping']['free_above_cents'];
                         <?php if ($highlightExternal): ?>
                             <a class="btn btn--accent btn--lg" href="<?= e($highlighted['external_url']) ?>"
                                target="_blank" rel="noopener noreferrer">
-                                Acheter sur <?= e($seller) ?> <span aria-hidden="true">→</span>
+                                Acheter sur <?= e($seller) ?> <span aria-hidden="true">&rarr;</span>
                                 <span class="sr-only">(nouvel onglet)</span>
                             </a>
                         <?php else: ?>
                             <a class="btn btn--accent btn--lg" href="/produit/<?= e($highlighted['slug']) ?>">Voir le produit</a>
                         <?php endif; ?>
                         <a class="link-quiet" href="/produit/<?= e($highlighted['slug']) ?>">
-                            <?= $highlightExternal ? 'En savoir plus' : 'Toutes les informations' ?>
+                            <?= $highlightExternal ? 'Feuilleter et en savoir plus' : 'Toutes les informations' ?>
                         </a>
                     </div>
+
+                    <?php if ($apercus !== []): ?>
+                        <?php /* Aperçu de l'intérieur : les doubles pages en disent
+                                 plus long qu'un paragraphe de description. */ ?>
+                        <ul class="apercus">
+                            <?php foreach ($apercus as $index => $image): ?>
+                                <li>
+                                    <a href="/produit/<?= e($highlighted['slug']) ?>?photo=<?= (int) $index + 1 ?>">
+                                        <img src="<?= e($image['url']) ?>" alt="<?= e($image['alt']) ?>"
+                                             width="1500" height="1104" loading="lazy">
+                                    </a>
+                                </li>
+                            <?php endforeach; ?>
+                        </ul>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>

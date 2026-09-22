@@ -8,12 +8,13 @@
  */
 
 use Bouge\Support\Csrf;
+use Bouge\Support\View;
 ?>
 <div class="admin-login">
     <div class="admin-login__card">
-        <img class="admin-login__logo"
-             src="<?= e(asset('/assets/brand/wordmark-anthracite.png')) ?>"
-             alt="<?= e($shop['name']) ?>" width="720" height="346">
+        <div class="admin-login__logo">
+            <?= View::partial('partials/logo', ['shop' => $shop]) ?>
+        </div>
 
         <h1 class="t-l">Administration</h1>
         <p class="muted t-s">Connectez-vous pour gérer la boutique.</p>

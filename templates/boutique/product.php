@@ -103,7 +103,18 @@ if (!$external) {
                 <div style="margin-top:1.5rem">
                     <?php if ($external): ?>
                         <div class="stack-l">
-                            <p class="t-m muted">Ce modèle est vendu par <?= e($seller) ?>.</p>
+                            <?php if ($price->cents > 0): ?>
+                                <?php /* Prix public communiqué par l'éditeur ou la
+                                         marque : il situe l'article, mais la vente
+                                         se fait chez le revendeur, qui reste maître
+                                         de son tarif. */ ?>
+                                <div class="row">
+                                    <?= View::partial('partials/price', ['price' => $price, 'size' => 'lg']) ?>
+                                    <span class="t-s muted">prix éditeur</span>
+                                </div>
+                            <?php endif; ?>
+
+                            <p class="t-m muted">Vendu par <?= e($seller) ?>.</p>
 
                             <a class="btn btn--accent btn--lg" href="<?= e($product['external_url']) ?>"
                                target="_blank" rel="noopener noreferrer">

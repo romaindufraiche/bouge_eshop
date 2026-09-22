@@ -38,9 +38,18 @@ $cover = $product['cover'] ?? null;
             <h3 class="product-card__name"><?= e($product['name']) ?></h3>
 
             <?php if ($external): ?>
-                <?php /* Pas de prix pour un produit vendu ailleurs : il est fixé
-                         par le revendeur et nous n'en avons pas la maîtrise. */ ?>
-                <p class="t-s muted">Vendu sur <?= e($product['external_label'] ?: parse_url((string) $product['external_url'], PHP_URL_HOST) ?: 'le revendeur') ?></p>
+                <?php
+                $revendeur = $product['external_label']
+                    ?: (parse_url((string) $product['external_url'], PHP_URL_HOST) ?: 'le revendeur');
+                ?>
+                <?php /* Le prix affiché est le prix public annoncé par l'éditeur
+                         ou la marque ; la vente se fait chez le revendeur, qui
+                         reste maître de son tarif. Sans prix connu, on n'en
+                         invente pas : seule la mention du revendeur s'affiche. */ ?>
+                <?php if ($price->cents > 0): ?>
+                    <?= View::partial('partials/price', ['price' => $price]) ?>
+                <?php endif; ?>
+                <p class="t-s muted">Vendu sur <?= e($revendeur) ?></p>
             <?php else: ?>
                 <?= View::partial('partials/price', ['price' => $price]) ?>
             <?php endif; ?>

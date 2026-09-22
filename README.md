@@ -1,9 +1,15 @@
-# BOUGE. — boutique en ligne
+# BOUGE Club — boutique en ligne
 
-Site e-commerce de matériel de natation : bonnets, lunettes, accessoires et
-vêtements. Vente en ligne avec livraison en France ou retrait sur place, et
-une interface d'administration prévue pour être utilisée sans compétence
-technique.
+Boutique en ligne du concept store **BOUGE** : matériel de natation — bonnets,
+lunettes, accessoires et vêtements — avec livraison en France ou retrait sur
+place, et une interface d'administration prévue pour être utilisée sans
+compétence technique.
+
+BOUGE est le concept store ; **BOUGE Club** est son enseigne en ligne. Le logo
+dessiné de la marque n'est pas modifié : le mot « Club » lui est adossé dans
+une autre typographie (Manrope, capitales espacées). Le verrou tient dans un
+seul gabarit, `templates/partials/logo.php`, et sa règle `.marque` dans la
+feuille de style.
 
 **PHP et MySQL, sans framework ni étape de compilation.** Le site tourne sur
 n'importe quel hébergement mutualisé à quelques euros par mois : on dépose
@@ -307,7 +313,11 @@ près, une police d'affichage grasse y nuirait à la lecture.
 
 ### Logo et visuels
 
-Les fichiers web sont dans `public/assets/brand/`, redimensionnés depuis les
+Les visuels du livre *Corps et esprit* sont dans `public/assets/images/livre/`
+(couverture, neuf doubles pages, portrait de l'auteur), redimensionnés et
+recompressés pour le web depuis la page de l'éditeur.
+
+Les fichiers de marque sont dans `public/assets/brand/`, redimensionnés depuis les
 originaux de la charte (jusqu'à 25 000 px de large) :
 
 - `wordmark-anthracite.png` / `wordmark-creme.png` — en-tête et pied de page
@@ -407,6 +417,8 @@ installer, ni version de Node à maintenir. C'est ce qui a été retenu.
       à faire relire.
 - [ ] **Photos produits** : les visuels de démonstration sont des formes
       abstraites aux couleurs de la marque, à remplacer par de vraies photos.
+      Seul le livre *Corps et esprit* a ses vrais visuels (couverture, doubles
+      pages, portrait), repris de la page de son éditeur.
 - [ ] **Licence de Sun Motter** : la police est livrée avec la charte et
       hébergée avec le site, donc téléchargeable par n'importe quel visiteur.
       Vérifier que la licence l'autorise pour un usage web avant la mise en

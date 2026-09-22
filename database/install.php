@@ -84,7 +84,7 @@ echo "✓ Tables créées\n";
 
 // --- Compte d'administration ---------------------------------------------------
 
-(new AdminUserRepository())->upsert($email, $password, 'Administration BOUGE.');
+(new AdminUserRepository())->upsert($email, $password, 'Administration BOUGE Club');
 
 echo "✓ Compte d'administration : {$email}\n\n";
 echo "Installation terminée. Connectez-vous sur <votre-site>/admin/connexion,\n";

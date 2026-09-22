@@ -30,7 +30,7 @@ $adminPassword = $argv[2] ?? 'bouge-dev-2026';
 $pdo = Database::connection();
 
 // --- Compte administrateur ----------------------------------------------------
-(new AdminUserRepository())->upsert($adminEmail, $adminPassword, 'Administration BOUGE.');
+(new AdminUserRepository())->upsert($adminEmail, $adminPassword, 'Administration BOUGE Club');
 echo "✓ Compte admin : {$adminEmail}\n";
 
 // --- Catalogue ------------------------------------------------------------------
@@ -168,22 +168,56 @@ $catalogue = [
         'image' => '/assets/images/demo/livre.svg',
         'products' => [
             [
-                // Seul article réel du catalogue : il n'est pas vendu ici mais
-                // par la Fnac, et disponible à la boutique.
+                // Seul article réel du catalogue : le livre de Melvin Maillot,
+                // fondateur de la marque. Il n'est pas vendu ici mais par son
+                // éditeur et en librairie, et disponible à la boutique.
                 //
-                // La description reste à compléter : la fiche du revendeur
-                // refuse la lecture automatisée et la page de l'éditeur ne
-                // publie ni résumé ni prix. Rien n'a été inventé.
+                // Résumé, caractéristiques, prix et visuels proviennent de la
+                // page de l'éditeur (dashbook.fr/book/corps-et-esprit).
                 'name' => 'Corps et esprit',
-                'description' => "Le livre de Melvin Maillot, fondateur de BOUGE.\n\nRésumé à compléter depuis l'administration : ni la fiche du revendeur ni celle de l'éditeur ne le publient.",
-                // Prix non affiché pour un produit vendu ailleurs : celui du
-                // revendeur fait foi et peut changer sans que nous le sachions.
-                'price' => 0,
+                // Une ligne par paragraphe : la fiche conserve les retours
+                // à la ligne tels quels, une coupure ici en produirait une à
+                // l'écran, au milieu d'une phrase.
+                'description' => implode("\n", [
+                    "Plonger dans une piscine, c'est parfois plonger en soi.",
+                    '',
+                    "Dans Corps et esprit, Melvin Maillot retrace un parcours atypique, marqué par la découverte de la natation, les défis personnels et la transmission — toujours en quête d'équilibre intérieur. Un récit intime sur les liens profonds entre le mouvement du corps et la clarté de l'esprit.",
+                    '',
+                    'Au fil des pages :',
+                    "— Des premières longueurs jusqu'à la douleur du deuil, le sport devient un guide, une école de rigueur, de résilience et de dépassement de soi.",
+                    "— De coach à entrepreneur, il partage ses apprentissages, ses échecs et ses réussites, illustrés de témoignages et d'anecdotes de transformation.",
+                    '— Des pistes concrètes pour cultiver la discipline, rester en mouvement et retrouver du sens dans les gestes du quotidien.',
+                    '',
+                    "Et un message : c'est toujours le bon moment, peu importe l'âge, pour plonger dans sa propre vie et suivre sa vague.",
+                    '',
+                    "L'auteur — Melvin Maillot, fondateur du concept store BOUGE. À 18 ans, la disparition de sa mère fait tout basculer. La natation devient d'abord un refuge, puis un exutoire, aujourd'hui un outil de développement personnel qu'il met au service de ceux qui veulent s'en saisir.",
+                    '',
+                    '—',
+                    '146 pages · Format poche 12 × 17 cm · Couverture souple · Papier 90 g',
+                    'Éditions DashBook · ISBN 978-2-38589-435-1 · Parution mars 2026',
+                ]),
+                // Prix public de l'éditeur. Le produit n'est pas vendu ici :
+                // le montant est affiché à titre indicatif, pas encaissé.
+                'price' => 1500,
                 'featured' => true,
                 'in_store' => true,
                 'external_url' => 'https://www.fnac.com/a23070255/Melvin-Maillot-Corps-et-esprit',
                 'external_label' => 'la Fnac',
-                'meta' => 'Corps et esprit, le livre de Melvin Maillot. Vendu par la Fnac et disponible en magasin.',
+                'meta' => "Corps et esprit, le récit de Melvin Maillot : ce que la natation lui a appris sur la vie. En magasin et chez les libraires.",
+                // Couverture, doubles pages intérieures et portrait de l'auteur.
+                'images' => [
+                    ['/assets/images/livre/couverture.jpg', 'Couverture de Corps et esprit, de Melvin Maillot'],
+                    ['/assets/images/livre/extrait-01.jpg', "Double page : « J'ai longtemps cru que la natation renforçait le corps »"],
+                    ['/assets/images/livre/extrait-02.jpg', 'Double page intérieure de Corps et esprit'],
+                    ['/assets/images/livre/extrait-03.jpg', 'Double page intérieure de Corps et esprit'],
+                    ['/assets/images/livre/extrait-04.jpg', 'Double page intérieure de Corps et esprit'],
+                    ['/assets/images/livre/extrait-05.jpg', 'Double page intérieure de Corps et esprit'],
+                    ['/assets/images/livre/extrait-06.jpg', 'Double page intérieure de Corps et esprit'],
+                    ['/assets/images/livre/extrait-07.jpg', 'Double page intérieure de Corps et esprit'],
+                    ['/assets/images/livre/extrait-08.jpg', 'Double page intérieure de Corps et esprit'],
+                    ['/assets/images/livre/extrait-09.jpg', 'Double page intérieure de Corps et esprit'],
+                    ['/assets/images/livre/melvin-maillot.jpg', 'Melvin Maillot, auteur de Corps et esprit'],
+                ],
             ],
         ],
     ],
@@ -227,10 +261,16 @@ foreach ($catalogue as $position => $category) {
         $productId = (int) $pdo->lastInsertId();
         $productCount++;
 
-        Database::run(
-            'INSERT INTO product_images (product_id, url, alt, position) VALUES (?, ?, ?, 0)',
-            [$productId, $category['image'], "{$product['name']} — {$category['name']} BOUGE."]
-        );
+        // Visuels propres au produit s'il en a, sinon le visuel générique de
+        // sa catégorie, en attendant les photos de la marque.
+        $images = $product['images'] ?? [[$category['image'], "{$product['name']} — {$category['name']}"]];
+
+        foreach ($images as $position => [$url, $alt]) {
+            Database::run(
+                'INSERT INTO product_images (product_id, url, alt, position) VALUES (?, ?, ?, ?)',
+                [$productId, $url, $alt, $position]
+            );
+        }
 
         foreach ($product['variants'] ?? [] as $index => $variant) {
             Database::run(
@@ -251,7 +291,7 @@ if ($existing === 0) {
     Database::run(
         'INSERT INTO pickup_points (name, address_line1, postal_code, city, hours, position)
          VALUES (?, ?, ?, ?, ?, 0)',
-        ['Boutique BOUGE.', '12 rue de la Piscine', '92400', 'Courbevoie', 'Du mardi au samedi, 10h – 19h']
+        ['Le concept store BOUGE', '12 rue de la Piscine', '92400', 'Courbevoie', 'Du mardi au samedi, 10h – 19h']
     );
     echo "✓ Point de retrait de démonstration créé\n";
 }
