@@ -1,0 +1,25 @@
+# ---------------------------------------------------------------------------
+# Redirection vers le dossier public/
+#
+# À utiliser UNIQUEMENT si votre hébergeur ne permet pas de faire pointer le
+# domaine directement sur le dossier `public/`. Dans ce cas, déposez tout le
+# projet à la racine de votre espace web et ce fichier s'occupe du reste.
+#
+# Si vous POUVEZ régler la racine du domaine sur `public/` — c'est le cas chez
+# o2switch, Hostinger, ou sur un serveur dédié — préférez cette solution et
+# supprimez ce fichier : le code de la boutique reste alors hors de portée du
+# web, ce qui est plus sûr.
+# ---------------------------------------------------------------------------
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Le contenu de config/, src/, templates/ et database/ ne doit jamais être
+    # servi, même si la redirection ci-dessous venait à échouer.
+    RewriteRule ^(config|src|templates|database|vendor)/ - [F,L]
+
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+
+Options -Indexes

@@ -1,53 +1,16 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# Configuration propre à chaque installation : contient les mots de passe
+/config/config.php
 
-# dependencies
-/node_modules
-/.pnp
-.pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
-
-# testing
-/coverage
-
-# next.js
-/.next/
-/out/
-
-# production
-/build
-
-# misc
-.DS_Store
-*.pem
-
-# debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
-
-# env files (can opt-in for committing if needed)
-.env*
-
-# vercel
-.vercel
-
-# typescript
-*.tsbuildinfo
-next-env.d.ts
-
-# Le modèle de configuration, lui, doit être versionné
-!.env.example
-
-# Base SQLite de développement
-/prisma/*.db
-/prisma/*.db-journal
-
-# Images produits envoyées depuis l'admin (stockage local de dev)
+# Photos envoyées depuis l'administration
 /public/uploads/*
 !/public/uploads/.gitkeep
+!/public/uploads/.htaccess
 
+# Fichiers système
+.DS_Store
+Thumbs.db
+*.log
+
+# Outils de développement locaux
+/.idea
+/.vscode
