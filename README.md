@@ -22,6 +22,7 @@ les fichiers, on importe la base, c'est en ligne.
 - [Configuration](#configuration)
 - [Brancher Stripe](#brancher-stripe)
 - [Mise en ligne sur un hébergement mutualisé](#mise-en-ligne-sur-un-hébergement-mutualisé)
+- [Aperçu statique sur GitHub Pages](#aperçu-statique-sur-github-pages)
 - [Utiliser l'administration](#utiliser-ladministration)
 - [Direction artistique](#direction-artistique)
 - [Organisation du code](#organisation-du-code)
@@ -220,6 +221,34 @@ Deux choses à sauvegarder, et rien d'autre :
 La plupart des hébergeurs proposent une sauvegarde automatique ; vérifier
 qu'elle couvre bien les deux.
 
+## Aperçu statique sur GitHub Pages
+
+`docs/` contient une **photographie statique des pages publiques** : le HTML
+réellement produit par le site, enregistré page par page, avec les liens
+internes réécrits en fichiers `.html` voisins. GitHub Pages publie ce dossier
+tel quel, à l'adresse <https://romaindufraiche.github.io/bouge_eshop/>.
+
+À activer une fois, dans **Settings → Pages** du dépôt : *Source* = « Deploy
+from a branch », *Branch* = `claude/bold-tesla-g5oa8g`, dossier `/docs`. La
+mise en ligne prend une minute ou deux.
+
+Ce qu'on y voit : l'accueil, le catalogue, les cinq catégories, les quatorze
+fiches produits, le panier vide et les pages légales — le design, les polices
+et les visuels réels. Ce qu'on n'y voit pas : **l'ajout au panier, le paiement
+et l'administration**, qui ont besoin de PHP et d'une base de données. Un
+bandeau le rappelle en haut de chaque page.
+
+C'est donc une vitrine, pas la boutique : pour la vraie, voir
+[Mise en ligne sur un hébergement mutualisé](#mise-en-ligne-sur-un-hébergement-mutualisé).
+
+### Le régénérer après une modification
+
+```bash
+php database/seed.php                          # le catalogue de l'aperçu
+php -S localhost:8000 -t public dev-server.php &
+php bin/apercu.php                             # réécrit docs/
+```
+
 ## Utiliser l'administration
 
 `/admin`, accessible après connexion.
@@ -368,6 +397,9 @@ templates/
   boutique/              Pages publiques
   admin/                 Écrans d'administration
   partials/              Fragments réutilisés (prix, vignette, panier…)
+bin/
+  apercu.php             Génère l'aperçu statique dans docs/
+docs/                    Aperçu statique publié par GitHub Pages
 vendor/                  Bibliothèque Stripe (versionnée, voir plus haut)
 dev-server.php           Routeur du serveur PHP intégré, développement seul
 ```
