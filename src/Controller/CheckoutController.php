@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace Bouge\Controller;
 
+use Bouge\Repository\CustomerRepository;
 use Bouge\Repository\OrderRepository;
 use Bouge\Repository\PickupPointRepository;
 use Bouge\Support\Cart;
 use Bouge\Support\Csrf;
+use Bouge\Support\CustomerAuth;
 use Bouge\Support\Session;
 use Bouge\Support\Shipping;
 use Bouge\Support\Status;
@@ -118,6 +120,9 @@ final class CheckoutController
                 'shipping_country'       => $fulfilment === Status::DELIVERY ? 'FR' : null,
 
                 'pickup_point_id' => $pickupPointId,
+                // Rattachement au compte s'il y en a un. NULL sinon : commander
+                // sans compte reste possible, et c'est le cas par défaut.
+                'customer_id'     => CustomerAuth::id(),
                 'subtotal_cents'  => $cart['subtotal_cents'],
                 'shipping_cents'  => $shippingCents,
                 'total_cents'     => $totalCents,
@@ -136,6 +141,20 @@ final class CheckoutController
                 $cart['lines']
             )
         );
+
+        // Le client connecté retrouvera ses coordonnées préremplies la fois
+        // suivante — sans avoir eu à les enregistrer explicitement.
+        $customerId = CustomerAuth::id();
+        if ($customerId !== null && $fulfilment === Status::DELIVERY) {
+            (new CustomerRepository())->updateProfile($customerId, [
+                'name'          => $validator->value('customer_name'),
+                'phone'         => $validator->value('phone') ?: null,
+                'address_line1' => $validator->value('shipping_address_line1'),
+                'address_line2' => $validator->value('shipping_address_line2') ?: null,
+                'postal_code'   => $validator->value('shipping_postal_code'),
+                'city'          => $validator->value('shipping_city'),
+            ]);
+        }
 
         // --- Session de paiement ------------------------------------------------
         try {
@@ -228,6 +247,21 @@ final class CheckoutController
         $cart = Cart::resolve();
         $fulfilment = $values['fulfilment'] ?? Status::DELIVERY;
 
+        // Préremplissage depuis le compte, au premier affichage seulement :
+        // après une erreur de validation, c'est la saisie du client qui prime.
+        $client = CustomerAuth::user();
+        if ($client !== null && $values === []) {
+            $values = array_filter([
+                'customer_name'          => $client['name'],
+                'email'                  => $client['email'],
+                'phone'                  => $client['phone'],
+                'shipping_address_line1' => $client['address_line1'],
+                'shipping_address_line2' => $client['address_line2'],
+                'shipping_postal_code'   => $client['postal_code'],
+                'shipping_city'          => $client['city'],
+            ], static fn (mixed $valeur): bool => $valeur !== null && $valeur !== '');
+        }
+
         return View::render('boutique/commande', [
             'title'          => 'Votre commande',
             'canonical'      => '/commande',
@@ -240,6 +274,7 @@ final class CheckoutController
             'fulfilment'     => $fulfilment,
             'shippingCents'  => Shipping::cents($cart['subtotal_cents'], $fulfilment),
             'stripeReady'    => StripeGateway::isConfigured(),
+            'client'         => $client,
             'shop'           => require dirname(__DIR__, 2) . '/config/shop.php',
         ]);
     }

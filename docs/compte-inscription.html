@@ -3,14 +3,13 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Serviette microfibre — BOUGE Club</title>
-            <meta name="description" content="Serviette de natation en microfibre 80 × 130 cm, séchage rapide, étui fourni.">
-    
+    <title>Créer un compte — BOUGE Club</title>
+                <meta name="robots" content="noindex, nofollow">
+        
     <meta property="og:type" content="website">
     <meta property="og:locale" content="fr_FR">
     <meta property="og:site_name" content="BOUGE Club">
-    <meta property="og:title" content="Serviette microfibre — BOUGE Club">
-            <meta property="og:description" content="Serviette de natation en microfibre 80 × 130 cm, séchage rapide, étui fourni.">
+    <meta property="og:title" content="Créer un compte — BOUGE Club">
     
     <link rel="icon" href="assets/brand/icone-512.png" type="image/png">
     <link rel="apple-touch-icon" href="assets/brand/icone-apple.png">
@@ -213,140 +212,59 @@ form:has([disabled]) { opacity: 0.6; }
 
 <main id="contenu">
     
-    <script type="application/ld+json">{"@context":"https://schema.org","@type":"Product","name":"Serviette microfibre","description":"Absorbe trois fois son poids, sèche en une heure et tient dans une poche de sac. 80 × 130 cm, étui fourni.","sku":"127","brand":{"@type":"Brand","name":"BOUGE Club"},"image":["assets/images/demo/vetements.svg"],"offers":{"@type":"Offer","url":"http://localhost:8000/produit/serviette-microfibre","priceCurrency":"EUR","price":"29.90","availability":"https://schema.org/InStock"}}</script>
-
-<div class="wrap">
+    <div class="wrap wrap--narrow">
     <div class="section">
-        <nav aria-label="Fil d'Ariane">
-            <ol class="breadcrumb">
-                <li><a href="boutique.html">Boutique</a></li>
-                <li aria-hidden="true">/</li>
-                <li><a href="categorie-vetements.html">Vêtements</a></li>
-                <li aria-hidden="true">/</li>
-                <li aria-current="page">Serviette microfibre</li>
-            </ol>
-        </nav>
+        <h1 class="t-xl">Créer un compte</h1>
+        <p class="muted" style="margin-top:.75rem">
+            Trois champs. Ensuite, votre panier vous suit d'un appareil à l'autre
+            et vos commandes se retrouvent en deux clics.
+        </p>
 
-        <div class="grid grid--split" style="margin-top:2rem;align-items:start">
-            <div>
-                <div class="gallery__main">
-                                            <img src="assets/images/demo/vetements.svg" alt="Serviette microfibre — Vêtements" width="800" height="1000">
-                                    </div>
-
+        <form method="post" action="/compte/inscription" class="stack" style="margin-top:2rem">
+            <input disabled type="hidden" name="_token" value="2562abb074f84134f4acfecf34949e989fb996ccdd67d28fc8f8c27635771592">
+            <div class="field">
+                <label for="name">Nom</label>
+                <input disabled type="text" id="name" name="name" value=""
+                       autocomplete="name" maxlength="120" required autofocus>
                             </div>
 
-            <div>
-                <p class="eyebrow">Vêtements</p>
-                <h1 class="t-xl" style="margin-top:.5rem">Serviette microfibre</h1>
-
-                <div style="margin-top:1.5rem">
-                                            <span class="price price--lg">
-    <span class="price__now">29,90 €</span>
-    </span>
-
-                        
-                        <form method="post" action="/panier/ajouter" class="stack-l" style="margin-top:1.5rem">
-                            <input disabled type="hidden" name="_token" value="36426ba895a47098e06814d7b62a8578d97ebbb1ed3b5da207abbde2c4265e1a">                            <input disabled type="hidden" name="product_id" value="127">
-                            <input disabled type="hidden" name="slug" value="serviette-microfibre">
-
-                            
-                            <div class="row">
-                                <label class="t-s">
-                                    <span class="muted">Quantité</span>
-                                    <input disabled type="number" name="quantity" value="1" min="1"
-                                           max="30"
-                                           style="width:5.5rem;text-align:center;margin-left:.5rem;display:inline-block">
-                                </label>
-
-                                <button disabled type="submit" class="btn btn--accent btn--lg"
-                                        >
-                                    Ajouter au panier                                </button>
+            <div class="field">
+                <label for="email">Adresse électronique</label>
+                <input disabled type="email" id="email" name="email" value=""
+                       autocomplete="email" required>
                             </div>
 
-                                                    </form>
+            <div class="field">
+                <label for="phone">Téléphone (facultatif)</label>
+                <input disabled type="tel" id="phone" name="phone" value=""
+                       autocomplete="tel" maxlength="30">
+                <p class="field-help">Utilisé uniquement si le transporteur doit vous joindre.</p>
+            </div>
+
+            <div class="field">
+                <label for="password">Mot de passe</label>
+                <input disabled type="password" id="password" name="password"
+                       autocomplete="new-password" minlength="12" required>
+                <p class="field-help">
+                    Douze caractères minimum. Une phrase courte protège mieux qu'un
+                    mot compliqué, et se retient.
+                </p>
+                            </div>
+
+            <div class="field">
+                <label for="password_confirm">Confirmer le mot de passe</label>
+                <input disabled type="password" id="password_confirm" name="password_confirm"
+                       autocomplete="new-password" required>
+                            </div>
+
+            <button disabled class="btn btn--accent btn--block btn--lg" type="submit">Créer mon compte</button>
+        </form>
 <p class="apercu-inerte">Inactif dans l'aperçu : demande le serveur PHP.</p>
 
-                                                            </div>
-
-                <div class="divider" style="margin-top:2.5rem;padding-top:1.5rem">
-                    <h2 class="t-s">Description</h2>
-                                        <p class="muted" style="margin-top:.5rem;white-space:pre-line">Absorbe trois fois son poids, sèche en une heure et tient dans une poche de sac. 80 × 130 cm, étui fourni.</p>
-                </div>
-
-                                <ul class="reassurance">
-                                            <li>
-                            <span aria-hidden="true">→</span>
-                            <span><strong>Livraison en France 4,90 €</strong>, offerte dès 60,00 €.
-                                Expédition sous 48 h ouvrées.</span>
-                        </li>
-                        <li>
-                            <span aria-hidden="true">→</span>
-                            <span><strong>Retrait sans frais</strong> au concept store, dès que la commande est prête.</span>
-                        </li>
-                        <li>
-                            <span aria-hidden="true">→</span>
-                            <span><strong>Paiement sécurisé</strong> par Stripe. Aucune donnée bancaire ne passe par nos serveurs.</span>
-                        </li>
-                                        <li>
-                        <span aria-hidden="true">→</span>
-                        <span>Une hésitation sur la taille ou le modèle ?
-                            <a href="mailto:contact@bouge.fr">Écrivez-nous</a>, on répond vite.</span>
-                    </li>
-                </ul>
-            </div>
-        </div>
-
-                    <section class="divider" style="margin-top:5rem;padding-top:3rem">
-                <h2 class="t-l">À voir aussi</h2>
-                <div style="margin-top:2rem">
-                        <ul class="product-grid">
-                    <li><article class="product-card">
-    <a href="produit-maillot-d-entrainement-femme.html">
-        <div class="product-card__media">
-                            <img src="assets/images/demo/vetements.svg" alt="Maillot d&#039;entraînement femme — Vêtements" loading="lazy" width="800" height="1000">
-            
-            
-                    </div>
-
-        <div class="product-card__body">
-                            <p class="eyebrow">Vêtements</p>
-            
-            <h3 class="product-card__name">Maillot d&#039;entraînement femme</h3>
-
-                            <span class="price">
-    <span class="price__now">49,90 €</span>
-    </span>
-                    </div>
-    </a>
-</article>
-</li>
-                    <li><article class="product-card">
-    <a href="produit-jammer-homme.html">
-        <div class="product-card__media">
-                            <img src="assets/images/demo/vetements.svg" alt="Jammer homme — Vêtements" loading="lazy" width="800" height="1000">
-            
-                            <span class="pill pill--accent product-card__badge">Promo</span>
-            
-                    </div>
-
-        <div class="product-card__body">
-                            <p class="eyebrow">Vêtements</p>
-            
-            <h3 class="product-card__name">Jammer homme</h3>
-
-                            <span class="price price--sale">
-    <span class="price__now">35,90 €</span>
-            <s class="price__was">44,90 €</s>
-                    <span class="pill pill--accent">−20 %</span>
-            </span>
-                    </div>
-    </a>
-</article>
-</li>
-            </ul>
-                </div>
-            </section>
-            </div>
+        <p class="t-s muted" style="margin-top:2rem">
+            Déjà un compte ? <a href="compte-connexion.html">Se connecter</a>.
+        </p>
+    </div>
 </div>
 </main>
 

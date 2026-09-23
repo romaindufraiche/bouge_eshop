@@ -18,6 +18,7 @@
      7. Produits
      8. Formulaires
      9. Panier et commande
+    9 bis. Compte client et concept store
     10. Administration
    =========================================================================== */
 
@@ -1003,6 +1004,111 @@ textarea[aria-invalid='true'] { border-color: var(--accent); }
 .summary dd { margin: 0; font-variant-numeric: tabular-nums; }
 .summary__total { border-top: 1px solid var(--line); padding-top: 0.75rem; margin-top: 0.75rem !important; font-size: 1rem; }
 .summary__total dt { color: var(--ink); }
+
+/* --- 9 bis. Compte client et concept store -------------------------------------- */
+
+.compte-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.875rem;
+  text-decoration: none;
+}
+.compte-link span[aria-hidden] { font-size: 0.6em; color: var(--accent-deep); }
+@media (max-width: 520px) {
+  /* Sur un petit écran, la pastille suffit : le mot pousserait le panier
+     hors de la barre. */
+  .compte-link__texte { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); }
+  .compte-link span[aria-hidden] { font-size: 1rem; }
+}
+
+.compte { display: grid; gap: 2.5rem; margin-top: 2.5rem; }
+@media (min-width: 960px) {
+  .compte { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 3rem; align-items: start; }
+}
+
+.commandes { list-style: none; margin: 1.5rem 0 0; padding: 0; display: grid; gap: 1rem; }
+.commandes a {
+  display: block;
+  position: relative;
+  padding: 1.25rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-surface);
+  text-decoration: none;
+  transition: border-color 0.15s;
+}
+.commandes a:hover { border-color: var(--ink); text-decoration: none; }
+.commandes__tete { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; }
+.commandes__ref { font-weight: 600; font-variant-numeric: tabular-nums; }
+.commandes p { margin: 0.35rem 0 0; }
+.commandes__total { font-weight: 600; margin-top: 0.75rem !important; }
+
+/* Avancement d'une commande : trois jalons, celui qui est atteint est plein. */
+
+.etapes {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  counter-reset: etape;
+}
+.etapes li { position: relative; padding-top: 1.5rem; font-size: 0.875rem; color: var(--ink-soft); }
+/* Le trait qui relie les jalons passe derrière les puces. */
+.etapes li::before {
+  content: '';
+  position: absolute;
+  top: 0.4rem;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--line);
+}
+.etapes li:first-child::before { left: 50%; }
+.etapes li:last-child::before { right: 50%; }
+.etapes__puce {
+  position: absolute;
+  top: 0;
+  left: calc(50% - 0.5rem);
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid var(--line);
+  border-radius: 50%;
+  background: var(--cream);
+}
+.etapes li.est-atteinte { color: var(--ink); font-weight: 600; }
+.etapes li.est-atteinte::before { background: var(--ink); }
+.etapes li.est-atteinte .etapes__puce { border-color: var(--ink); background: var(--ink); }
+.etapes__libelle { display: block; text-align: center; }
+
+/* Le lieu avant la boutique ------------------------------------------------------- */
+
+.concept-store { background: var(--ink); color: var(--cream); }
+.concept-store a:not(.btn) { color: var(--cream); }
+.concept-store .eyebrow { color: color-mix(in srgb, var(--cream) 65%, transparent); }
+.concept-store .muted { color: color-mix(in srgb, var(--cream) 65%, transparent); }
+.concept-store__grille { display: grid; gap: 2.5rem; align-items: center; }
+@media (min-width: 900px) {
+  .concept-store__grille { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 4rem; }
+}
+.concept-store__infos { list-style: none; margin: 2rem 0 0; padding: 0; display: grid; gap: 0.75rem; }
+.concept-store__infos li { display: grid; gap: 0.15rem; }
+.concept-store__infos span { font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; }
+/* La mascotte est dessinée en anthracite : sur le fond sombre de la section
+   elle disparaîtrait. On lui rend un fond crème, comme sur l'accueil. */
+.concept-store__visuel {
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+  border-radius: var(--radius-surface);
+  background: var(--cream);
+}
+.concept-store__visuel img { width: 80%; max-width: 14rem; height: auto; }
+/* Le bouton fantôme est dessiné pour le fond crème : sur l'anthracite il
+   faut inverser ses couleurs, comme dans la barre d'administration. */
+.concept-store .btn--ghost { border-color: color-mix(in srgb, var(--cream) 45%, transparent); color: var(--cream); }
+.concept-store .btn--ghost:hover { background: var(--cream); color: var(--ink); }
 
 /* --- 10. Administration ------------------------------------------------------
    L'administration partage les jetons de la charte mais pas la mise en page de

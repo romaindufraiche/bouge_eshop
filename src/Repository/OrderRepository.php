@@ -132,6 +132,22 @@ final class OrderRepository
         Database::run('UPDATE orders SET status = ? WHERE id = ?', [$status, $id]);
     }
 
+    /**
+     * Transporteur et numéro de suivi, saisis à l'expédition. La date
+     * d'expédition est posée en même temps : c'est elle qui fait foi pour le
+     * client, pas la date du changement de statut.
+     */
+    public function updateTracking(int $id, ?string $carrier, ?string $number): void
+    {
+        Database::run(
+            'UPDATE orders
+             SET tracking_carrier = ?, tracking_number = ?,
+                 shipped_at = CASE WHEN ? IS NULL THEN NULL ELSE COALESCE(shipped_at, NOW()) END
+             WHERE id = ?',
+            [$carrier, $number, $number, $id]
+        );
+    }
+
     public function updateNote(int $id, ?string $note): void
     {
         Database::run('UPDATE orders SET admin_note = ? WHERE id = ?', [$note, $id]);

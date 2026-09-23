@@ -23,6 +23,7 @@ les fichiers, on importe la base, c'est en ligne.
 - [Brancher Stripe](#brancher-stripe)
 - [Mise en ligne sur un hébergement mutualisé](#mise-en-ligne-sur-un-hébergement-mutualisé)
 - [Structure du site](#structure-du-site)
+- [Le compte client](#le-compte-client)
 - [Aperçu statique sur GitHub Pages](#aperçu-statique-sur-github-pages)
 - [Utiliser l'administration](#utiliser-ladministration)
 - [Direction artistique](#direction-artistique)
@@ -116,6 +117,13 @@ vos mots de passe.
 Versionné, car il décrit la boutique et non le serveur : nom, baseline,
 adresse de contact, frais de port (`490` centimes), franco de port
 (`6000` centimes), plafonds du panier, taille maximale des photos.
+
+Il porte aussi la section **`store`** : le concept store BOUGE, dont ce site
+est le prolongement en ligne. Elle alimente un bloc sur l'accueil et un
+rappel dans le pied de page. **`store.url` est vide** : renseignez l'adresse
+du site de la salle et le bouton « Découvrir la salle » apparaît. Laissée
+vide, seule l'adresse postale est affichée — un lien mort vaudrait moins que
+pas de lien.
 
 ## Brancher Stripe
 
@@ -296,9 +304,65 @@ plus, sur le modèle des usages.
 Leurs pages de gammes (Fastskin, Biofuse…) supposent de même des familles de
 produits qui n'existent pas encore ici.
 
+## Le compte client
+
+Facultatif, et jamais imposé : on peut commander sans, et c'est le chemin par
+défaut. Le compte sert à trois choses concrètes.
+
+| | |
+| --- | --- |
+| **Retrouver son panier** | Il est enregistré sur le compte à chaque modification. On le remplit sur son téléphone, on le retrouve sur son ordinateur. |
+| **Ne plus retaper son adresse** | Le tunnel de commande est prérempli, et l'adresse utilisée est mémorisée après chaque commande livrée. |
+| **Suivre ses commandes** | Historique, avancement en trois jalons, et le numéro de suivi du colis dès que la boutique le saisit. |
+
+À l'inscription, les commandes déjà passées avec la même adresse
+électronique sont rattachées au compte : l'historique ne commence pas vide.
+
+Côté sécurité : mots de passe hachés (`password_hash`, algorithme par défaut
+de PHP), identifiant de session régénéré à la connexion, jeton CSRF sur
+chaque formulaire, et une temporisation de cinq minutes après cinq tentatives
+ratées. Une commande n'est lisible que par le compte auquel elle appartient —
+le filtre est dans la requête SQL, pas dans l'affichage.
+
+La session client est **distincte de celle de l'administration** : elles ne
+partagent aucune clé, et être connecté d'un côté n'ouvre rien de l'autre.
+
+### Le suivi de livraison
+
+Dans l'administration, la fiche d'une commande livrée porte deux champs :
+transporteur et numéro de suivi. Renseignés, ils apparaissent aussitôt dans
+l'espace du client, avec la date d'expédition. Le site ne consulte pas le
+transporteur : il montre le numéro, à reporter sur le site de celui-ci.
+
 ## Utiliser l'administration
 
-`/admin`, accessible après connexion.
+**L'adresse est `/admin`** — par exemple `https://votre-domaine.fr/admin`.
+Sans session ouverte, elle renvoie vers `/admin/connexion`.
+
+Les identifiants sont ceux donnés au script d'installation :
+
+```bash
+php database/install.php contact@votre-domaine.fr "un mot de passe long"
+```
+
+En développement, `php database/seed.php` crée le compte
+`contact@bouge.fr` avec le mot de passe `bouge-dev-2026`. **À ne jamais
+laisser en ligne** : rejouez `install.php` avec vos propres identifiants
+avant l'ouverture.
+
+Pour changer le mot de passe ensuite, relancez `install.php`… mais il recrée
+les tables. Sur une boutique en service, passez plutôt par une requête, le
+hachage étant calculé sur votre poste :
+
+```bash
+php -r 'echo password_hash("nouveau mot de passe", PASSWORD_DEFAULT), PHP_EOL;'
+```
+
+```sql
+UPDATE admin_users SET password_hash = '<le hachage obtenu>' WHERE email = 'contact@votre-domaine.fr';
+```
+
+Une fois connecté :
 
 - **Tableau de bord** — commandes à préparer, total encaissé, stocks faibles.
 - **Produits** — recherche, filtre par statut, tri. Le formulaire couvre le
@@ -512,5 +576,11 @@ installer, ni version de Node à maintenir. C'est ce qui a été retenu.
 - [ ] **Courriels de confirmation** : la boutique n'en envoie aucun. Activer
       les reçus Stripe (« Paramètres » → « Reçus par e-mail ») couvre le
       justificatif de paiement ; la confirmation de commande reste à écrire.
+- [ ] **Adresse du site de la salle** : `store.url` dans `config/shop.php`
+      est vide, faute de connaître l'adresse officielle. Le bloc « Avant
+      d'être une boutique » s'affiche sans bouton tant qu'elle manque.
+- [ ] **Courriel de bienvenue et mot de passe oublié** : la création de
+      compte n'envoie aucun courriel, et il n'y a pas encore de procédure de
+      réinitialisation — un mot de passe perdu se change aujourd'hui en base.
 - [ ] **Certificat HTTPS** : indispensable au paiement. Tous les hébergeurs
       proposent Let's Encrypt gratuitement, souvent en une case à cocher.

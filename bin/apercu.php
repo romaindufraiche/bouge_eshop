@@ -35,6 +35,11 @@ $pages = [
     '/livraison'        => 'livraison.html',
     '/cgv'              => 'cgv.html',
     '/mentions-legales' => 'mentions-legales.html',
+    // Les pages du compte sont incluses pour que le lien « Se connecter » de
+    // l'en-tête mène quelque part ; leurs formulaires y sont inertes, comme
+    // les autres.
+    '/compte/connexion'   => 'compte-connexion.html',
+    '/compte/inscription' => 'compte-inscription.html',
 ];
 
 foreach (Database::all('SELECT slug FROM categories ORDER BY position ASC') as $categorie) {

@@ -12,6 +12,7 @@
 
 use Bouge\Repository\CategoryRepository;
 use Bouge\Support\Cart;
+use Bouge\Support\CustomerAuth;
 use Bouge\Support\Money;
 use Bouge\Support\Session;
 use Bouge\Support\Usage;
@@ -19,6 +20,7 @@ use Bouge\Support\View;
 
 $categories = (new CategoryRepository())->all();
 $cartCount = Cart::count();
+$client = CustomerAuth::user();
 $pageTitle = isset($title) && $title !== ''
     ? $title . ' — ' . $shop['name']
     : $shop['name'] . ' — ' . $shop['tagline'];
@@ -97,6 +99,20 @@ $flash = Session::takeFlash('shop');
             </form>
 
             <div class="row">
+                <?php /* Le compte n'est jamais un passage obligé : le lien est
+                         offert, la commande reste possible sans. */ ?>
+                <?php if ($client !== null): ?>
+                    <a class="compte-link" href="/compte">
+                        <span aria-hidden="true">●</span>
+                        <span class="compte-link__texte">Mon compte</span>
+                    </a>
+                <?php else: ?>
+                    <a class="compte-link" href="/compte/connexion">
+                        <span aria-hidden="true">○</span>
+                        <span class="compte-link__texte">Se connecter</span>
+                    </a>
+                <?php endif; ?>
+
                 <a class="cart-link" href="/panier">
                     Panier
                     <?php if ($cartCount > 0): ?>
@@ -251,6 +267,23 @@ $flash = Session::takeFlash('shop');
                 <p class="t-s" style="margin-top:1rem;opacity:.7">
                     La boutique en ligne du concept store BOUGE.<br><?= e($shop['tagline']) ?>.
                 </p>
+
+                <?php /* La salle existe avant la boutique : le pied de page le
+                         rappelle sur chaque page, sans insister. */ ?>
+                <?php if (($shop['store']['name'] ?? '') !== ''): ?>
+                    <p class="t-s" style="margin-top:1rem;opacity:.7">
+                        <?php if (!empty($shop['store']['url'])): ?>
+                            <a href="<?= e($shop['store']['url']) ?>" target="_blank" rel="noopener">
+                                La salle <?= e($shop['store']['name']) ?> <span aria-hidden="true">&rarr;</span>
+                            </a>
+                        <?php else: ?>
+                            La salle <?= e($shop['store']['name']) ?>
+                        <?php endif; ?>
+                        <?php if (!empty($shop['store']['address'])): ?>
+                            <br><?= e($shop['store']['address']) ?>
+                        <?php endif; ?>
+                    </p>
+                <?php endif; ?>
             </div>
 
             <nav aria-label="Boutique">
@@ -277,6 +310,9 @@ $flash = Session::takeFlash('shop');
                 <h2 class="eyebrow">Aide</h2>
                 <ul class="t-s">
                     <li><a href="/livraison">Livraison et retrait</a></li>
+                    <li><a href="<?= $client !== null ? '/compte' : '/compte/connexion' ?>">
+                        <?= $client !== null ? 'Mon compte et mes commandes' : 'Suivre ma commande' ?>
+                    </a></li>
                     <li><a href="/boutique/selection/en-magasin">Disponible en magasin</a></li>
                     <li><a href="mailto:<?= e($shop['email']) ?>">Nous écrire</a></li>
                     <li><a href="/cgv">Conditions générales de vente</a></li>

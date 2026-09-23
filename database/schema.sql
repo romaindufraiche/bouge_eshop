@@ -174,6 +174,36 @@ CREATE TABLE `pickup_points` (
 
 -- --- Commandes --------------------------------------------------------------
 
+-- --- Comptes clients ----------------------------------------------------------
+-- Facultatif : on peut commander sans compte. Le compte sert à retrouver son
+-- panier d'un appareil à l'autre et à suivre ses commandes.
+
+DROP TABLE IF EXISTS `customers`;
+CREATE TABLE `customers` (
+  `id`            INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `email`         VARCHAR(190) NOT NULL,
+  `password_hash` VARCHAR(255) NOT NULL,
+  `name`          VARCHAR(120) NOT NULL,
+  `phone`         VARCHAR(30) DEFAULT NULL,
+
+  -- Dernière adresse de livraison utilisée, pour préremplir le tunnel.
+  `address_line1` VARCHAR(200) DEFAULT NULL,
+  `address_line2` VARCHAR(200) DEFAULT NULL,
+  `postal_code`   VARCHAR(10) DEFAULT NULL,
+  `city`          VARCHAR(120) DEFAULT NULL,
+
+  -- Panier conservé entre deux visites, au format JSON : identifiants et
+  -- quantités uniquement. Les prix sont toujours relus en base.
+  `cart`          TEXT DEFAULT NULL,
+
+  `last_login_at` DATETIME DEFAULT NULL,
+  `created_at`    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at`    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `customers_email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 DROP TABLE IF EXISTS `orders`;
 CREATE TABLE `orders` (
   `id`            INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -207,6 +237,15 @@ CREATE TABLE `orders` (
   `stripe_payment_intent_id` VARCHAR(190) DEFAULT NULL,
   `paid_at`                  DATETIME DEFAULT NULL,
 
+  -- Client connecté au moment de la commande, s'il y en avait un. NULL pour
+  -- une commande passée sans compte : on ne force personne à s'inscrire.
+  `customer_id` INT UNSIGNED DEFAULT NULL,
+
+  -- Suivi de l'expédition, saisi depuis l'administration et montré au client.
+  `tracking_carrier` VARCHAR(60) DEFAULT NULL,
+  `tracking_number`  VARCHAR(80) DEFAULT NULL,
+  `shipped_at`       DATETIME DEFAULT NULL,
+
   -- Note interne, visible uniquement dans l'administration.
   `admin_note`  TEXT DEFAULT NULL,
   `created_at`  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -217,8 +256,13 @@ CREATE TABLE `orders` (
   UNIQUE KEY `orders_stripe_session` (`stripe_session_id`),
   KEY `orders_status` (`status`),
   KEY `orders_created` (`created_at`),
+  KEY `orders_customer` (`customer_id`),
   CONSTRAINT `orders_pickup_point_fk` FOREIGN KEY (`pickup_point_id`)
-    REFERENCES `pickup_points` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+    REFERENCES `pickup_points` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  -- Un compte supprimé ne fait pas disparaître ses commandes : elles gardent
+  -- leurs libellés et restent comptabilisées.
+  CONSTRAINT `orders_customer_fk` FOREIGN KEY (`customer_id`)
+    REFERENCES `customers` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --- Lignes de commande -----------------------------------------------------

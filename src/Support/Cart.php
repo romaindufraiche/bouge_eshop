@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Bouge\Support;
 
+use Bouge\Repository\CustomerRepository;
 use Bouge\Repository\ProductRepository;
 
 /**
@@ -44,7 +45,7 @@ final class Cart
         foreach ($lines as $index => $line) {
             if (self::key($line['product_id'], $line['variant_id']) === $key) {
                 $lines[$index]['quantity'] = min($line['quantity'] + $quantity, $max);
-                Session::set(self::KEY, $lines);
+                self::store($lines);
 
                 return;
             }
@@ -60,7 +61,7 @@ final class Cart
             'quantity'   => max(1, min($quantity, $max)),
         ];
 
-        Session::set(self::KEY, $lines);
+        self::store($lines);
     }
 
     public static function setQuantity(int $productId, ?int $variantId, int $quantity): void
@@ -88,7 +89,7 @@ final class Cart
             static fn (?array $line): bool => $line !== null
         ));
 
-        Session::set(self::KEY, $lines);
+        self::store($lines);
     }
 
     public static function remove(int $productId, ?int $variantId): void
@@ -99,6 +100,79 @@ final class Cart
     public static function clear(): void
     {
         Session::forget(self::KEY);
+    }
+
+    // --- Panier retrouvé d'une visite à l'autre ---------------------------------
+
+    /**
+     * Écrit le panier dans la session, puis sur le compte si le visiteur est
+     * connecté. Toutes les modifications passent par ici : il n'y a qu'un
+     * endroit où le panier peut se désynchroniser, et c'est celui-ci.
+     *
+     * @param array<int, array<string, mixed>> $lines
+     */
+    private static function store(array $lines): void
+    {
+        Session::set(self::KEY, $lines);
+        self::persist();
+    }
+
+    /** Enregistre le panier courant sur le compte du client connecté. */
+    public static function persist(): void
+    {
+        $customerId = CustomerAuth::id();
+
+        if ($customerId === null) {
+            return;
+        }
+
+        (new CustomerRepository())->saveCart($customerId, self::lines());
+    }
+
+    /**
+     * Fusionne un panier enregistré avec celui de la session, à la connexion.
+     * En cas de doublon, la quantité la plus élevée l'emporte : on ne retire
+     * jamais à quelqu'un ce qu'il venait de choisir.
+     *
+     * @param array<int, array<string, mixed>> $stored
+     */
+    public static function mergeInto(array $stored): void
+    {
+        $lines = self::lines();
+        $max = (int) Config::shop('cart.max_quantity_per_line', 20);
+
+        foreach ($stored as $line) {
+            $productId = (int) ($line['product_id'] ?? 0);
+            $variantId = isset($line['variant_id']) && $line['variant_id'] !== null
+                ? (int) $line['variant_id']
+                : null;
+            $quantity = (int) ($line['quantity'] ?? 0);
+
+            if ($productId <= 0 || $quantity <= 0) {
+                continue;
+            }
+
+            $key = self::key($productId, $variantId);
+            $trouve = false;
+
+            foreach ($lines as $index => $existante) {
+                if (self::key($existante['product_id'], $existante['variant_id']) === $key) {
+                    $lines[$index]['quantity'] = min(max($existante['quantity'], $quantity), $max);
+                    $trouve = true;
+                    break;
+                }
+            }
+
+            if (!$trouve && count($lines) < (int) Config::shop('cart.max_lines', 50)) {
+                $lines[] = [
+                    'product_id' => $productId,
+                    'variant_id' => $variantId,
+                    'quantity'   => min($quantity, $max),
+                ];
+            }
+        }
+
+        Session::set(self::KEY, $lines);
     }
 
     /**
@@ -199,7 +273,7 @@ final class Cart
         // Le panier stocké est réaligné sur ce qui est réellement commandable :
         // sans cela le client reverrait le même avertissement à chaque page.
         if ($changed) {
-            Session::set(self::KEY, array_map(
+            self::store(array_map(
                 static fn (array $line): array => [
                     'product_id' => $line['product_id'],
                     'variant_id' => $line['variant_id'],

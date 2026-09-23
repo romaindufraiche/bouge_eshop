@@ -232,6 +232,8 @@ $freeAbove = $shop['shipping']['free_above_cents'];
     </section>
 <?php endif; ?>
 
+<?= View::partial('partials/concept-store', ['shop' => $shop]) ?>
+
 <section class="section--tight section--line">
     <div class="wrap">
         <div class="stack" style="display:flex;flex-direction:column;align-items:center;text-align:center;padding:2rem 0">

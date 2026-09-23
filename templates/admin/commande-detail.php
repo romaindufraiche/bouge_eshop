@@ -133,8 +133,48 @@ $isPickup = $order['fulfilment'] === Status::PICKUP;
             </p>
         </div>
 
+        <?php if (!$isPickup): ?>
+            <div class="admin-card">
+                <h2 class="t-m">Suivi du colis</h2>
+                <p class="field-help">
+                    Renseigné, le client le voit sur sa commande, dans son
+                    espace. La date d'expédition est posée automatiquement.
+                </p>
+
+                <form method="post" action="/admin/commandes/suivi" class="stack">
+                    <?= Csrf::field() ?>
+                    <input type="hidden" name="id" value="<?= (int) $order['id'] ?>">
+
+                    <div class="field">
+                        <label for="tracking_carrier">Transporteur</label>
+                        <input type="text" id="tracking_carrier" name="tracking_carrier"
+                               value="<?= e($order['tracking_carrier'] ?? '') ?>"
+                               maxlength="60" placeholder="Colissimo, Mondial Relay…">
+                    </div>
+
+                    <div class="field">
+                        <label for="tracking_number">Numéro de suivi</label>
+                        <input type="text" id="tracking_number" name="tracking_number"
+                               value="<?= e($order['tracking_number'] ?? '') ?>" maxlength="80">
+                    </div>
+
+                    <button class="btn btn--ghost" type="submit">Enregistrer le suivi</button>
+                </form>
+
+                <?php if (!empty($order['shipped_at'])): ?>
+                    <p class="t-xs muted" style="margin-top:1rem">
+                        Expédiée le <?= e(date('d/m/Y à H\hi', strtotime((string) $order['shipped_at']))) ?>.
+                    </p>
+                <?php endif; ?>
+            </div>
+        <?php endif; ?>
+
         <div class="admin-card">
             <h2 class="t-m">Client</h2>
+            <?php if (!empty($order['customer_id'])): ?>
+                <p class="t-xs"><span class="pill">Compte client</span></p>
+            <?php endif; ?>
+
             <p class="t-s stack-s">
                 <strong><?= e($order['customer_name']) ?></strong><br>
                 <a href="mailto:<?= e($order['email']) ?>"><?= e($order['email']) ?></a>

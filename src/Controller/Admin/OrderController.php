@@ -94,6 +94,37 @@ final class OrderController
         return '';
     }
 
+    /** Transporteur et numéro de suivi, visibles ensuite par le client. */
+    public function updateTracking(): string
+    {
+        Auth::require();
+        Auth::requireToken();
+
+        $repository = new OrderRepository();
+        $id = (int) ($_POST['id'] ?? 0);
+        $order = $repository->find($id);
+
+        if ($order === null) {
+            redirect('/admin/commandes');
+        }
+
+        $carrier = trim((string) ($_POST['tracking_carrier'] ?? ''));
+        $number = trim((string) ($_POST['tracking_number'] ?? ''));
+
+        $repository->updateTracking(
+            $id,
+            $carrier === '' ? null : mb_substr($carrier, 0, 60),
+            $number === '' ? null : mb_substr($number, 0, 80)
+        );
+
+        Session::flash('admin', $number === ''
+            ? 'Suivi retiré.'
+            : 'Suivi enregistré : le client le voit sur sa commande.');
+        redirect('/admin/commandes/' . $id);
+
+        return '';
+    }
+
     public function updateNote(): string
     {
         Auth::require();

@@ -8,6 +8,7 @@ declare(strict_types=1);
  * @var \Bouge\Support\Router $router
  */
 
+use Bouge\Controller\AccountController;
 use Bouge\Controller\CartController;
 use Bouge\Controller\CatalogueController;
 use Bouge\Controller\CheckoutController;
@@ -46,6 +47,18 @@ $router->get('/panier', [CartController::class, 'show']);
 $router->post('/panier/ajouter', [CartController::class, 'add']);
 $router->post('/panier/modifier', [CartController::class, 'update']);
 $router->post('/panier/retirer', [CartController::class, 'remove']);
+
+// --- Compte client ---------------------------------------------------------------
+// Facultatif : aucune de ces pages n'est nécessaire pour commander.
+
+$router->get('/compte/connexion', [AccountController::class, 'showLogin']);
+$router->post('/compte/connexion', [AccountController::class, 'login']);
+$router->get('/compte/inscription', [AccountController::class, 'showRegister']);
+$router->post('/compte/inscription', [AccountController::class, 'register']);
+$router->post('/compte/deconnexion', [AccountController::class, 'logout']);
+$router->post('/compte/coordonnees', [AccountController::class, 'updateProfile']);
+$router->get('/compte/commande/{reference}', [AccountController::class, 'order']);
+$router->get('/compte', [AccountController::class, 'index']);
 
 // --- Commande ------------------------------------------------------------------
 
@@ -92,3 +105,4 @@ $router->get('/admin/commandes', [AdminOrderController::class, 'index']);
 $router->get('/admin/commandes/{id}', [AdminOrderController::class, 'show']);
 $router->post('/admin/commandes/statut', [AdminOrderController::class, 'updateStatus']);
 $router->post('/admin/commandes/note', [AdminOrderController::class, 'updateNote']);
+$router->post('/admin/commandes/suivi', [AdminOrderController::class, 'updateTracking']);
