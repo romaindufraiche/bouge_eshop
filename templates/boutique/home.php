@@ -32,7 +32,13 @@ $freeAbove = $shop['shipping']['free_above_cents'];
         <div class="grid grid--split">
             <div>
                 <p class="note"><?= e($shop['baseline']) ?></p>
-                <h1 class="t-xxl" style="margin-top:.75rem">Le matériel qui suit,<br>même le lundi.</h1>
+                <?php /* Le titre à l'impératif, comme le nom de la marque :
+                         le client fait sa part, la boutique fait la sienne.
+                         La coupure est forcée après la première phrase — laissé
+                         libre, le titre casse après « le » et laisse un article
+                         seul en bout de ligne. D'autres formulations du même
+                         registre sont proposées dans le README. */ ?>
+                <h1 class="t-xxl" style="margin-top:.75rem">Nagez.<br>Le matériel suivra.</h1>
                 <p class="t-m muted" style="margin-top:1.5rem;max-width:30rem">
                     Bonnets, lunettes, accessoires et textile. Choisis pour tenir la
                     distance, pas pour faire joli au fond du sac.

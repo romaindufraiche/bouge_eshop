@@ -479,6 +479,25 @@ filtres et pastilles reprennent cette rondeur, comme les stickers de
 l'identité. Tout tient dans un jeton — passer `--radius-control` de `9999px` à
 `6px` suffit pour une allure anguleuse.
 
+### Le titre de l'accueil
+
+`templates/boutique/home.php`, une seule ligne. Il est aujourd'hui à
+l'impératif, comme le nom de la marque : **« Nagez. Le matériel suivra. »** —
+le client fait sa part, la boutique fait la sienne.
+
+Trois autres formulations du même registre, si celle-ci lasse :
+
+| | |
+| --- | --- |
+| `Le matériel qui ne lâche pas avant vous.` | La promesse d'endurance, avec un clin d'œil. Tient sur quatre lignes. |
+| `Le matériel qui suit, séance après séance.` | Plus sage, plus proche de l'ancienne formule. |
+| `Tout pour avoir envie d'y retourner.` | Le motif plutôt que l'objet — met le geste en avant, pas le produit. |
+
+La coupure est forcée après la première phrase : laissé libre, le titre
+coupait après « le », ce qui laisse un article seul en bout de ligne. En
+changeant de formule, vérifiez où il casse — la police d'affichage est large
+et la colonne étroite.
+
 ### Ton
 
 La charte décrit une voix « chaleureuse, motivante, avec une pointe d'humour,
