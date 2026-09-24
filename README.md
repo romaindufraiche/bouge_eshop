@@ -19,6 +19,7 @@ les fichiers, on importe la base, c'est en ligne.
 
 - [Ce qu'il faut](#ce-quil-faut)
 - [Démarrer en local](#démarrer-en-local)
+- [Sur un Mac, en partant de zéro](#sur-un-mac-en-partant-de-zéro)
 - [Configuration](#configuration)
 - [Brancher Stripe](#brancher-stripe)
 - [Mise en ligne sur un hébergement mutualisé](#mise-en-ligne-sur-un-hébergement-mutualisé)
@@ -69,6 +70,47 @@ La boutique répond sur <http://localhost:8000> et l'administration sur
 
 > L'option `-t public` est indispensable : sans elle, les images et la feuille
 > de style renvoient 404.
+
+### Sur un Mac, en partant de zéro
+
+macOS ne fournit plus PHP depuis la version 12, et jamais MySQL. Les deux
+s'installent avec [Homebrew](https://brew.sh) :
+
+```bash
+# Homebrew, si vous ne l'avez pas encore (il demandera votre mot de passe)
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+brew install php mysql
+brew services start mysql
+```
+
+Sur un Mac à puce Apple, la fin de l'installation de Homebrew affiche deux
+lignes « Next steps » à copier-coller : elles ajoutent `brew` au PATH. Sans
+elles, `brew` reste introuvable au terminal suivant.
+
+Ensuite, dans le dossier du projet, ces commandes règlent la configuration
+pour une base locale — l'utilisateur `root` de MySQL n'a pas de mot de passe
+tant qu'on ne lui en donne pas :
+
+```bash
+mysql -u root -e "CREATE DATABASE IF NOT EXISTS bouge CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+
+cp config/config.example.php config/config.php
+sed -i '' "s/'user'     => 'bouge'/'user'     => 'root'/"               config/config.php
+sed -i '' "s/'password' => 'a-remplacer'/'password' => ''/"             config/config.php
+sed -i '' "s|'site_url' => 'https://www.bouge.fr'|'site_url' => 'http://localhost:8000'|" config/config.php
+sed -i '' "s/'debug' => false/'debug' => true/"                          config/config.php
+
+php database/install.php contact@bouge.fr bouge-dev-2026
+php database/seed.php
+php -S localhost:8000 -t public dev-server.php
+```
+
+La boutique répond sur <http://localhost:8000>, l'administration sur
+<http://localhost:8000/admin>.
+
+> `sed -i ''` avec deux apostrophes : c'est la forme macOS. Sous Linux, c'est
+> `sed -i` tout court.
 
 ### Les deux scripts de base
 
