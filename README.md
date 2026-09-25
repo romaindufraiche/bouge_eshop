@@ -94,7 +94,10 @@ pour une base locale — l'utilisateur `root` de MySQL n'a pas de mot de passe
 tant qu'on ne lui en donne pas :
 
 ```bash
-mysql -u root -e "CREATE DATABASE IF NOT EXISTS bouge CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+# Le -p est indispensable : si root a un mot de passe, la création échoue
+# sinon, et les commandes suivantes butent sur « Unknown database ».
+mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS bouge CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+mysql -u root -p -e "SHOW DATABASES" | grep bouge      # doit répondre « bouge »
 
 cp config/config.example.php config/config.php
 sed -i '' "s/'user'     => 'bouge'/'user'     => 'root'/"               config/config.php

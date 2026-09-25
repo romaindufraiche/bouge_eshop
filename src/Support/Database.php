@@ -83,7 +83,7 @@ final class Database
                 . "  mysql -u root -e \"SELECT 1\"        (sans mot de passe)\n"
                 . "  mysql -u root -p -e \"SELECT 1\"     (avec mot de passe)",
             '1049' => "La base « {$name} » n'existe pas encore.\n"
-                . "  mysql -u root -e \"CREATE DATABASE {$name} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci\"\n"
+                . "  mysql -u root -p -e \"CREATE DATABASE {$name} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci\"\n"
                 . '  php database/install.php votre@adresse.fr "un mot de passe long"',
             '2002' => "Le serveur MySQL ne répond pas : il est probablement arrêté.\n"
                 . '  brew services start mysql      (macOS)',
