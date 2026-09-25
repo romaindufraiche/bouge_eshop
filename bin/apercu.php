@@ -58,6 +58,31 @@ foreach (['nouveautes', 'promotions', 'en-magasin'] as $selection) {
     $pages['/boutique/selection/' . $selection] = 'selection-' . $selection . '.html';
 }
 
+// Les produits de démonstration portent des visuels qui ne nous appartiennent
+// pas : ils n'ont rien à faire sur une page publiée. Mieux vaut refuser de
+// construire l'aperçu que de les y emporter sans le dire.
+$demo = (int) Database::run(
+    'SELECT COUNT(*) FROM products WHERE demo_source IS NOT NULL'
+)->fetchColumn();
+
+if ($demo > 0) {
+    exit(
+        "{$demo} produits de démonstration sont en base. Leurs visuels appartiennent
+"
+        . "à leur source : l'aperçu public ne doit pas les publier.
+
+"
+        . "Retirez-les, puis relancez :
+"
+        . "  php database/seed-demo.php --purger
+"
+        . "  php database/seed.php
+"
+        . "  php bin/apercu.php
+"
+    );
+}
+
 $banniere = <<<'HTML'
 <div class="apercu-banniere">
   <p><strong>Aperçu statique.</strong> La navigation fonctionne.

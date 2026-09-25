@@ -98,6 +98,12 @@ CREATE TABLE `products` (
   -- attraper un autre usage. Valeurs autorisées : src/Support/Usage.php.
   `usages`           VARCHAR(190) DEFAULT NULL,
 
+  -- Produit importé pour la démonstration, avant que le vrai catalogue
+  -- n'arrive : porte le nom de sa source. NULL pour un produit de la
+  -- boutique. Permet de tous les retirer d'un coup, et de les signaler dans
+  -- l'administration.
+  `demo_source`      VARCHAR(60) DEFAULT NULL,
+
   `meta_title`       VARCHAR(70) DEFAULT NULL,
   `meta_description` VARCHAR(180) DEFAULT NULL,
   `created_at`       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -108,6 +114,7 @@ CREATE TABLE `products` (
   KEY `products_category` (`category_id`),
   KEY `products_status` (`status`),
   KEY `products_featured` (`featured`),
+  KEY `products_demo` (`demo_source`),
   -- On empêche la suppression d'une catégorie qui contient encore des
   -- produits : ils se retrouveraient sans rayon.
   CONSTRAINT `products_category_fk` FOREIGN KEY (`category_id`)

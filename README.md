@@ -23,6 +23,7 @@ les fichiers, on importe la base, c'est en ligne.
 - [Configuration](#configuration)
 - [Brancher Stripe](#brancher-stripe)
 - [Mise en ligne sur un hébergement mutualisé](#mise-en-ligne-sur-un-hébergement-mutualisé)
+- [Le catalogue de démonstration](#le-catalogue-de-démonstration)
 - [Structure du site](#structure-du-site)
 - [Le compte client](#le-compte-client)
 - [Aperçu statique sur GitHub Pages](#aperçu-statique-sur-github-pages)
@@ -118,6 +119,7 @@ La boutique répond sur <http://localhost:8000>, l'administration sur
 | --- | --- |
 | `php database/install.php <email> <mot-de-passe>` | **Crée les tables** à partir de `database/schema.sql`, puis le compte d'administration. Le catalogue reste vide. C'est le script d'une vraie installation. |
 | `php database/seed.php [email] [mot-de-passe]` | Remplit un catalogue de démonstration (5 catégories, 14 produits). Les tables doivent déjà exister. |
+| `php database/seed-demo.php` | Ajoute une soixantaine de produits réels avec leurs visuels, pour une démonstration parlante. Voir [Le catalogue de démonstration](#le-catalogue-de-démonstration). |
 
 Sur une base **déjà installée**, les évolutions du schéma sont dans
 `database/migrations/`, à jouer dans l'ordre :
@@ -306,6 +308,30 @@ php database/seed.php                          # le catalogue de l'aperçu
 php -S localhost:8000 -t public dev-server.php &
 php bin/apercu.php                             # réécrit docs/
 ```
+
+## Le catalogue de démonstration
+
+Avant que le vrai catalogue n'existe, des formes abstraites ne donnent aucune
+idée du rendu. `database/seed-demo.php` importe donc une soixantaine de
+produits réels — lunettes, bonnets, accessoires, sacs, maillots — avec leurs
+visuels, leurs prix, leurs coloris et leurs tailles, depuis le site d'arena.
+
+```bash
+php database/seed-demo.php            # importe (en remplaçant l'import précédent)
+php database/seed-demo.php --purger   # les retire tous
+```
+
+**Ces produits ne sont pas à vous, et ne doivent pas être mis en vente.** Les
+visuels et les intitulés appartiennent à arena. Trois garde-fous sont en
+place pour que cela ne parte pas en production par inadvertance :
+
+| | |
+| --- | --- |
+| **Marqués en base** | La colonne `demo_source` porte le nom de la source, et une pastille « Démo » apparaît dans la liste des produits de l'administration. |
+| **Hors du dépôt** | Les visuels sont téléchargés dans `public/uploads/demo/`, que Git ignore : ils ne partent ni dans le dépôt, ni chez un autre développeur. |
+| **Hors de l'aperçu public** | `bin/apercu.php` refuse de construire l'aperçu tant que des produits de démonstration sont en base, et dit comment les retirer. |
+
+Le jour où le client fournit son catalogue : `--purger`, et il ne reste rien.
 
 ## Structure du site
 
@@ -624,6 +650,8 @@ installer, ni version de Node à maintenir. C'est ce qui a été retenu.
       à faire relire.
 - [ ] **Photos produits** : les visuels de démonstration sont des formes
       abstraites aux couleurs de la marque, à remplacer par de vraies photos.
+      Si `seed-demo.php` a été lancé, **purgez-le avant l'ouverture** : ces
+      visuels appartiennent à arena.
       Seul le livre *Corps et esprit* a ses vrais visuels (couverture, doubles
       pages, portrait), repris de la page de son éditeur.
 - [ ] **Licence de Sun Motter** : la police est livrée avec la charte et

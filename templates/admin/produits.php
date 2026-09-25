@@ -112,6 +112,11 @@ $sorts = [
                                 <?php if (!empty($product['featured'])): ?>
                                     <span class="pill pill--outline-accent t-xs">Mis en avant</span>
                                 <?php endif; ?>
+                                <?php /* Importé pour la démonstration : à retirer
+                                         quand le vrai catalogue arrive. */ ?>
+                                <?php if (!empty($product['demo_source'])): ?>
+                                    <span class="pill t-xs" title="Produit de démonstration importé depuis <?= e($product['demo_source']) ?>">Démo</span>
+                                <?php endif; ?>
                                 <?php if ($isExternal): ?>
                                     <span class="t-xs muted d-block">Vendu par <?= e($product['external_label'] ?: 'un revendeur') ?></span>
                                 <?php endif; ?>

@@ -778,7 +778,17 @@ main { flex: 1; }
   border-radius: var(--radius-surface);
   background: var(--sand);
 }
-.product-card__media img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s; }
+/* `multiply` fond la photo dans la vignette : les visuels produits sont
+   photographiés sur blanc ou gris clair, et ces aplats froids juraient avec
+   le sable de la charte. À revoir si un jour les photos arrivent détourées
+   sur fond sombre — le mélange les noircirait. */
+.product-card__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  mix-blend-mode: multiply;
+  transition: transform 0.4s;
+}
 .product-card a:hover .product-card__media img { transform: scale(1.03); }
 
 .product-card__badge { position: absolute; top: 0.75rem; left: 0.75rem; }
@@ -804,7 +814,7 @@ main { flex: 1; }
    images composées — une couverture de livre, une double page. Les recadrer
    couperait un titre ou un visage. Le cadre garde donc l'image entière, le
    fond sable comblant ce qui reste. */
-.gallery__main img { width: 100%; height: 100%; object-fit: contain; padding: 1rem; }
+.gallery__main img { width: 100%; height: 100%; object-fit: contain; padding: 1rem; mix-blend-mode: multiply; }
 
 .gallery__thumbs {
   display: grid;
