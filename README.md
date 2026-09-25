@@ -22,11 +22,12 @@ les fichiers, on importe la base, c'est en ligne.
 - [Sur un Mac, en partant de zéro](#sur-un-mac-en-partant-de-zéro)
 - [Configuration](#configuration)
 - [Brancher Stripe](#brancher-stripe)
-- [Mise en ligne sur un hébergement mutualisé](#mise-en-ligne-sur-un-hébergement-mutualisé)
+- [Mettre en ligne chez OVH](#mettre-en-ligne-chez-ovh)
+- [Chez un autre hébergeur](#chez-un-autre-hébergeur)
+- [Aperçu statique sur GitHub Pages](#aperçu-statique-sur-github-pages)
 - [Le catalogue de démonstration](#le-catalogue-de-démonstration)
 - [Structure du site](#structure-du-site)
 - [Le compte client](#le-compte-client)
-- [Aperçu statique sur GitHub Pages](#aperçu-statique-sur-github-pages)
 - [Utiliser l'administration](#utiliser-ladministration)
 - [Direction artistique](#direction-artistique)
 - [Organisation du code](#organisation-du-code)
@@ -206,83 +207,195 @@ stock ne doit être décompté qu'une fois.
 En mode test, utiliser la carte `4242 4242 4242 4242`, n'importe quelle date
 future et n'importe quel cryptogramme.
 
-## Mise en ligne sur un hébergement mutualisé
+## Mettre en ligne chez OVH
 
-Testé dans l'esprit des offres courantes : o2switch, OVH, Ionos, Hostinger,
-LWS. Aucune n'a besoin d'un accès SSH, sauf pour lancer le script
-d'installation — et une solution sans SSH est décrite plus bas.
+La marche à suivre complète, dans l'ordre. Comptez une heure la première
+fois, l'essentiel étant de l'attente : propagation du domaine, émission du
+certificat.
 
-### 1. Créer la base de données
+Les intitulés du panneau OVH changent au fil des refontes. Ceux donnés ici
+décrivent la fonction plutôt que le bouton : si le libellé diffère, cherchez
+l'intention.
 
-Dans l'espace client de l'hébergeur, rubrique « Bases de données » : créer une
-base **en utf8mb4** et un utilisateur. Noter les quatre valeurs (hôte, nom,
-utilisateur, mot de passe).
+### 0. Choisir l'offre
 
-### 2. Transférer les fichiers
+| Offre | Ce que ça change pour nous |
+| --- | --- |
+| **Perso** | Suffit : PHP 8, une base MySQL, un domaine. **Pas de SSH** — l'installation se fait alors par phpMyAdmin, décrite ci-dessous. |
+| **Pro / Performance** | Ajoute le SSH, donc `php database/install.php` directement sur le serveur, et plusieurs bases. |
 
-En FTP (FileZilla) ou par le gestionnaire de fichiers de l'hébergeur.
+Le site tient sans difficulté sur une offre Perso : il n'y a ni compilation,
+ni processus à faire tourner en continu.
 
-**Le mieux**, si l'hébergeur permet de choisir la racine du domaine (c'est le
-cas chez o2switch et Hostinger) : déposer tout le projet en dehors de l'espace
-web, puis faire pointer le domaine sur le dossier `public/`. Le code de la
-boutique, la configuration et les gabarits restent alors hors de portée du web.
+### 1. La base de données
 
-**Sinon** : déposer tout le projet dans `www/` (ou `public_html/`). Le fichier
-`.htaccess` à la racine du projet redirige vers `public/` et refuse l'accès
-direct à `config/`, `src/`, `templates/`, `database/` et `vendor/`.
+Panneau OVH → votre hébergement → onglet **Bases de données** → *Créer une
+base de données*. Choisissez **MySQL**, le plus récent proposé, et notez les
+quatre valeurs affichées.
 
-### 3. Renseigner la configuration
+> **Le piège numéro un :** chez OVH, le serveur de base n'est pas
+> `localhost`. C'est une adresse du genre `bougexxxxx.mysql.db`. La recopier
+> telle quelle, sinon rien ne se connectera.
 
-Copier `config/config.example.php` en `config/config.php`, y mettre les
-identifiants de la base, l'adresse réelle du site, les clés Stripe **de
-production**, et `'debug' => false`.
+### 2. Envoyer les fichiers
 
-### 4. Créer les tables et le compte d'administration
+Par FTP, avec FileZilla et les identifiants de l'onglet **FTP - SSH**.
 
-Avec un accès SSH :
+L'espace FTP contient un dossier `www` : c'est ce que le web sert. Deux
+dispositions possibles.
+
+**La bonne** — le domaine pointe sur `public/`, le reste du code n'est pas
+servi du tout :
+
+1. Déposez le projet dans un dossier **à côté** de `www`, par exemple
+   `boutique/`, en excluant `.git`, `docs/` et `config/config.php`.
+2. Panneau OVH → **Multisite** → ajoutez votre domaine, et renseignez le
+   *dossier racine* : `boutique/public`.
+
+**La dépannante**, si le multisite vous résiste : déposez tout le contenu du
+projet directement dans `www`. Le fichier `.htaccess` fourni à la racine
+redirige vers `public/` et refuse l'accès à `config/`, `src/`, `templates/`,
+`database/`, `vendor/`, `bin/` et `docs/`.
+
+### 3. La version de PHP
+
+Panneau OVH → votre hébergement → **Modifier la version de PHP**, et
+choisissez **8.1 ou plus récent**.
+
+Si le réglage n'existe pas dans votre panneau, renommez `.ovhconfig.example`
+en `.ovhconfig` et déposez-le à la racine de l'espace FTP — au même niveau
+que `www`, pas dedans. En cas de souci après l'avoir ajouté, supprimez-le :
+le site repart sur la configuration par défaut.
+
+### 4. La configuration
+
+Copiez `config/config.example.php` en `config/config.php` **sur le serveur**,
+et remplissez-le avec les valeurs OVH :
+
+```php
+'db' => [
+    'host'     => 'bougexxxxx.mysql.db',   // PAS localhost
+    'name'     => 'bougexxxxx',
+    'user'     => 'bougexxxxx',
+    'password' => '...',                   // celui choisi à l'étape 1
+    'port'     => '',
+    'socket'   => '',
+],
+
+'site_url' => 'https://www.votre-domaine.fr',   // sans slash final
+'debug'    => false,                            // jamais true en ligne
+```
+
+N'envoyez pas votre `config/config.php` local : il contient les identifiants
+de votre Mac, qui ne valent rien ici.
+
+### 5. Créer les tables
+
+**Avec SSH** (offres Pro et plus) :
 
 ```bash
+cd ~/boutique
 php database/install.php contact@votre-domaine.fr "un mot de passe long"
 ```
 
-Sans SSH : importer `database/schema.sql` depuis phpMyAdmin (onglet
-« Importer »), puis créer le compte avec une requête SQL, le mot de passe
-étant haché **sur votre poste** — il ne doit jamais circuler en clair :
+**Sans SSH** (offre Perso), par phpMyAdmin, accessible depuis l'onglet Bases
+de données :
 
-```bash
-php -r 'echo password_hash("votre-mot-de-passe", PASSWORD_DEFAULT), PHP_EOL;'
-```
+1. Onglet **Importer** → choisissez `database/schema.sql` → *Exécuter*.
+2. Calculez le haché de votre mot de passe **sur votre Mac** — il ne doit
+   jamais circuler en clair :
 
-```sql
-INSERT INTO admin_users (email, password_hash, name)
-VALUES ('contact@votre-domaine.fr', '<le hachage obtenu>', 'Administration');
-```
+   ```bash
+   php -r 'echo password_hash("votre mot de passe", PASSWORD_DEFAULT), PHP_EOL;'
+   ```
 
-### 5. Droits du dossier des photos
+3. Onglet **SQL**, et collez, en remplaçant les deux valeurs :
 
-`public/uploads/` doit être accessible en écriture par PHP (permissions `755`,
-ou `775` selon l'hébergeur). C'est le seul dossier dans ce cas.
+   ```sql
+   INSERT INTO admin_users (email, password_hash, name)
+   VALUES ('contact@votre-domaine.fr', '<le haché obtenu>', 'Administration');
+   ```
 
-Il contient un `.htaccess` qui **interdit l'exécution de code** : si un fichier
-`.php` y parvenait malgré les contrôles de type, il ne serait servi qu'en
-texte.
+Le catalogue de démonstration, lui, n'a pas sa place en ligne : ses visuels
+ne nous appartiennent pas. Ne lancez pas `seed-demo.php` sur le serveur.
 
-### 6. Vérifier
+### 6. Droits d'écriture sur les photos
 
-- La boutique s'affiche, avec ses images et sa feuille de style.
-- `/admin/connexion` accepte le compte créé.
-- Un paiement de test aboutit et la commande apparaît dans l'administration
-  au statut « Payée » — c'est ce qui prouve que le webhook fonctionne.
+Dans FileZilla, clic droit sur `public/uploads` → *Droits d'accès au
+fichier* → `755`. C'est le seul dossier où le site écrit. Si l'envoi de
+photos échoue depuis l'administration, essayez `775`.
+
+### 7. Le certificat HTTPS
+
+Panneau OVH → **Multisite** → votre domaine → activez le certificat SSL
+(Let's Encrypt, gratuit). Comptez de quelques minutes à une heure.
+
+Une fois qu'il répond, forcez le HTTPS : dans `public/.htaccess`,
+décommentez les trois lignes du bloc « HTTPS obligatoire ». **Pas avant** :
+sans certificat, la règle envoie les visiteurs vers une adresse muette.
+
+### 8. Stripe
+
+1. Tableau de bord Stripe, passez en mode **production** (l'interrupteur
+   « Mode test » en haut).
+2. Reportez les clés `sk_live_…` et `pk_live_…` dans `config/config.php`.
+3. **Développeurs → Webhooks → Ajouter un point de terminaison** :
+   `https://www.votre-domaine.fr/webhook/stripe`, événement
+   `checkout.session.completed`. Reportez le secret `whsec_…`.
+
+Sans ce webhook, les commandes payées resteront « en attente » et le stock
+ne bougera pas. C'est le seul endroit où une commande devient payée.
+
+### 9. Vérifier
+
+- [ ] La boutique s'affiche, avec ses images et ses polices.
+- [ ] L'adresse en `http://` bascule bien en `https://`.
+- [ ] `/admin/connexion` accepte le compte créé.
+- [ ] Une photo s'envoie depuis l'administration sans erreur.
+- [ ] Un paiement de test aboutit **et** la commande passe à « Payée » —
+      c'est ce qui prouve que le webhook fonctionne.
+- [ ] `config/config.php` n'est pas lisible depuis un navigateur :
+      `https://votre-domaine.fr/config/config.php` doit renvoyer une erreur.
+
+### Mettre à jour le site ensuite
+
+Il n'y a rien à compiler : on remplace les fichiers modifiés par FTP. En
+pratique, `src/`, `templates/`, `public/assets/` et `vendor/` se remplacent
+sans risque. **Ne touchez jamais** à `config/config.php` ni à
+`public/uploads/` : le premier porte vos identifiants, le second vos photos.
+
+Si une mise à jour ajoute une colonne, un fichier apparaît dans
+`database/migrations/` : jouez-le par phpMyAdmin, onglet Importer. Les
+migrations déjà passées ne se rejouent pas.
 
 ### Sauvegardes
 
-Deux choses à sauvegarder, et rien d'autre :
+Deux choses, et rien d'autre : **la base** (phpMyAdmin → Exporter) et
+**`public/uploads/`** (copie FTP). OVH propose ses propres sauvegardes ;
+vérifiez qu'elles couvrent bien les deux, et faites-en une à vous avant
+chaque intervention.
 
-1. **La base** (export SQL depuis phpMyAdmin) — le catalogue et les commandes.
-2. **`public/uploads/`** — les photos des produits.
+## Chez un autre hébergeur
 
-La plupart des hébergeurs proposent une sauvegarde automatique ; vérifier
-qu'elle couvre bien les deux.
+o2switch, Ionos, Hostinger, LWS : la marche à suivre est celle décrite pour
+OVH, à trois nuances près.
+
+- **L'hôte de la base** est souvent `localhost` ailleurs que chez OVH. La
+  valeur exacte est toujours affichée à la création de la base ; c'est elle
+  qui fait foi, jamais l'habitude.
+- **La racine du domaine** se choisit librement chez o2switch et Hostinger :
+  déposez le projet hors de l'espace web et pointez le domaine sur
+  `public/`. C'est la disposition à préférer partout où elle est possible.
+- **Le dossier web** s'appelle `public_html` plutôt que `www` chez beaucoup
+  d'entre eux.
+
+Tout le reste — PHP 8.1, `config/config.php`, l'import de `schema.sql`, les
+droits sur `public/uploads/`, le certificat, le webhook Stripe — est
+identique.
+
+À propos de `public/uploads/` : il contient un `.htaccess` qui **interdit
+l'exécution de code**. Si un fichier `.php` y parvenait malgré les contrôles
+de type, il ne serait servi qu'en texte.
 
 ## Aperçu statique sur GitHub Pages
 

@@ -15,8 +15,10 @@
     RewriteEngine On
 
     # Le contenu de config/, src/, templates/ et database/ ne doit jamais être
-    # servi, même si la redirection ci-dessous venait à échouer.
-    RewriteRule ^(config|src|templates|database|vendor)/ - [F,L]
+    # servi, même si la redirection ci-dessous venait à échouer. `docs/` est
+    # bloqué aussi : c'est la copie statique destinée à GitHub Pages, et deux
+    # exemplaires du site sous le même domaine brouillent le référencement.
+    RewriteRule ^(config|src|templates|database|vendor|bin|docs)/ - [F,L]
 
     RewriteCond %{REQUEST_URI} !^/public/
     RewriteRule ^(.*)$ public/$1 [L]

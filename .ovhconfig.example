@@ -1,0 +1,17 @@
+# ---------------------------------------------------------------------------
+# Réglage du moteur PHP chez OVH — à renommer en « .ovhconfig » et à déposer
+# à la RACINE de l'espace FTP (au même niveau que le dossier www).
+#
+# À n'utiliser que si le panneau OVH ne propose pas déjà le choix de la
+# version PHP : le réglage du panneau est plus sûr, et ce fichier le
+# remplace. En cas de doute, ne déposez pas ce fichier — supprimez-le si le
+# site cesse de répondre après son ajout.
+#
+# La boutique demande PHP 8.1 ou plus récent.
+# ---------------------------------------------------------------------------
+
+app.engine=php
+app.engine.version=8.3
+http.firewall=none
+environment=production
+container.image=stable

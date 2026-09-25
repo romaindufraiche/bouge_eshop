@@ -8,6 +8,17 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
+    # --- HTTPS obligatoire ---------------------------------------------------
+    # À DÉCOMMENTER une fois le certificat actif, pas avant : sans certificat,
+    # cette règle renvoie les visiteurs vers une adresse qui ne répond pas.
+    # Le paiement l'exige, et un formulaire de connexion en clair n'a pas de
+    # sens. Sur un hébergement mutualisé, c'est l'en-tête envoyé par le
+    # répartiteur qui dit si la requête est arrivée en HTTPS.
+    #
+    # RewriteCond %{HTTP:X-Forwarded-Proto} !https
+    # RewriteCond %{HTTPS} !=on
+    # RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+
     # Toutes les requêtes qui ne correspondent pas à un fichier ou un dossier
     # réel passent par le contrôleur frontal.
     RewriteCond %{REQUEST_FILENAME} !-f
