@@ -15,6 +15,7 @@ use Bouge\Support\Money;
 use Bouge\Support\Status;
 
 $isPickup = $order['fulfilment'] === Status::PICKUP;
+$isRelay = $order['fulfilment'] === Status::RELAY;
 ?>
 <header class="admin-head between">
     <div>
@@ -71,7 +72,7 @@ $isPickup = $order['fulfilment'] === Status::PICKUP;
                     </tr>
                     <tr>
                         <th scope="row" colspan="3" class="ta-right">
-                            <?= $isPickup ? 'Retrait' : 'Livraison' ?>
+                            <?= e(Status::fulfilments()[$order['fulfilment']] ?? $order['fulfilment']) ?>
                         </th>
                         <td class="ta-right nums">
                             <?= (int) $order['shipping_cents'] === 0
@@ -187,7 +188,25 @@ $isPickup = $order['fulfilment'] === Status::PICKUP;
         <div class="admin-card">
             <h2 class="t-m"><?= $isPickup ? 'Retrait' : 'Livraison' ?></h2>
 
-            <?php if ($isPickup): ?>
+            <?php if ($isRelay): ?>
+                <?php /* Le colis part à l'adresse du point relais, pas à celle du
+                         client : c'est celle-là qu'il faut recopier sur
+                         l'étiquette, avec le code du point pour que le
+                         transporteur sache où l'acheminer. */ ?>
+                <p class="t-s">
+                    <strong><?= e((string) $order['relay_name']) ?></strong><br>
+                    <?= e((string) $order['relay_address']) ?><br>
+                    <?= e((string) $order['relay_postal_code']) ?> <?= e((string) $order['relay_city']) ?>
+                </p>
+                <p class="t-xs muted" style="margin-top:1rem">
+                    Transporteur : <?= e((string) $order['relay_operator']) ?><br>
+                    Code du point : <code><?= e((string) $order['relay_code']) ?></code>
+                </p>
+                <p class="t-xs muted" style="margin-top:1rem">
+                    Le client passera le retirer sur place&nbsp;; il reçoit un avis du
+                    transporteur dès l'arrivée du colis.
+                </p>
+            <?php elseif ($isPickup): ?>
                 <?php if ($order['pickup_name'] === null): ?>
                     <p class="t-s muted">Le point de retrait choisi a été supprimé depuis.</p>
                 <?php else: ?>

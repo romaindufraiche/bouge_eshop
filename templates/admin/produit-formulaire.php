@@ -149,6 +149,17 @@ $saleValue = $field(
                        value="<?= e($field('stock', '0')) ?>">
                 <p class="field-help">Ignoré si le produit a des déclinaisons : c'est alors leur stock qui compte.</p>
             </div>
+
+            <div class="field">
+                <label for="weight_grams">Poids en grammes</label>
+                <input type="number" id="weight_grams" name="weight_grams" min="0" step="1"
+                       value="<?= e($field('weight_grams', '')) ?>" placeholder="120">
+                <p class="field-help">
+                    Le transporteur facture au poids. Laissé vide, le poids par défaut de la
+                    configuration s'applique — mieux vaut une estimation haute qu'un colis
+                    refusé au dépôt.
+                </p>
+            </div>
         </div>
 
         <fieldset class="field-group">

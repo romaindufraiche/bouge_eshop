@@ -29,7 +29,11 @@ final class Status
 
     // --- Mode de remise ------------------------------------------------------
 
+    /** Livraison à l'adresse du client. */
     public const DELIVERY = 'livraison';
+    /** Livraison dans un point relais du transporteur. */
+    public const RELAY = 'point_relais';
+    /** Retrait au concept store, sans transporteur. */
     public const PICKUP = 'retrait';
 
     /** @return array<string, string> */
@@ -37,8 +41,20 @@ final class Status
     {
         return [
             self::DELIVERY => 'Livraison à domicile',
+            self::RELAY    => 'Livraison en point relais',
             self::PICKUP   => 'Retrait sur place',
         ];
+    }
+
+    /**
+     * Les modes qui passent par un transporteur, et demandent donc une
+     * étiquette et un numéro de suivi. Le retrait sur place n'en demande pas.
+     *
+     * @return list<string>
+     */
+    public static function shippedFulfilments(): array
+    {
+        return [self::DELIVERY, self::RELAY];
     }
 
     // --- Statut d'une commande -----------------------------------------------

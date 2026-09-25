@@ -1370,5 +1370,27 @@ input[type='file'] { margin-top: 0.4rem; font-size: 0.875rem; }
    page : c'est le CSS qui masque celui qui ne correspond pas au choix. Le
    tunnel fonctionne donc sans JavaScript. */
 
+/* Chaque bloc de champs n'est visible que pour le mode qui lui correspond.
+   Écrit en négatif — « masqué si un AUTRE mode est coché » — pour que
+   l'apparition d'un quatrième mode n'oblige pas à réécrire les précédents. */
+form:has(#mode-relais:checked) .champs-livraison,
 form:has(#mode-retrait:checked) .champs-livraison { display: none; }
-form:has(#mode-livraison:checked) .champs-retrait { display: none; }
+
+form:has(#mode-livraison:checked) .champs-relais,
+form:has(#mode-retrait:checked) .champs-relais { display: none; }
+
+form:has(#mode-livraison:checked) .champs-retrait,
+form:has(#mode-relais:checked) .champs-retrait { display: none; }
+
+/* La recherche de points relais : deux champs et un bouton sur une ligne au
+   large, empilés sur téléphone. Le bouton s'aligne sur le bas des champs. */
+.relais-recherche {
+    display: grid;
+    gap: 1.25rem;
+    align-items: end;
+    grid-template-columns: 1fr;
+}
+
+@media (min-width: 40rem) {
+    .relais-recherche { grid-template-columns: 8rem 1fr auto; }
+}

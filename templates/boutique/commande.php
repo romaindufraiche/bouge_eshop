@@ -10,6 +10,9 @@
  * @var string                          $fulfilment
  * @var int                             $shippingCents
  * @var bool                            $stripeReady
+ * @var list<\Bouge\Shipping\RelayPoint> $relayPoints
+ * @var string|null                     $relayError
+ * @var bool                            $relayAvailable
  * @var array<string, mixed>            $shop
  */
 
@@ -23,6 +26,7 @@ $v = static fn (string $key): string => $values[$key] ?? '';
 $err = static fn (string $key): ?string => $errors[$key] ?? null;
 
 $deliveryCost = Shipping::cents($cart['subtotal_cents'], Status::DELIVERY);
+$relayCost = Shipping::cents($cart['subtotal_cents'], Status::RELAY);
 ?>
 <div class="wrap">
     <div class="section">
@@ -99,6 +103,23 @@ $deliveryCost = Shipping::cents($cart['subtotal_cents'], Status::DELIVERY);
                                 </span>
                             </label>
 
+                            <?php if ($relayAvailable): ?>
+                                <label class="choice">
+                                    <input type="radio" name="fulfilment" id="mode-relais"
+                                           value="<?= e(Status::RELAY) ?>"
+                                           <?= $fulfilment === Status::RELAY ? 'checked' : '' ?>>
+                                    <span>
+                                        <span class="choice__title">Livraison en point relais</span>
+                                        <span class="choice__detail">
+                                            <?= $relayCost === 0 ? 'Offerte' : e(Money::format($relayCost)) ?>
+                                            <?php if ($relayCost < $deliveryCost): ?>
+                                                — le plus économique
+                                            <?php endif; ?>
+                                        </span>
+                                    </span>
+                                </label>
+                            <?php endif; ?>
+
                             <label class="choice">
                                 <input type="radio" name="fulfilment" id="mode-retrait"
                                        value="<?= e(Status::PICKUP) ?>"
@@ -156,6 +177,78 @@ $deliveryCost = Shipping::cents($cart['subtotal_cents'], Status::DELIVERY);
 
                             <p class="t-s muted" style="margin-top:1rem">Livraison en France métropolitaine uniquement.</p>
                         </div>
+
+                        <?php if ($relayAvailable): ?>
+                            <?php /* Pas de carte ni de JavaScript : le client donne
+                                     son code postal, le serveur interroge le
+                                     transporteur, et les points reviennent en
+                                     boutons radio. Un formulaire, deux allers-retours,
+                                     et cela marche partout. */ ?>
+                            <div class="champs-relais divider" style="padding-top:1.5rem">
+                                <div class="relais-recherche">
+                                    <label class="field">
+                                        <span class="field__label">Code postal</span>
+                                        <span class="field__hint">Pour trouver les points relais autour de vous.</span>
+                                        <input type="text" name="relay_search_postal_code" inputmode="numeric"
+                                               autocomplete="postal-code" maxlength="5"
+                                               value="<?= e($v('relay_search_postal_code')) ?>">
+                                    </label>
+
+                                    <label class="field">
+                                        <span class="field__label">Ville <span class="field__optional">(facultatif)</span></span>
+                                        <span class="field__hint">Utile si le code postal couvre plusieurs communes.</span>
+                                        <input type="text" name="relay_search_city" autocomplete="address-level2"
+                                               value="<?= e($v('relay_search_city')) ?>">
+                                    </label>
+
+                                    <button type="submit" name="chercher_relais" value="1" class="btn btn--ghost">
+                                        Chercher les points relais
+                                    </button>
+                                </div>
+
+                                <?php if ($relayError !== null): ?>
+                                    <p class="notice notice--accent" style="margin-top:1.5rem"><?= e($relayError) ?></p>
+                                <?php elseif ($relayPoints !== []): ?>
+                                    <fieldset style="border:0;margin:1.5rem 0 0;padding:0">
+                                        <legend class="field__label">Où souhaitez-vous récupérer votre colis&nbsp;?</legend>
+                                        <div class="stack" style="margin-top:.75rem">
+                                            <?php foreach ($relayPoints as $index => $relais): ?>
+                                                <label class="choice">
+                                                    <input type="radio" name="relay_code" value="<?= e($relais->code) ?>"
+                                                           <?= $relais->code === $v('relay_code') || ($v('relay_code') === '' && $index === 0) ? 'checked' : '' ?>>
+                                                    <span>
+                                                        <span class="choice__title">
+                                                            <?= e($relais->name) ?>
+                                                            <?php if ($relais->distance() !== null): ?>
+                                                                <span class="muted">— <?= e($relais->distance()) ?></span>
+                                                            <?php endif; ?>
+                                                        </span>
+                                                        <span class="choice__detail">
+                                                            <?= e($relais->address) ?><br>
+                                                            <?= e($relais->postalCode) ?> <?= e($relais->city) ?>
+                                                            <?php foreach ($relais->schedule as $ligne): ?>
+                                                                <br><?= e($ligne) ?>
+                                                            <?php endforeach; ?>
+                                                        </span>
+                                                    </span>
+                                                </label>
+                                            <?php endforeach; ?>
+                                        </div>
+                                        <?php if ($err('relay_code')): ?>
+                                            <p class="field-error" style="margin-top:.5rem"><?= e($err('relay_code')) ?></p>
+                                        <?php endif; ?>
+                                    </fieldset>
+                                <?php else: ?>
+                                    <p class="t-s muted" style="margin-top:1.5rem">
+                                        Indiquez votre code postal, puis lancez la recherche&nbsp;: la liste des
+                                        points relais s'affichera ici.
+                                        <?php if ($err('relay_code')): ?>
+                                            <br><span class="field-error"><?= e($err('relay_code')) ?></span>
+                                        <?php endif; ?>
+                                    </p>
+                                <?php endif; ?>
+                            </div>
+                        <?php endif; ?>
 
                         <?php if ($points !== []): ?>
                             <div class="champs-retrait divider" style="padding-top:1.5rem">

@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace Bouge\Controller;
 
 use Bouge\Repository\CustomerRepository;
+use Bouge\Shipping\CarrierException;
+use Bouge\Shipping\Carriers;
+use Bouge\Shipping\RelayPoint;
 use Bouge\Repository\OrderRepository;
 use Bouge\Repository\PickupPointRepository;
 use Bouge\Support\Cart;
@@ -41,6 +44,14 @@ final class CheckoutController
         $points = (new PickupPointRepository())->active();
         $fulfilment = (string) ($_POST['fulfilment'] ?? Status::DELIVERY);
 
+        // Le bouton « Chercher les points relais » renvoie le formulaire sans
+        // rien valider : le client n'a pas fini de le remplir, lui reprocher
+        // ses champs vides à ce moment-là serait absurde. C'est la seule
+        // manière d'interroger le transporteur sans JavaScript.
+        if (isset($_POST['chercher_relais'])) {
+            return $this->renderForm([], $_POST);
+        }
+
         $validator = new Validator($_POST);
         $validator
             ->required('customer_name', 'Indiquez votre nom.')
@@ -48,12 +59,21 @@ final class CheckoutController
             ->required('email', 'Indiquez votre adresse électronique.')
             ->email('email', 'Adresse électronique invalide.')
             ->maxLength('phone', 30, 'Numéro trop long.')
-            ->inList('fulfilment', [Status::DELIVERY, Status::PICKUP], 'Choisissez la livraison ou le retrait.')
+            ->inList(
+                'fulfilment',
+                Shipping::availableFulfilments($points !== []),
+                'Choisissez un mode de livraison.'
+            )
             ->when($fulfilment === Status::DELIVERY, static function (Validator $v): void {
                 $v->required('shipping_address_line1', 'Indiquez votre adresse.')
                   ->required('shipping_city', 'Indiquez votre ville.')
                   ->required('shipping_postal_code', 'Indiquez votre code postal.')
                   ->pattern('shipping_postal_code', '/^\d{5}$/', 'Code postal à 5 chiffres.');
+            })
+            // En point relais, c'est le commerce qui reçoit le colis : l'adresse
+            // du client ne sert à rien et ne lui est donc pas demandée.
+            ->when($fulfilment === Status::RELAY, static function (Validator $v): void {
+                $v->required('relay_code', 'Choisissez un point relais dans la liste.');
             })
             ->when($fulfilment === Status::PICKUP, static function (Validator $v): void {
                 $v->required('pickup_point_id', 'Choisissez un point de retrait.');
@@ -98,6 +118,38 @@ final class CheckoutController
             $pickupPointId = (int) $point['id'];
         }
 
+        // --- Point relais ------------------------------------------------------
+        // Le code arrive du formulaire, mais jamais l'adresse : elle est
+        // redemandée au transporteur. Sans quoi un client pourrait faire
+        // imprimer l'étiquette pour l'adresse de son choix.
+        $relay = null;
+        if ($fulfilment === Status::RELAY) {
+            try {
+                $relay = $this->findRelayByCode(
+                    (string) $validator->value('relay_code'),
+                    (string) ($_POST['relay_search_postal_code'] ?? ''),
+                    (string) ($_POST['relay_search_city'] ?? '')
+                );
+            } catch (CarrierException $e) {
+                error_log('Transporteur injoignable au moment de la commande : ' . $e);
+
+                return $this->renderForm(
+                    [],
+                    $validator->values(),
+                    "Le transporteur ne répond pas pour l'instant. Réessayez dans un moment, "
+                    . 'ou choisissez la livraison à domicile.'
+                );
+            }
+
+            if ($relay === null) {
+                return $this->renderForm(
+                    ['relay_code' => 'Choisissez un autre point relais.'],
+                    $validator->values(),
+                    "Ce point relais n'est plus proposé. Relancez la recherche et choisissez-en un autre."
+                );
+            }
+        }
+
         $shippingCents = Shipping::cents($cart['subtotal_cents'], $fulfilment);
         $totalCents = $cart['subtotal_cents'] + $shippingCents;
         $reference = OrderRepository::generateReference();
@@ -120,6 +172,10 @@ final class CheckoutController
                 'shipping_country'       => $fulfilment === Status::DELIVERY ? 'FR' : null,
 
                 'pickup_point_id' => $pickupPointId,
+                // Le point relais est recopié sur la commande : il appartient au
+                // transporteur, il changera, et la commande doit rester lisible
+                // dans dix ans même si le commerce a fermé.
+                ...($relay?->toOrderColumns() ?? []),
                 // Rattachement au compte s'il y en a un. NULL sinon : commander
                 // sans compte reste possible, et c'est le cas par défaut.
                 'customer_id'     => CustomerAuth::id(),
@@ -259,8 +315,14 @@ final class CheckoutController
                 'shipping_address_line2' => $client['address_line2'],
                 'shipping_postal_code'   => $client['postal_code'],
                 'shipping_city'          => $client['city'],
+                // Le client cherchera presque toujours un point relais près de
+                // chez lui : autant lui épargner la saisie.
+                'relay_search_postal_code' => $client['postal_code'],
+                'relay_search_city'        => $client['city'],
             ], static fn (mixed $valeur): bool => $valeur !== null && $valeur !== '');
         }
+
+        $relais = $this->relaySearch($values);
 
         return View::render('boutique/commande', [
             'title'          => 'Votre commande',
@@ -268,6 +330,9 @@ final class CheckoutController
             'noindex'        => true,
             'cart'           => $cart,
             'points'         => (new PickupPointRepository())->active(),
+            'relayPoints'    => $relais['points'],
+            'relayError'     => $relais['error'],
+            'relayAvailable' => Shipping::relayAvailable(),
             'errors'         => $errors,
             'values'         => $values,
             'message'        => $message,
@@ -277,6 +342,60 @@ final class CheckoutController
             'client'         => $client,
             'shop'           => require dirname(__DIR__, 2) . '/config/shop.php',
         ]);
+    }
+
+    /**
+     * Retrouve un point relais par son code, en relançant la recherche autour
+     * de la même adresse. Le transporteur est la seule source de vérité sur
+     * l'adresse du point : elle n'est jamais reprise du formulaire.
+     *
+     * @throws CarrierException
+     */
+    private function findRelayByCode(string $code, string $postalCode, string $city): ?RelayPoint
+    {
+        foreach (Carriers::get()->relayPointsNear($postalCode, $city) as $point) {
+            if ($point->code === $code) {
+                return $point;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Les points relais à montrer, s'il y a de quoi chercher.
+     *
+     * Un transporteur en panne ne bloque pas la commande : le message explique
+     * la situation et les autres modes de livraison restent ouverts.
+     *
+     * @param array<string, mixed> $values
+     * @return array{points: list<RelayPoint>, error: string|null}
+     */
+    private function relaySearch(array $values): array
+    {
+        $postalCode = trim((string) ($values['relay_search_postal_code'] ?? ''));
+
+        if (!Shipping::relayAvailable() || !preg_match('/^\d{5}$/', $postalCode)) {
+            return ['points' => [], 'error' => null];
+        }
+
+        try {
+            return [
+                'points' => Carriers::get()->relayPointsNear(
+                    $postalCode,
+                    trim((string) ($values['relay_search_city'] ?? ''))
+                ),
+                'error' => null,
+            ];
+        } catch (CarrierException $e) {
+            error_log('Recherche de points relais impossible : ' . $e);
+
+            return [
+                'points' => [],
+                'error'  => 'La liste des points relais est indisponible pour le moment. '
+                    . 'Réessayez dans un moment, ou choisissez un autre mode de livraison.',
+            ];
+        }
     }
 
     private function message(string $heading, string $body): string

@@ -50,7 +50,7 @@ use Bouge\Support\Status;
                     <ul class="commandes">
                         <?php foreach ($commandes as $commande): ?>
                             <?php
-                            $estRetrait = $commande['fulfilment'] === Status::PICKUP;
+                            $mode = Status::fulfilments()[$commande['fulfilment']] ?? 'Livraison';
                             $expediee = in_array($commande['status'], [Status::ORDER_SHIPPED, Status::ORDER_COLLECTED], true);
                             ?>
                             <li>
@@ -65,7 +65,7 @@ use Bouge\Support\Status;
                                     <p class="t-s muted">
                                         <?= e(date('d/m/Y', strtotime((string) $commande['created_at']))) ?>
                                         · <?= (int) $commande['item_count'] ?> article<?= (int) $commande['item_count'] > 1 ? 's' : '' ?>
-                                        · <?= $estRetrait ? 'Retrait sur place' : 'Livraison' ?>
+                                        · <?= e($mode) ?>
                                     </p>
 
                                     <?php if (!empty($commande['tracking_number'])): ?>

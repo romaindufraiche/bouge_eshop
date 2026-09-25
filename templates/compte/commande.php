@@ -9,6 +9,7 @@ use Bouge\Support\Money;
 use Bouge\Support\Status;
 
 $estRetrait = $commande['fulfilment'] === Status::PICKUP;
+$estRelais = $commande['fulfilment'] === Status::RELAY;
 
 // Étapes de l'avancement : la dernière dépend du mode de remise choisi.
 $etapes = [
@@ -117,7 +118,17 @@ $annulee = $commande['status'] === Status::ORDER_CANCELLED;
                 <div class="admin-card" style="margin-top:0">
                     <h2 class="t-m"><?= $estRetrait ? 'Retrait' : 'Livraison' ?></h2>
 
-                    <?php if ($estRetrait): ?>
+                    <?php if ($estRelais): ?>
+                        <p class="t-s">
+                            <strong><?= e((string) $commande['relay_name']) ?></strong><br>
+                            <?= e((string) $commande['relay_address']) ?><br>
+                            <?= e((string) $commande['relay_postal_code']) ?> <?= e((string) $commande['relay_city']) ?>
+                        </p>
+                        <p class="t-xs muted" style="margin-top:1rem">
+                            <?= e((string) $commande['relay_operator']) ?> vous préviendra dès que le colis
+                            sera arrivé. Pensez à une pièce d'identité pour le retirer.
+                        </p>
+                    <?php elseif ($estRetrait): ?>
                         <?php if ($commande['pickup_name'] === null): ?>
                             <p class="t-s muted">Le point de retrait n'est plus renseigné. Écrivez-nous.</p>
                         <?php else: ?>

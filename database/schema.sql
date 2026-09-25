@@ -81,6 +81,10 @@ CREATE TABLE `products` (
   -- Dès qu'il en existe, c'est leur stock qui fait foi.
   `stock`            INT NOT NULL DEFAULT 0,
 
+  -- Poids unitaire en grammes, pour le calcul du port et l'achat de
+  -- l'étiquette. Vide : le poids par défaut de `config/shop.php` s'applique.
+  `weight_grams`     INT UNSIGNED DEFAULT NULL,
+
   -- Mis en avant en haut de la page d'accueil.
   `featured`         TINYINT(1) NOT NULL DEFAULT 0,
 
@@ -232,8 +236,19 @@ CREATE TABLE `orders` (
   `shipping_city`          VARCHAR(120) DEFAULT NULL,
   `shipping_country`       VARCHAR(2) DEFAULT NULL,
 
-  -- Point de retrait, renseigné si fulfilment = 'retrait'
+  -- Point de retrait de la boutique, renseigné si fulfilment = 'retrait'
   `pickup_point_id` INT UNSIGNED DEFAULT NULL,
+
+  -- Point relais du transporteur, renseigné si fulfilment = 'point_relais'.
+  -- Rien à voir avec la table `pickup_points` : ce point appartient au
+  -- transporteur, il change à chaque commande, et son adresse est recopiée
+  -- pour rester lisible même si le commerce a fermé depuis.
+  `relay_code`        VARCHAR(40) DEFAULT NULL,
+  `relay_operator`    VARCHAR(40) DEFAULT NULL,
+  `relay_name`        VARCHAR(160) DEFAULT NULL,
+  `relay_address`     VARCHAR(200) DEFAULT NULL,
+  `relay_postal_code` VARCHAR(10) DEFAULT NULL,
+  `relay_city`        VARCHAR(120) DEFAULT NULL,
 
   `subtotal_cents` INT UNSIGNED NOT NULL,
   `shipping_cents` INT UNSIGNED NOT NULL DEFAULT 0,
@@ -252,6 +267,11 @@ CREATE TABLE `orders` (
   `tracking_carrier` VARCHAR(60) DEFAULT NULL,
   `tracking_number`  VARCHAR(80) DEFAULT NULL,
   `shipped_at`       DATETIME DEFAULT NULL,
+
+  -- Étiquette achetée auprès du transporteur : de quoi la réimprimer sans la
+  -- racheter.
+  `label_url`       VARCHAR(500) DEFAULT NULL,
+  `label_reference` VARCHAR(80) DEFAULT NULL,
 
   -- Note interne, visible uniquement dans l'administration.
   `admin_note`  TEXT DEFAULT NULL,

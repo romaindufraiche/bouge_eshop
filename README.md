@@ -25,6 +25,7 @@ les fichiers, on importe la base, c'est en ligne.
 - [Mettre en ligne chez OVH](#mettre-en-ligne-chez-ovh)
 - [Chez un autre hébergeur](#chez-un-autre-hébergeur)
 - [Aperçu statique sur GitHub Pages](#aperçu-statique-sur-github-pages)
+- [Livraison : qui fait quoi](#livraison--qui-fait-quoi)
 - [Le catalogue de démonstration](#le-catalogue-de-démonstration)
 - [Structure du site](#structure-du-site)
 - [Le compte client](#le-compte-client)
@@ -132,9 +133,11 @@ Sur une base **déjà installée**, les évolutions du schéma sont dans
 mysql -u UTILISATEUR -p NOM_DE_LA_BASE < database/migrations/001-usages.sql
 ```
 
-Chacune porte en tête ce qu'elle fait et si elle vous concerne. La dernière,
-`004-maillots.sql`, renomme la catégorie « Vêtements » en « Maillots » : son
-adresse passe de `/boutique/vetements` à `/boutique/maillots`.
+Chacune porte en tête ce qu'elle fait et si elle vous concerne. Les deux
+dernières : `004-maillots.sql` renomme la catégorie « Vêtements » en
+« Maillots » — son adresse passe de `/boutique/vetements` à
+`/boutique/maillots` ; `005-point-relais.sql` ajoute la livraison en point
+relais et le poids des produits.
 
 `install.php` **recrée les tables** et efface donc tout le contenu existant,
 commandes comprises : il est fait pour une première installation.
@@ -428,6 +431,79 @@ php database/seed.php                          # le catalogue de l'aperçu
 php -S localhost:8000 -t public dev-server.php &
 php bin/apercu.php                             # réécrit docs/
 ```
+
+## Livraison : qui fait quoi
+
+Deux prestataires, deux métiers, qu'il vaut mieux ne pas confondre.
+
+**Stripe encaisse.** Il dit qui a payé, combien, et pour quels articles. Il
+ne sait rien du colis : ni son poids, ni son point d'arrivée, ni l'étiquette.
+
+**Un transporteur achemine.** C'est lui qui fournit la liste des points
+relais, vend l'étiquette prépayée et suit le colis. Sans lui, emballer,
+acheter le Colissimo et le déposer reste entièrement manuel.
+
+La boutique propose trois modes de remise :
+
+| Mode | Ce que ça demande au vendeur |
+| --- | --- |
+| **Retrait au concept store** | Rien : le client vient chercher sa commande. |
+| **Livraison à domicile** | Une étiquette, un colis, un dépôt. |
+| **Livraison en point relais** | La même chose, en moins cher — mais il faut un transporteur branché pour que le client puisse choisir son point. |
+
+### Brancher un transporteur
+
+Tant que `carrier.driver` est vide dans `config/shop.php`, le point relais
+n'est pas proposé au client. C'est volontaire : mieux vaut ne pas offrir une
+option que de l'offrir sans pouvoir tenir la promesse.
+
+Le code parle à une interface, `Bouge\Shipping\Carrier`, qui ne demande que
+deux choses au prestataire : **lister les points relais autour d'un code
+postal**, et **vendre une étiquette**. Changer de prestataire, c'est donc
+écrire une classe et modifier une ligne de configuration — pas retoucher le
+tunnel de commande.
+
+```php
+'carrier' => [
+    'driver' => '',   // '' = aucun, 'demonstration' = points relais inventés
+    'from' => [ /* l'adresse d'expédition, imprimée sur l'étiquette */ ],
+],
+```
+
+### Voir le parcours sans compte transporteur
+
+Pour regarder le tunnel avant d'avoir ouvert un compte quelque part, mettez
+`'driver' => 'demonstration'`. Le site inventera alors des points relais
+plausibles autour du code postal saisi.
+
+**À ne jamais laisser en production** : un client choisirait un commerce qui
+n'existe pas. Le pilote refuse d'ailleurs de fabriquer des étiquettes, et son
+nom le rappelle dans l'administration.
+
+### Le poids des produits
+
+Le transporteur facture au poids. Chaque fiche produit a donc un champ
+**Poids en grammes**, dans le bloc « Prix et stock ». Laissé vide, c'est
+`shipping.default_weight_grams` qui s'applique — une estimation haute vaut
+mieux qu'un colis refusé au dépôt.
+
+Le poids du colis est la somme des articles plus `shipping.packaging_grams`,
+compté une fois.
+
+### Comment le client choisit son point relais, sans JavaScript
+
+Il saisit son code postal et presse **Chercher les points relais**. Le
+formulaire se renvoie à lui-même, le serveur interroge le transporteur, et
+les points reviennent en boutons radio, du plus proche au plus loin.
+
+Un aller-retour de plus qu'une carte interactive, mais qui fonctionne sur
+tous les téléphones, sans dépendance et sans mouchard.
+
+Le code du point est le seul élément repris du formulaire. **L'adresse est
+toujours redemandée au transporteur** avant d'enregistrer la commande : sans
+cela, un client pourrait faire imprimer l'étiquette pour l'adresse de son
+choix. Elle est ensuite recopiée sur la commande, pour rester lisible dans
+dix ans même si le commerce a fermé.
 
 ## Le catalogue de démonstration
 

@@ -5,9 +5,11 @@
  */
 
 use Bouge\Support\Money;
+use Bouge\Support\Shipping;
 
 $flatRate = (int) $shop['shipping']['flat_rate_cents'];
 $freeAbove = $shop['shipping']['free_above_cents'];
+$relayRate = $shop['shipping']['relay_cents'];
 ?>
 <div class="wrap wrap--narrow">
     <article class="section">
@@ -23,9 +25,21 @@ $freeAbove = $shop['shipping']['free_above_cents'];
                 </p>
             </section>
 
+            <?php if (Shipping::relayAvailable()): ?>
+                <section>
+                    <h2 class="t-s" style="color:var(--ink)">Livraison en point relais</h2>
+                    <p style="margin-top:.5rem">
+                        Frais de port : <?= e(Money::format((int) $relayRate)) ?><?php if ($freeAbove !== null): ?>,
+                        offerts au même seuil<?php endif; ?>. Vous choisissez le commerce qui vous
+                        arrange au moment de commander, et le transporteur vous prévient dès que
+                        le colis y est arrivé. Comptez une pièce d'identité pour le retirer.
+                    </p>
+                </section>
+            <?php endif; ?>
+
             <?php if ($points !== []): ?>
                 <section>
-                    <h2 class="t-s" style="color:var(--ink)">Retrait sur place</h2>
+                    <h2 class="t-s" style="color:var(--ink)">Retrait au concept store</h2>
                     <p style="margin-top:.5rem">
                         Sans frais. Vous recevez un courriel dès que la commande est prête.
                     </p>

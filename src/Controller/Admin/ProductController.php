@@ -171,6 +171,11 @@ final class ProductController
             'sale_ends_at'       => $saleEnd ?: null,
             'status'             => $validator->value('status'),
             'stock'              => max(0, (int) $validator->value('stock')),
+            // Vide plutôt que zéro : zéro gramme ferait croire à un poids connu,
+            // alors que c'est le poids par défaut qui doit s'appliquer.
+            'weight_grams'       => ((int) $validator->value('weight_grams')) > 0
+                ? (int) $validator->value('weight_grams')
+                : null,
             'featured'           => isset($_POST['featured']) ? 1 : 0,
             'external_url'       => $externalUrl ?: null,
             'external_label'     => $validator->value('external_label') ?: null,

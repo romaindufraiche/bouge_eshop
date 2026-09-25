@@ -38,12 +38,50 @@ return [
 
     'shipping' => [
         // Frais de port forfaitaires pour la France métropolitaine, en centimes.
+        // Ce sont les tarifs facturés au client, pas ceux que le transporteur
+        // nous facture : la marge — ou la perte — est la différence.
         'flat_rate_cents' => 490,
+        // Le point relais coûte moins cher au transporteur qu'un passage à
+        // domicile : le client doit y voir son intérêt, sinon il ne le choisit
+        // pas. Mettre null pour ne pas proposer le point relais du tout.
+        'relay_cents' => 390,
         // Montant de panier à partir duquel la livraison est offerte.
         // Mettre null pour désactiver le franco de port.
         'free_above_cents' => 6000,
         // Le retrait sur place est toujours gratuit.
         'pickup_cents' => 0,
+        // Poids retenu pour un produit dont la fiche ne dit rien. Le
+        // transporteur facture au poids : mieux vaut une estimation haute
+        // qu'un colis refusé au dépôt.
+        'default_weight_grams' => 300,
+        // Poids de l'emballage, ajouté une fois par colis.
+        'packaging_grams' => 120,
+    ],
+
+    // --- Le transporteur -----------------------------------------------------
+    // Stripe encaisse ; il ne fabrique pas d'étiquette. Pour que l'acheteur
+    // puisse choisir un point relais et que le vendeur n'ait plus qu'à
+    // imprimer, il faut un second prestataire, branché ici.
+    //
+    // Tant que 'driver' est vide, le site fonctionne exactement comme avant :
+    // livraison à domicile au forfait et retrait sur place. L'option « point
+    // relais » n'est pas proposée, plutôt que de l'être sans pouvoir tenir la
+    // promesse.
+    'carrier' => [
+        // '' pour aucun, 'boxtal' une fois le compte ouvert.
+        'driver' => '',
+
+        // Adresse d'expédition, imprimée sur l'étiquette et point de départ
+        // du calcul de tarif. C'est celle de la salle.
+        'from' => [
+            'company'     => 'BOUGE',
+            'address'     => '12 rue de la Piscine',
+            'postal_code' => '92400',
+            'city'        => 'Courbevoie',
+            'country'     => 'FR',
+            'phone'       => '',
+            'email'       => 'contact@bouge.fr',
+        ],
     ],
 
     'cart' => [

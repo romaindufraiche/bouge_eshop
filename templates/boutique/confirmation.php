@@ -8,6 +8,7 @@ use Bouge\Support\Money;
 use Bouge\Support\Status;
 
 $isPickup = $order['fulfilment'] === Status::PICKUP;
+$isRelay = $order['fulfilment'] === Status::RELAY;
 ?>
 <div class="wrap">
     <div class="section">
@@ -16,16 +17,26 @@ $isPickup = $order['fulfilment'] === Status::PICKUP;
 
         <p class="muted" style="margin-top:1rem;max-width:36rem">
             Un récapitulatif part à l'instant sur <?= e($order['email']) ?>.
-            <?= $isPickup
-                ? 'Nous vous prévenons dès que la commande est prête à être retirée.'
-                : 'Votre commande part sous 48 heures ouvrées.' ?>
+            <?php if ($isPickup): ?>
+                Nous vous prévenons dès que la commande est prête à être retirée.
+            <?php elseif ($isRelay): ?>
+                Votre colis part sous 48 heures ouvrées&nbsp;; le transporteur vous
+                prévient dès qu'il est arrivé au point relais.
+            <?php else: ?>
+                Votre commande part sous 48 heures ouvrées.
+            <?php endif; ?>
         </p>
 
         <div class="grid grid--2" style="margin-top:3rem">
             <section>
-                <h2 class="eyebrow"><?= $isPickup ? 'Retrait sur place' : 'Livraison' ?></h2>
+                <h2 class="eyebrow"><?= e(Status::fulfilments()[$order['fulfilment']] ?? 'Livraison') ?></h2>
                 <address class="t-s" style="margin-top:.75rem;font-style:normal">
-                    <?php if ($isPickup): ?>
+                    <?php if ($isRelay): ?>
+                        <strong><?= e((string) $order['relay_name']) ?></strong><br>
+                        <?= e((string) $order['relay_address']) ?><br>
+                        <?= e((string) $order['relay_postal_code']) ?> <?= e((string) $order['relay_city']) ?><br>
+                        <span class="muted">Par <?= e((string) $order['relay_operator']) ?></span>
+                    <?php elseif ($isPickup): ?>
                         <?php if (!empty($order['pickup_name'])): ?>
                             <strong><?= e($order['pickup_name']) ?></strong><br>
                             <?= e($order['pickup_address']) ?><br>
