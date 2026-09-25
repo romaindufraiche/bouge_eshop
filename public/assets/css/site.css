@@ -1328,9 +1328,10 @@ a.admin-stat:hover { border-color: var(--ink); text-decoration: none; }
 
 .btn--sm { padding: 0.35rem 0.9rem; font-size: 0.8125rem; }
 
-/* Confirmation avant suppression ---------------------------------------------------
-   Deux temps sans JavaScript : le bouton rouge n'apparaît qu'après avoir
-   déplié le bloc. Un clic isolé ne peut donc rien supprimer. */
+/* Confirmation en deux temps --------------------------------------------------------
+   Sans JavaScript : le bouton de confirmation n'apparaît qu'après avoir
+   déplié le bloc. Un clic isolé ne peut donc ni supprimer un produit, ni
+   acheter une étiquette — deux gestes que rien ne défait. */
 
 .confirm summary { cursor: pointer; list-style: none; display: inline-block; }
 .confirm summary::-webkit-details-marker { display: none; }
@@ -1342,6 +1343,7 @@ a.admin-stat:hover { border-color: var(--ink); text-decoration: none; }
   background: var(--cream);
 }
 .confirm--inline[open] { display: block; margin-top: 0.5rem; text-align: left; }
+.confirm__body > * + * { margin-top: 0.75rem; }
 
 /* Photos ----------------------------------------------------------------------------- */
 

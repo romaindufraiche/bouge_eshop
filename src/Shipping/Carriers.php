@@ -25,6 +25,7 @@ final class Carriers
         $driver = (string) Config::shop('carrier.driver', '');
 
         self::$instance = match ($driver) {
+            'boxtal' => self::boxtal(),
             // Points relais inventés, pour regarder le tunnel avant d'avoir
             // ouvert un compte. Jamais en production.
             'demonstration' => new DemoCarrier(),
@@ -34,6 +35,33 @@ final class Carriers
         };
 
         return self::$instance;
+    }
+
+    /**
+     * Les identifiants Boxtal vivent dans config/config.php, jamais versionné,
+     * à côté de ceux de Stripe. Sans eux, la boutique se rabat sur l'absence
+     * de transporteur plutôt que d'échouer à chaque page.
+     */
+    private static function boxtal(): Carrier
+    {
+        $utilisateur = (string) Config::get('boxtal.user', '');
+        $motDePasse = (string) Config::get('boxtal.password', '');
+
+        if ($utilisateur === '' || $motDePasse === '') {
+            error_log(
+                'carrier.driver vaut « boxtal » mais boxtal.user ou boxtal.password '
+                . 'manque dans config/config.php : le point relais reste désactivé.'
+            );
+
+            return new NoCarrier();
+        }
+
+        return new BoxtalCarrier(
+            utilisateur: $utilisateur,
+            motDePasse: $motDePasse,
+            test: (bool) Config::get('boxtal.test', true),
+            expediteur: (array) Config::shop('carrier.from', []),
+        );
     }
 
     public static function configured(): bool

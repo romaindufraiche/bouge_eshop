@@ -106,3 +106,4 @@ $router->get('/admin/commandes/{id}', [AdminOrderController::class, 'show']);
 $router->post('/admin/commandes/statut', [AdminOrderController::class, 'updateStatus']);
 $router->post('/admin/commandes/note', [AdminOrderController::class, 'updateNote']);
 $router->post('/admin/commandes/suivi', [AdminOrderController::class, 'updateTracking']);
+$router->post('/admin/commandes/etiquette', [AdminOrderController::class, 'buyLabel']);

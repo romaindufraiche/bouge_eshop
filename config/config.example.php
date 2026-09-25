@@ -35,6 +35,22 @@ return [
         'webhook_secret' => 'whsec_...',
     ],
 
+    // --- Transporteur (Boxtal) ----------------------------------------------
+    // Stripe encaisse ; Boxtal achemine. Identifiants du compte ouvert sur
+    // https://www.boxtal.com — les mêmes que pour se connecter à leur site.
+    //
+    // Ces clés ne servent que si 'carrier.driver' vaut 'boxtal' dans
+    // config/shop.php. Laissées vides, le point relais n'est pas proposé et
+    // les étiquettes restent à acheter à la main.
+    'boxtal' => [
+        'user'     => '',
+        'password' => '',
+        // true tant que vous n'avez pas vérifié le parcours de bout en bout :
+        // en mode test, aucun colis ne part et rien n'est facturé. Les
+        // identifiants de test sont distincts de ceux de production.
+        'test' => true,
+    ],
+
     // --- Courriels ----------------------------------------------------------
     // La boutique n'envoie aucun courriel elle-même : c'est Stripe qui
     // adresse le reçu de paiement au client (à activer dans le tableau de

@@ -137,7 +137,7 @@ Chacune porte en tête ce qu'elle fait et si elle vous concerne. Les deux
 dernières : `004-maillots.sql` renomme la catégorie « Vêtements » en
 « Maillots » — son adresse passe de `/boutique/vetements` à
 `/boutique/maillots` ; `005-point-relais.sql` ajoute la livraison en point
-relais et le poids des produits.
+relais, le poids des produits et celui recopié sur les lignes de commande.
 
 `install.php` **recrée les tables** et efface donc tout le contenu existant,
 commandes comprises : il est fait pour une première installation.
@@ -451,24 +451,68 @@ La boutique propose trois modes de remise :
 | **Livraison à domicile** | Une étiquette, un colis, un dépôt. |
 | **Livraison en point relais** | La même chose, en moins cher — mais il faut un transporteur branché pour que le client puisse choisir son point. |
 
-### Brancher un transporteur
+### Brancher Boxtal
 
-Tant que `carrier.driver` est vide dans `config/shop.php`, le point relais
-n'est pas proposé au client. C'est volontaire : mieux vaut ne pas offrir une
-option que de l'offrir sans pouvoir tenir la promesse.
+Boxtal est un courtier plutôt qu'un transporteur : **un seul compte** donne
+Mondial Relay, Colissimo et Chronopost, à domicile comme en point relais,
+sans abonnement ni engagement de volume. On paie au colis.
 
-Le code parle à une interface, `Bouge\Shipping\Carrier`, qui ne demande que
-deux choses au prestataire : **lister les points relais autour d'un code
-postal**, et **vendre une étiquette**. Changer de prestataire, c'est donc
-écrire une classe et modifier une ligne de configuration — pas retoucher le
-tunnel de commande.
+1. Ouvrez un compte sur [boxtal.com](https://www.boxtal.com), et un compte de
+   test sur `test.boxtal.com` — ils sont distincts, avec des identifiants
+   distincts.
+2. Dans `config/config.php`, renseignez le bloc `boxtal` : `user`, `password`,
+   et `test` à `true`.
+3. Dans `config/shop.php`, mettez `'driver' => 'boxtal'`, et vérifiez
+   l'adresse d'expédition juste en dessous : c'est elle qui sera imprimée sur
+   l'étiquette.
+4. Passez une commande d'essai de bout en bout. Tant que `test` vaut `true`,
+   aucun colis ne part et rien n'est facturé.
+5. Une fois le parcours vérifié, passez `test` à `false` et remplacez les
+   identifiants par ceux du compte de production.
 
 ```php
+// config/shop.php — versionné
 'carrier' => [
-    'driver' => '',   // '' = aucun, 'demonstration' = points relais inventés
+    'driver' => 'boxtal',   // '' = aucun, 'demonstration' = points inventés
     'from' => [ /* l'adresse d'expédition, imprimée sur l'étiquette */ ],
 ],
+
+// config/config.php — jamais versionné, comme les clés Stripe
+'boxtal' => ['user' => '…', 'password' => '…', 'test' => true],
 ```
+
+Si le pilote vaut `boxtal` mais que les identifiants manquent, la boutique
+**ne tombe pas** : elle se rabat sur l'absence de transporteur et le signale
+dans le journal d'erreurs.
+
+### Changer de prestataire
+
+Le code parle à une interface, `Bouge\Shipping\Carrier`, qui ne demande que
+trois choses : **lister les points relais autour d'un code postal**, **donner
+le détail d'un point**, et **vendre une étiquette**. Passer à Sendcloud ou à
+un contrat Mondial Relay direct, c'est écrire une classe à côté de
+`BoxtalCarrier` et ajouter un `case` dans `Carriers` — le tunnel de commande
+et l'administration n'en savent rien.
+
+### Acheter l'étiquette
+
+Sur la fiche commande, dans l'administration, un encadré **Étiquette** :
+
+- **Pas de transporteur branché** → il rappelle que l'achat se fait à la main
+  sur le site du transporteur, et que le numéro de suivi se saisit plus bas.
+- **Commande impayée** → aucun bouton. Rien ne part avant le paiement.
+- **Commande payée** → un bouton qui annonce le poids calculé, puis demande
+  confirmation en deux temps : l'étiquette est facturée dès le clic et rien
+  ne la rembourse.
+
+L'achat enregistre l'étiquette et le numéro de suivi, et passe la commande à
+« Expédiée » — acheter l'étiquette est l'acte qui engage l'envoi, inutile de
+le redire en deux clics. Le lien vers le PDF reste valable : si l'impression
+rate, on réimprime sans racheter.
+
+Une étiquette déjà achetée ne peut pas l'être une seconde fois. En cas
+d'échec — transporteur injoignable, adresse refusée — le message le dit et
+**rien n'est enregistré**.
 
 ### Voir le parcours sans compte transporteur
 

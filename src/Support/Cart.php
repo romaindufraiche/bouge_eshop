@@ -264,6 +264,12 @@ final class Cart
                 'variant_label'    => $variantLabel,
                 'image_url'        => $product['cover']['url'] ?? null,
                 'unit_price_cents' => $price->cents,
+                // Recopié jusqu'à la ligne de commande : le transporteur
+                // facture au poids, et le produit peut disparaître du
+                // catalogue avant que le colis ne parte.
+                'weight_grams'     => $product['weight_grams'] === null
+                    ? null
+                    : (int) $product['weight_grams'],
                 'compare_at_cents' => $price->compareAtCents,
                 'line_total_cents' => $price->cents * $quantity,
                 'available_stock'  => $stock,

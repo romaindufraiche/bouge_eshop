@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Bouge\Repository;
 
+use Bouge\Shipping\ShippingLabel;
 use Bouge\Support\Database;
 use Bouge\Support\Status;
 use PDO;
@@ -39,8 +40,8 @@ final class OrderRepository
             $statement = $pdo->prepare(
                 'INSERT INTO order_items
                    (order_id, product_id, variant_id, product_name, variant_label,
-                    image_url, unit_price_cents, quantity, line_total_cents)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
+                    image_url, unit_price_cents, weight_grams, quantity, line_total_cents)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
             );
 
             foreach ($items as $item) {
@@ -52,6 +53,7 @@ final class OrderRepository
                     $item['variant_label'],
                     $item['image_url'],
                     $item['unit_price_cents'],
+                    $item['weight_grams'],
                     $item['quantity'],
                     $item['line_total_cents'],
                 ]);
@@ -145,6 +147,31 @@ final class OrderRepository
                  shipped_at = CASE WHEN ? IS NULL THEN NULL ELSE COALESCE(shipped_at, NOW()) END
              WHERE id = ?',
             [$carrier, $number, $number, $id]
+        );
+    }
+
+    /**
+     * Enregistre l'étiquette achetée auprès du transporteur, et le suivi qui
+     * vient avec. La commande passe à « Expédiée » : acheter l'étiquette est
+     * l'acte qui engage l'envoi, inutile de le redire en deux clics.
+     */
+    public function attachLabel(int $id, ShippingLabel $label): void
+    {
+        Database::run(
+            'UPDATE orders
+             SET label_url = ?, label_reference = ?,
+                 tracking_carrier = ?, tracking_number = ?,
+                 shipped_at = COALESCE(shipped_at, NOW()),
+                 status = ?
+             WHERE id = ?',
+            [
+                $label->url,
+                $label->reference,
+                mb_substr($label->carrier, 0, 60),
+                mb_substr($label->trackingNumber, 0, 80),
+                Status::ORDER_SHIPPED,
+                $id,
+            ]
         );
     }
 

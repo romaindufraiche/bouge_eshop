@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace Bouge\Controller\Admin;
 
 use Bouge\Repository\OrderRepository;
+use Bouge\Shipping\CarrierException;
+use Bouge\Shipping\Carriers;
+use Bouge\Support\Shipping;
 use Bouge\Support\Auth;
 use Bouge\Support\Session;
 use Bouge\Support\Status;
@@ -55,6 +58,11 @@ final class OrderController
             // La liste dépend du mode de remise : proposer « Expédiée » sur un
             // retrait en magasin n'aurait pas de sens.
             'statuses' => Status::orderStatusesFor((string) $order['fulfilment']),
+            // De quoi décider s'il faut montrer le bouton d'achat d'étiquette,
+            // et annoncer le poids avant de cliquer.
+            'carrierReady' => Carriers::configured(),
+            'carrierName'  => Carriers::get()->name(),
+            'parcelWeight' => Shipping::parcelWeightGrams($order['items']),
         ], 'layout/admin');
     }
 
@@ -120,6 +128,60 @@ final class OrderController
         Session::flash('admin', $number === ''
             ? 'Suivi retiré.'
             : 'Suivi enregistré : le client le voit sur sa commande.');
+        redirect('/admin/commandes/' . $id);
+
+        return '';
+    }
+
+    /**
+     * Achète l'étiquette auprès du transporteur.
+     *
+     * C'est le seul geste que le vendeur ne peut pas faire depuis le site
+     * autrement : le reste — emballer, coller, déposer — se passe sur une
+     * table. On enregistre l'étiquette et le suivi, et la commande passe à
+     * « Expédiée ».
+     */
+    public function buyLabel(): string
+    {
+        Auth::require();
+        Auth::requireToken();
+
+        $repository = new OrderRepository();
+        $id = (int) ($_POST['id'] ?? 0);
+        $order = $repository->find($id);
+
+        if ($order === null) {
+            redirect('/admin/commandes');
+        }
+
+        // Une commande impayée ne part pas, et une étiquette déjà achetée est
+        // déjà payée : la racheter coûterait une seconde fois.
+        if ($order['paid_at'] === null) {
+            Session::flash('admin', "Cette commande n'est pas payée : aucune étiquette ne peut être achetée.");
+            redirect('/admin/commandes/' . $id);
+        }
+
+        if (!empty($order['label_url'])) {
+            Session::flash('admin', 'Une étiquette a déjà été achetée pour cette commande.');
+            redirect('/admin/commandes/' . $id);
+        }
+
+        if (!in_array((string) $order['fulfilment'], Status::shippedFulfilments(), true)) {
+            Session::flash('admin', "Cette commande est à retirer sur place : elle n'a pas d'étiquette.");
+            redirect('/admin/commandes/' . $id);
+        }
+
+        try {
+            $label = Carriers::get()->buyLabel($order, Shipping::parcelWeightGrams($order['items']));
+        } catch (CarrierException $e) {
+            error_log("Achat d'étiquette impossible pour la commande {$order['reference']} : " . $e);
+            Session::flash('admin', "L'étiquette n'a pas pu être achetée. " . $e->getMessage());
+            redirect('/admin/commandes/' . $id);
+        }
+
+        $repository->attachLabel($id, $label);
+
+        Session::flash('admin', 'Étiquette achetée. Imprimez-la, collez-la sur le colis, et déposez-le.');
         redirect('/admin/commandes/' . $id);
 
         return '';

@@ -191,6 +191,7 @@ final class CheckoutController
                     'variant_label'    => $line['variant_label'],
                     'image_url'        => $line['image_url'],
                     'unit_price_cents' => $line['unit_price_cents'],
+                    'weight_grams'     => $line['weight_grams'],
                     'quantity'         => $line['quantity'],
                     'line_total_cents' => $line['line_total_cents'],
                 ],
@@ -353,9 +354,21 @@ final class CheckoutController
      */
     private function findRelayByCode(string $code, string $postalCode, string $city): ?RelayPoint
     {
-        foreach (Carriers::get()->relayPointsNear($postalCode, $city) as $point) {
-            if ($point->code === $code) {
-                return $point;
+        $carrier = Carriers::get();
+
+        // Le détail d'un point donné, quand le transporteur sait le fournir :
+        // c'est l'adresse la plus sûre, et un appel plutôt qu'une liste.
+        $point = $carrier->relayPoint($code);
+
+        if ($point !== null) {
+            return $point;
+        }
+
+        // Sinon on relance la recherche et on retrouve le point dedans : cela
+        // vérifie au passage qu'il était bien dans la liste proposée.
+        foreach ($carrier->relayPointsNear($postalCode, $city) as $candidat) {
+            if ($candidat->code === $code) {
+                return $candidat;
             }
         }
 

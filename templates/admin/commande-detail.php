@@ -135,11 +135,69 @@ $isRelay = $order['fulfilment'] === Status::RELAY;
         </div>
 
         <?php if (!$isPickup): ?>
+            <?php /* L'étiquette d'abord, le suivi manuel ensuite : quand le
+                     transporteur est branché, le second n'est qu'un
+                     rattrapage. */ ?>
+            <div class="admin-card">
+                <h2 class="t-m">Étiquette</h2>
+
+                <?php if (!empty($order['label_url'])): ?>
+                    <p class="t-s">
+                        <a class="btn btn--accent" href="<?= e((string) $order['label_url']) ?>"
+                           target="_blank" rel="noopener">
+                            Imprimer l'étiquette
+                            <span class="sr-only">(nouvel onglet)</span>
+                        </a>
+                    </p>
+                    <p class="t-xs muted" style="margin-top:1rem">
+                        Envoi n° <code><?= e((string) $order['label_reference']) ?></code><br>
+                        Imprimez, collez sur le colis, déposez. Le lien reste valable&nbsp;:
+                        inutile de racheter une étiquette si l'impression rate.
+                    </p>
+                <?php elseif (!$carrierReady): ?>
+                    <p class="t-s muted">
+                        Aucun transporteur n'est branché. L'étiquette s'achète pour l'instant
+                        sur le site du transporteur, en recopiant l'adresse ci-contre, et le
+                        numéro de suivi se saisit plus bas.
+                    </p>
+                <?php elseif ($order['paid_at'] === null): ?>
+                    <p class="t-s muted">
+                        Cette commande n'est pas encore payée&nbsp;: rien ne part tant que le
+                        paiement n'est pas confirmé.
+                    </p>
+                <?php else: ?>
+                    <p class="field-help">
+                        Achète l'étiquette chez <?= e($carrierName) ?> pour un colis de
+                        <strong><?= e(number_format($parcelWeight / 1000, 2, ',', ' ')) ?> kg</strong>,
+                        emballage compris, et passe la commande à «&nbsp;Expédiée&nbsp;».
+                        <?php /* Une confirmation en deux temps : l'étiquette est
+                                 facturée dès le clic, et rien ne la rembourse. */ ?>
+                    </p>
+
+                    <details class="confirm">
+                        <summary class="btn btn--accent">Acheter l'étiquette</summary>
+                        <div class="confirm__body">
+                            <p class="t-s">
+                                L'étiquette est facturée par le transporteur dès maintenant.
+                                Vérifiez le poids sur les fiches produit s'il vous semble faux.
+                            </p>
+                            <form method="post" action="/admin/commandes/etiquette">
+                                <?= Csrf::field() ?>
+                                <input type="hidden" name="id" value="<?= (int) $order['id'] ?>">
+                                <button class="btn btn--accent" type="submit">Confirmer l'achat</button>
+                            </form>
+                        </div>
+                    </details>
+                <?php endif; ?>
+            </div>
+
             <div class="admin-card">
                 <h2 class="t-m">Suivi du colis</h2>
                 <p class="field-help">
                     Renseigné, le client le voit sur sa commande, dans son
                     espace. La date d'expédition est posée automatiquement.
+                    L'achat d'une étiquette le remplit tout seul&nbsp;; ces champs
+                    servent à le corriger, ou à saisir un envoi fait à la main.
                 </p>
 
                 <form method="post" action="/admin/commandes/suivi" class="stack">

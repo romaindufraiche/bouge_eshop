@@ -73,6 +73,23 @@ final class DemoCarrier implements Carrier
         return $points;
     }
 
+    public function relayPoint(string $code): ?RelayPoint
+    {
+        // Le code porte le code postal : de quoi reconstruire la même liste et
+        // y retrouver le point, sans rien stocker.
+        if (!preg_match('/^DEMO-(\d{5})-\d+$/', $code, $trouve)) {
+            return null;
+        }
+
+        foreach ($this->relayPointsNear($trouve[1], '') as $point) {
+            if ($point->code === $code) {
+                return $point;
+            }
+        }
+
+        return null;
+    }
+
     public function buyLabel(array $order, int $weightGrams): ShippingLabel
     {
         throw new CarrierException(

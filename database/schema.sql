@@ -312,6 +312,9 @@ CREATE TABLE `order_items` (
   `image_url`     VARCHAR(500) DEFAULT NULL,
 
   `unit_price_cents` INT UNSIGNED NOT NULL,
+  -- Poids recopié à l'achat, comme le libellé et le prix : la commande doit
+  -- rester expédiable même si le produit quitte le catalogue.
+  `weight_grams`     INT UNSIGNED DEFAULT NULL,
   `quantity`         INT UNSIGNED NOT NULL,
   `line_total_cents` INT UNSIGNED NOT NULL,
 

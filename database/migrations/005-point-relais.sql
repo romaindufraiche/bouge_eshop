@@ -35,3 +35,8 @@ ALTER TABLE `products`
   -- Poids unitaire en grammes. Le transporteur facture au poids ; sans cette
   -- valeur, le poids par défaut de `config/shop.php` s'applique.
   ADD COLUMN `weight_grams` INT UNSIGNED DEFAULT NULL AFTER `stock`;
+
+ALTER TABLE `order_items`
+  -- Poids recopié au moment de l'achat, comme le libellé et le prix : la
+  -- commande doit rester expédiable même si le produit quitte le catalogue.
+  ADD COLUMN `weight_grams` INT UNSIGNED DEFAULT NULL AFTER `unit_price_cents`;

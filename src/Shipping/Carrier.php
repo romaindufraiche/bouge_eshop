@@ -30,6 +30,17 @@ interface Carrier
     public function relayPointsNear(string $postalCode, string $city, int $limit = 8): array;
 
     /**
+     * Le détail d'un point relais, par son code.
+     *
+     * Séparé de la liste parce que les deux appels n'ont pas le même coût :
+     * la liste doit être rapide, le détail n'est demandé que pour le point
+     * réellement choisi. Null si le code ne correspond à rien.
+     *
+     * @throws CarrierException si le transporteur ne répond pas.
+     */
+    public function relayPoint(string $code): ?RelayPoint;
+
+    /**
      * Achète une étiquette et renvoie de quoi l'imprimer.
      *
      * @param array<string, mixed> $order      La commande, telle qu'en base.

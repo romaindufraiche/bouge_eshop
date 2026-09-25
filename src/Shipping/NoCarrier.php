@@ -24,6 +24,11 @@ final class NoCarrier implements Carrier
         return [];
     }
 
+    public function relayPoint(string $code): ?RelayPoint
+    {
+        return null;
+    }
+
     public function buyLabel(array $order, int $weightGrams): ShippingLabel
     {
         throw new CarrierException(
