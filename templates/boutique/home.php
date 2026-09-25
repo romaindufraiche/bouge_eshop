@@ -18,7 +18,7 @@ $categoryImages = [
     'bonnets'     => '/assets/images/demo/bonnets.svg',
     'lunettes'    => '/assets/images/demo/lunettes.svg',
     'accessoires' => '/assets/images/demo/accessoires.svg',
-    'vetements'   => '/assets/images/demo/vetements.svg',
+    'maillots'    => '/assets/images/demo/maillots.svg',
     // Le livre a sa vraie couverture ; le reste attend les photos de la marque.
     'livre'       => '/assets/images/livre/couverture.jpg',
 ];
@@ -40,8 +40,9 @@ $freeAbove = $shop['shipping']['free_above_cents'];
                          registre sont proposées dans le README. */ ?>
                 <h1 class="t-xxl" style="margin-top:.75rem">Nagez.<br>Le matériel suivra.</h1>
                 <p class="t-m muted" style="margin-top:1.5rem;max-width:30rem">
-                    Bonnets, lunettes, accessoires et textile. Choisis pour tenir la
-                    distance, pas pour faire joli au fond du sac.
+                    Performance, style, confort : bonnets, lunettes, accessoires et
+                    maillots, du premier bassin à la ligne d'arrivée. Rien ici
+                    qu'on n'utiliserait pas soi-même.
                 </p>
                 <div class="row" style="margin-top:2rem">
                     <a class="btn btn--accent btn--lg" href="/boutique">Voir le catalogue</a>
@@ -160,7 +161,7 @@ $freeAbove = $shop['shipping']['free_above_cents'];
             <li>
                 <h3 class="t-s">Livraison en France</h3>
                 <p class="muted" style="margin-top:.25rem">
-                    <?= e(Money::format($flatRate)) ?><?php if ($freeAbove !== null): ?>, offerte dès <?= e(Money::format((int) $freeAbove)) ?><?php endif; ?>.
+                    Expédition sous 48 h ouvrées<?php if ($freeAbove !== null): ?>, offerte dès <?= e(Money::format((int) $freeAbove)) ?><?php endif; ?>.
                 </p>
             </li>
             <li>

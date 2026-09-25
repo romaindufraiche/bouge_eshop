@@ -36,7 +36,7 @@ if ($shortcut !== null) {
     $intro = Usage::descriptions()[$usage] ?? null;
 } else {
     $heading = 'Tout le matériel';
-    $intro = 'Bonnets, lunettes, accessoires et textile, choisis pour tenir la distance.';
+    $intro = 'Bonnets, lunettes, accessoires et maillots : performance, style ou confort, il y a de tout.';
 }
 
 $categorieActive = $category['slug'] ?? '';

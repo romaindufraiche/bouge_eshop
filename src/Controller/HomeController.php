@@ -28,7 +28,7 @@ final class HomeController
 
         return View::render('boutique/home', [
             'title'       => null,
-            'description' => 'Bonnets, lunettes, accessoires et vêtements de natation. '
+            'description' => 'Bonnets, lunettes, accessoires et maillots de natation. '
                 . 'Livraison en France ou retrait sur place.',
             'canonical'   => '/',
             'categories'  => (new CategoryRepository())->all(),

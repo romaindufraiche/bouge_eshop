@@ -147,9 +147,9 @@ $catalogue = [
         ],
     ],
     [
-        'name' => 'Vêtements',
-        'description' => 'Maillots et textile résistants au chlore.',
-        'image' => '/assets/images/demo/vetements.svg',
+        'name' => 'Maillots',
+        'description' => 'Maillots et jammers résistants au chlore.',
+        'image' => '/assets/images/demo/maillots.svg',
         'products' => [
             [
                 'name' => "Maillot d'entraînement femme",

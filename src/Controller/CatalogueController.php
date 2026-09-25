@@ -31,7 +31,7 @@ final class CatalogueController
         return $this->afficher(
             titre: 'Tout le matériel de natation',
             description: "L'ensemble du catalogue BOUGE Club : bonnets, lunettes, accessoires "
-                . 'et vêtements de natation. Livraison en France ou retrait sur place.',
+                . 'et maillots de natation. Livraison en France ou retrait sur place.',
             canonical: '/boutique',
             filtres: $filtres,
         );

@@ -2,10 +2,11 @@
 /**
  * Rappel du concept store BOUGE.
  *
- * Le site vend en ligne, mais la marque est d'abord un lieu : salle de sport
- * et boutique. Ce bloc le dit, sans faire semblant d'être un article du
- * catalogue. Il disparaît si la configuration ne nomme aucun magasin, et le
- * bouton n'apparaît que si une adresse web est renseignée.
+ * BOUGE est une salle de sport ; ce site n'en est que le rayon matériel,
+ * ouvert à toute heure. Ce bloc le rappelle et invite à passer sur place,
+ * sans faire semblant d'être un article du catalogue. Il disparaît si la
+ * configuration ne nomme aucun lieu, et le bouton n'apparaît que si une
+ * adresse web est renseignée.
  *
  * @var array<string, mixed> $shop
  */
@@ -20,9 +21,10 @@ if (($store['name'] ?? '') === '') {
     <div class="wrap">
         <div class="concept-store__grille">
             <div>
-                <p class="eyebrow">Avant d'être une boutique</p>
+                <p class="eyebrow">Venez nous voir</p>
                 <h2 class="t-l" style="margin-top:.75rem">
-                    <?= e($store['name']) ?>, c'est d'abord un lieu
+                    <?= e($store['name']) ?> est une salle de sport.<br>
+                    La boutique, c'est ici.
                 </h2>
 
                 <?php if (!empty($store['pitch'])): ?>
@@ -47,7 +49,7 @@ if (($store['name'] ?? '') === '') {
                         </a>
                     <?php endif; ?>
                     <a class="btn btn--ghost" href="/boutique/selection/en-magasin">
-                        Ce qu'on y trouve
+                        Ce qu'on y trouve aussi en rayon
                     </a>
                 </div>
             </div>

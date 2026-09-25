@@ -59,13 +59,13 @@ $sources = [
         'limite'    => 6,
     ],
     [
-        'categorie' => 'vetements',
+        'categorie' => 'maillots',
         'url'       => 'https://www.arenasport.com/fr_fr/homme/maillots-de-bain/jammers.html',
         'usages'    => [Usage::TRAINING, Usage::COMPETITION],
         'limite'    => 8,
     ],
     [
-        'categorie' => 'vetements',
+        'categorie' => 'maillots',
         'url'       => 'https://www.arenasport.com/fr_fr/femme/maillots-de-bain/maillots-une-piece.html',
         'usages'    => [Usage::TRAINING, Usage::LEISURE],
         'limite'    => 8,

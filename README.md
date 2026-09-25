@@ -132,6 +132,10 @@ Sur une base **déjà installée**, les évolutions du schéma sont dans
 mysql -u UTILISATEUR -p NOM_DE_LA_BASE < database/migrations/001-usages.sql
 ```
 
+Chacune porte en tête ce qu'elle fait et si elle vous concerne. La dernière,
+`004-maillots.sql`, renomme la catégorie « Vêtements » en « Maillots » : son
+adresse passe de `/boutique/vetements` à `/boutique/maillots`.
+
 `install.php` **recrée les tables** et efface donc tout le contenu existant,
 commandes comprises : il est fait pour une première installation.
 

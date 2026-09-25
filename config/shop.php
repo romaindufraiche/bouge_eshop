@@ -22,14 +22,15 @@ return [
     // Laisser vide pour masquer la ligne dans le pied de page.
     'phone'    => '',
 
-    // --- Le concept store --------------------------------------------------
-    // La salle et la boutique physique, dont ce site est le prolongement en
-    // ligne. Le bloc de rappel disparaît si 'name' est vide ; le bouton n'est
-    // affiché que si 'url' est renseignée — un lien mort vaut moins que pas
-    // de lien du tout.
+    // --- La salle ----------------------------------------------------------
+    // BOUGE est d'abord un lieu : une salle de sport doublée d'un concept
+    // store. Ce site en est le rayon matériel, ouvert à toute heure — pas
+    // l'inverse. Le bloc de rappel disparaît si 'name' est vide ; le bouton
+    // n'est affiché que si 'url' est renseignée — un lien mort vaut moins que
+    // pas de lien du tout.
     'store' => [
         'name'    => 'BOUGE',
-        'pitch'   => "Salle de sport et concept store : on y pousse de la fonte, on y nage, on y boit un café, et on y repart avec son matériel.",
+        'pitch'   => "On y pousse de la fonte, on y nage, on y boit un café, et on y croise du monde. Ce site en est le rayon matériel, ouvert quand la salle ne l'est pas — le reste se vit sur place. Poussez la porte, on vous fera visiter.",
         'url'     => '',
         'address' => '12 rue de la Piscine, 92400 Courbevoie',
         'hours'   => 'Du mardi au samedi, 10h – 19h',
