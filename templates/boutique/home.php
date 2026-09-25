@@ -170,7 +170,7 @@ $freeAbove = $shop['shipping']['free_above_cents'];
             <li>
                 <h3 class="t-s">Paiement sécurisé</h3>
                 <p class="muted" style="margin-top:.25rem">
-                    Carte bancaire via Stripe. Aucune donnée de paiement ne passe par nos serveurs.
+                    Carte bancaire. Aucune donnée de paiement ne passe par nos serveurs.
                 </p>
             </li>
         </ul>

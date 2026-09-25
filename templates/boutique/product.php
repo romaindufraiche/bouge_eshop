@@ -220,7 +220,7 @@ if (!$external) {
                         </li>
                         <li>
                             <span aria-hidden="true">→</span>
-                            <span><strong>Paiement sécurisé</strong> par Stripe. Aucune donnée bancaire ne passe par nos serveurs.</span>
+                            <span><strong>Paiement sécurisé</strong>. Aucune donnée bancaire ne passe par nos serveurs.</span>
                         </li>
                     <?php else: ?>
                         <li>

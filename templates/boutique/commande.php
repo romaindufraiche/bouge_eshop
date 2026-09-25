@@ -199,7 +199,7 @@ $deliveryCost = Shipping::cents($cart['subtotal_cents'], Status::DELIVERY);
                         'subtotalCents' => $cart['subtotal_cents'],
                         'shippingCents' => $shippingCents,
                         'actions'       => '<button type="submit" class="btn btn--accent btn--lg btn--block">Payer par carte</button>'
-                            . '<p class="t-xs muted" style="margin-top:.75rem">Vous allez être redirigé vers Stripe pour le paiement. '
+                            . '<p class="t-xs muted" style="margin-top:.75rem">Vous allez être redirigé vers une page de paiement sécurisée. '
                             . 'Vos coordonnées bancaires ne transitent pas par nos serveurs.</p>'
                             . '<p class="t-xs muted" style="margin-top:.5rem">En retrait sur place, les frais de port sont retirés '
                             . 'du total au moment du paiement.</p>',

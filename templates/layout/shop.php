@@ -69,7 +69,7 @@ $flash = Session::takeFlash('shop');
             <li>Livraison <?= e(Money::format((int) $shop['shipping']['flat_rate_cents'])) ?> en France<?php
                 if ($shop['shipping']['free_above_cents'] !== null): ?>, offerte dès <?= e(Money::format((int) $shop['shipping']['free_above_cents'])) ?><?php endif; ?></li>
             <li>Retrait sans frais au concept store</li>
-            <li>Paiement sécurisé par Stripe</li>
+            <li>Paiement sécurisé</li>
         </ul>
     </div>
 </div>
