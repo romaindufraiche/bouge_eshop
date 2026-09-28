@@ -46,14 +46,26 @@ if ($tables === 0) {
 
     echo "✓ Schéma posé\n";
 
-    // Le catalogue de démonstration versionné : cinq catégories, quatorze
-    // produits, leurs visuels provisoires. Pas celui d'arena, dont les photos
-    // ne nous appartiennent pas et ne sont donc pas dans le dépôt.
+    // Le catalogue de base : cinq rayons, quatorze produits, leurs visuels
+    // provisoires.
     passthru(sprintf('%s %s/database/seed.php', escapeshellarg(PHP_BINARY), escapeshellarg($racine)), $code);
 
     if ($code !== 0) {
         fwrite(STDERR, "Le catalogue de démonstration n'a pas pu être chargé.\n");
         exit(1);
+    }
+
+    // Puis le catalogue arena, rejoué depuis le fichier versionné — jamais
+    // rescrapé : leurs serveurs n'ont pas à être sollicités à chaque réveil du
+    // conteneur. Ces produits portent `demo_source = 'arena'`, ce qui les
+    // signale dans l'administration et empêche la publication de l'aperçu
+    // public tant qu'ils sont là.
+    passthru(sprintf('%s %s/database/importer-demo.php', escapeshellarg(PHP_BINARY), escapeshellarg($racine)), $code);
+
+    if ($code !== 0) {
+        // Une démonstration sans les visuels arena vaut mieux qu'une
+        // démonstration qui ne démarre pas.
+        fwrite(STDERR, "Le catalogue arena n'a pas pu être importé ; la boutique démarre sans lui.\n");
     }
 } else {
     echo "✓ Base déjà installée, rien à refaire\n";

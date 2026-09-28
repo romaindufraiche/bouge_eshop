@@ -579,9 +579,16 @@ l'administration est sur `/admin/connexion`.
 
 ### Ce que la démonstration montre
 
-Le catalogue versionné : cinq catégories, quatorze produits, leurs visuels
-provisoires. **Pas celui d'arena** — ces photos ne nous appartiennent pas et ne
-sont pas dans le dépôt.
+Soixante-huit produits : les quatorze du catalogue de base, plus les
+cinquante-quatre du catalogue arena avec leurs photos.
+
+Ces photos appartiennent à arena. Elles sont versionnées **pour la
+démonstration seulement** : les produits qu'elles illustrent portent
+`demo_source = 'arena'`, l'administration les marque d'une pastille « Démo »,
+et `bin/apercu.php` refuse de publier l'aperçu public tant qu'il en reste en
+base. Elles n'ont rien à faire dans une boutique ouverte — voir
+[Le catalogue de démonstration](#le-catalogue-de-démonstration) pour les
+retirer.
 
 Les points relais sont activés en mode démonstration
 (`BOUGE_CARRIER_DRIVER=demonstration`) : le tunnel de commande se déroule en
@@ -605,10 +612,22 @@ Render chiffre.
 | `STRIPE_*`, `BOXTAL_*` | Les clés, si vous voulez dérouler un paiement ou un achat d'étiquette. |
 | `BOUGE_DB_*` | Pour pointer vers une vraie base MySQL au lieu de celle du conteneur. |
 
-Au démarrage, `docker/preparer.php` pose le schéma et le catalogue si les
-tables manquent, puis **supprime tout compte d'administration autre que celui
-de l'environnement** : `seed.php` en crée un dont le mot de passe est écrit en
-clair dans ce dépôt, et une adresse publique n'en veut pas.
+Au démarrage, `docker/preparer.php` pose le schéma et les deux catalogues si
+les tables manquent, puis **supprime tout compte d'administration autre que
+celui de l'environnement** : `seed.php` en crée un dont le mot de passe est
+écrit en clair dans ce dépôt, et une adresse publique n'en veut pas.
+
+Le catalogue arena est rejoué depuis `database/demo-arena.json`, figé une fois
+pour toutes par `database/exporter-demo.php`. **Le conteneur ne contacte jamais
+arena** : leurs serveurs n'ont pas à être sollicités à chaque réveil, et le
+démarrage prend une seconde au lieu d'une minute.
+
+| Script | Quand s'en servir |
+| --- | --- |
+| `database/seed-demo.php` | Constituer le catalogue en allant le chercher sur le site d'arena. Une fois, à la main. |
+| `database/exporter-demo.php` | Figer ce catalogue dans `database/demo-arena.json`. Après le précédent. |
+| `database/importer-demo.php` | Rejouer le fichier figé, hors ligne. C'est ce que fait le conteneur. |
+| `database/importer-demo.php --purger` | Tout retirer, avant d'ouvrir la boutique. |
 
 ## Le catalogue de démonstration
 

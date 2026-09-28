@@ -6,6 +6,17 @@
 !/public/uploads/.gitkeep
 !/public/uploads/.htaccess
 
+# Exception : les visuels du catalogue de démonstration, versionnés pour que
+# la démonstration en ligne se reconstruise sans aller les rechercher sur le
+# site d'arena à chaque déploiement.
+#
+# Ces photos appartiennent à arena. Elles n'ont leur place que dans une
+# démonstration, jamais dans une boutique ouverte : les produits qu'elles
+# illustrent portent `demo_source = 'arena'`, l'administration les marque
+# d'une pastille « Démo », et `bin/apercu.php` refuse de publier l'aperçu
+# public tant qu'il en reste en base.
+!/public/uploads/demo/
+
 # Documentation des bibliothèques tierces : inutile au fonctionnement du site,
 # et le README de Stripe contient un exemple de clé de test qui déclenche
 # l'analyse de secrets de GitHub.
