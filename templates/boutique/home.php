@@ -84,10 +84,14 @@ $freeAbove = $shop['shipping']['free_above_cents'];
                                             <?= $copie ? 'aria-hidden="true"' : '' ?>>
                                             <a href="/produit/<?= e($article['slug']) ?>"
                                                <?= $copie ? 'tabindex="-1"' : '' ?>>
+                                                <?php /* Rien que la photo : un nom sous
+                                                         chaque vignette hacherait la bande,
+                                                         et le produit se lit mieux à l'image.
+                                                         Le texte de remplacement porte le nom
+                                                         pour qui ne voit pas l'image. */ ?>
                                                 <img src="<?= e($article['cover']['url']) ?>"
-                                                     alt="<?= $copie ? '' : e($article['cover']['alt']) ?>"
+                                                     alt="<?= $copie ? '' : e($article['name']) ?>"
                                                      loading="lazy" width="400" height="400">
-                                                <span><?= e($article['name']) ?></span>
                                             </a>
                                         </li>
                                     <?php endforeach; ?>

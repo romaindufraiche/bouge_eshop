@@ -67,6 +67,29 @@ if ($tables === 0) {
         // démonstration qui ne démarre pas.
         fwrite(STDERR, "Le catalogue arena n'a pas pu être importé ; la boutique démarre sans lui.\n");
     }
+
+    // `seed.php` illustre ses produits par des formes abstraites, faute de
+    // mieux au moment où il a été écrit. À côté de cinquante-quatre vraies
+    // photos, ces aplats géométriques ne passent plus pour des produits : ils
+    // font tache. On les retire.
+    //
+    // Le livre garde sa place : sa couverture est une vraie image, et c'est
+    // lui qui occupe la sélection du moment sur l'accueil.
+    $retires = Database::run(
+        "DELETE FROM products
+          WHERE id IN (
+              SELECT product_id FROM (
+                  SELECT DISTINCT product_id FROM product_images
+                   WHERE url LIKE '/assets/images/demo/%'
+              ) AS sans_photo
+          )"
+    )->rowCount();
+
+    if ($retires > 0) {
+        // Les visuels et les déclinaisons suivent : la clé étrangère est en
+        // suppression en cascade.
+        echo "✓ {$retires} produits sans photo retirés\n";
+    }
 } else {
     echo "✓ Base déjà installée, rien à refaire\n";
 }

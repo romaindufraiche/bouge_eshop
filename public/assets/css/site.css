@@ -1478,20 +1478,6 @@ form:has(#mode-relais:checked) .champs-retrait { display: none; }
   mix-blend-mode: multiply;
 }
 
-.vitrine__article span {
-  display: block;
-  margin-top: 0.25rem;
-  font-size: 0.7rem;
-  line-height: 1.3;
-  color: var(--ink-soft);
-  /* Deux lignes au plus : un nom de produit long ne doit pas déformer la
-     hauteur des articles, dont dépend le calage de la boucle. */
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
 /* Un mouvement perpétuel gêne, voire rend malade. Respecté sans discussion :
    la vitrine devient une colonne qu'on fait défiler soi-même. */
 @media (prefers-reduced-motion: reduce) {
