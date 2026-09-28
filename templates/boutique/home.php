@@ -5,6 +5,7 @@
  * @var array<string, mixed>            $shop
  * @var array<int, array<string,mixed>> $categories
  * @var array<int, array<string,mixed>> $products
+ * @var array<int, array<string,mixed>> $vitrine
  * @var array<string, mixed>|null       $highlighted
  */
 
@@ -13,14 +14,18 @@ use Bouge\Support\Usage;
 use Bouge\Support\Pricing;
 use Bouge\Support\View;
 
-// Visuels de catégorie provisoires, en attente des photos de la marque.
+// Visuels de catégorie : la mascotte de la marque plutôt que des pictogrammes
+// génériques. La charte n'en fournit que trois — haltères, course, serviette —
+// donc la quatrième vignette reprend la grenouille à la serviette, retournée
+// et sur un autre fond : la répétition se lit alors comme un rythme, pas comme
+// un oubli. Une quatrième illustration de la charte réglerait cela.
 $categoryImages = [
-    'bonnets'     => '/assets/images/demo/bonnets.svg',
-    'lunettes'    => '/assets/images/demo/lunettes.svg',
-    'accessoires' => '/assets/images/demo/accessoires.svg',
-    'maillots'    => '/assets/images/demo/maillots.svg',
-    // Le livre a sa vraie couverture ; le reste attend les photos de la marque.
-    'livre'       => '/assets/images/livre/couverture.jpg',
+    'bonnets'     => ['/assets/brand/mascotte-course.png', 'sky'],
+    'lunettes'    => ['/assets/brand/mascotte-03.png', 'jade'],
+    'accessoires' => ['/assets/brand/mascotte-02.png', 'sable'],
+    'maillots'    => ['/assets/brand/mascotte-course.png', 'accent'],
+    // Le livre garde sa vraie couverture : il n'a pas besoin d'illustration.
+    'livre'       => ['/assets/images/livre/couverture.jpg', 'couverture'],
 ];
 
 $flatRate = (int) $shop['shipping']['flat_rate_cents'];
@@ -50,13 +55,56 @@ $freeAbove = $shop['shipping']['free_above_cents'];
                 </div>
             </div>
 
-            <?php /* La mascotte de la marque : la grenouille, toujours en
-                     mouvement, jamais pressée (charte, page 27). */ ?>
-            <div style="display:grid;place-items:center;aspect-ratio:1;border-radius:var(--radius-surface);background:var(--sand)">
-                <img src="<?= e(asset('/assets/brand/mascotte-course.png')) ?>"
-                     alt="La mascotte de BOUGE, une grenouille en mouvement, serviette sur l'épaule"
-                     width="720" height="720" style="width:80%;height:auto">
-            </div>
+            <?php /* Le catalogue qui passe, plutôt qu'une image fixe : ce que
+                     vend la boutique se voit dès la première seconde. Deux
+                     colonnes qui glissent en sens inverse, sans JavaScript —
+                     une animation CSS et un ruban dupliqué pour boucler.
+
+                     Le survol met la bande en pause : sans cela, on ne
+                     pourrait pas cliquer sur ce qu'on vient de repérer. */ ?>
+            <?php if ($vitrine !== []): ?>
+                <?php
+                // Deux colonnes de longueur égale, pour qu'aucune ne se vide.
+                $moitie = (int) ceil(count($vitrine) / 2);
+                $colonnes = [array_slice($vitrine, 0, $moitie), array_slice($vitrine, $moitie)];
+                ?>
+                <div class="vitrine" aria-label="Aperçu du catalogue">
+                    <?php foreach ($colonnes as $index => $colonne): ?>
+                        <?php if ($colonne === []) { continue; } ?>
+                        <div class="vitrine__colonne<?= $index === 1 ? ' vitrine__colonne--inverse' : '' ?>">
+                            <ul class="vitrine__piste">
+                                <?php /* Le ruban est écrit deux fois : l'animation le
+                                         décale d'exactement sa moitié, et la boucle
+                                         est invisible. La copie est masquée aux
+                                         lecteurs d'écran et retirée du parcours au
+                                         clavier — c'est le même contenu. */ ?>
+                                <?php foreach ([false, true] as $copie): ?>
+                                    <?php foreach ($colonne as $article): ?>
+                                        <li class="vitrine__article"
+                                            <?= $copie ? 'aria-hidden="true"' : '' ?>>
+                                            <a href="/produit/<?= e($article['slug']) ?>"
+                                               <?= $copie ? 'tabindex="-1"' : '' ?>>
+                                                <img src="<?= e($article['cover']['url']) ?>"
+                                                     alt="<?= $copie ? '' : e($article['cover']['alt']) ?>"
+                                                     loading="lazy" width="400" height="400">
+                                                <span><?= e($article['name']) ?></span>
+                                            </a>
+                                        </li>
+                                    <?php endforeach; ?>
+                                <?php endforeach; ?>
+                            </ul>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php else: ?>
+                <?php /* Catalogue vide : la mascotte reprend sa place plutôt
+                         qu'un cadre creux (charte, page 27). */ ?>
+                <div style="display:grid;place-items:center;aspect-ratio:1;border-radius:var(--radius-surface);background:var(--sand)">
+                    <img src="<?= e(asset('/assets/brand/mascotte-course.png')) ?>"
+                         alt="La mascotte de BOUGE, une grenouille en mouvement, serviette sur l'épaule"
+                         width="720" height="720" style="width:80%;height:auto">
+                </div>
+            <?php endif; ?>
         </div>
     </div>
 </section>
@@ -207,12 +255,18 @@ $freeAbove = $shop['shipping']['free_above_cents'];
         <h2 class="t-l">Par catégorie</h2>
         <ul class="grid grid--4" style="list-style:none;margin:2rem 0 0;padding:0">
             <?php foreach ($categories as $category): ?>
+                <?php
+                [$visuel, $ton] = $categoryImages[$category['slug']]
+                    ?? ['/assets/brand/mascotte-02.png', 'sable'];
+                ?>
                 <li>
                     <a href="/boutique/<?= e($category['slug']) ?>" style="text-decoration:none">
-                        <div style="aspect-ratio:1;overflow:hidden;border-radius:var(--radius-surface);background:var(--sand)">
-                            <img src="<?= e($categoryImages[$category['slug']] ?? '/assets/images/demo/accessoires.svg') ?>"
-                                 alt="Catégorie <?= e($category['name']) ?>" loading="lazy"
-                                 width="800" height="1000" style="width:100%;height:100%;object-fit:cover">
+                        <div class="vignette vignette--<?= e($ton) ?>">
+                            <?php /* La grenouille est décorative : le nom du rayon
+                                     est juste dessous, le répéter en texte de
+                                     remplacement ferait doublon à l'oreille. */ ?>
+                            <img src="<?= e(asset($visuel)) ?>" alt="" loading="lazy"
+                                 width="720" height="720">
                         </div>
                         <h3 class="t-m" style="margin-top:.75rem"><?= e($category['name']) ?></h3>
                         <?php if (!empty($category['description'])): ?>
