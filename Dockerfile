@@ -21,13 +21,21 @@ FROM php:8.3-apache
 
 # pdo_mysql est la seule extension à ajouter : mbstring, curl, fileinfo et
 # iconv sont déjà compilées dans l'image officielle.
+#
+# Le php.ini de production est mis en place au passage : sans lui, PHP affiche
+# ses erreurs à l'écran — chemins du serveur et trace d'appels compris. Sur une
+# adresse publique, elles doivent aller au journal, pas au visiteur.
+#
+# Pas de commentaire à l'intérieur du RUN : les continuations de ligne en font
+# une seule commande, et un « # » y masquerait tout ce qui suit.
 RUN set -eux; \
     docker-php-ext-install -j"$(nproc)" pdo_mysql; \
     apt-get update; \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
         mariadb-server mariadb-client; \
     rm -rf /var/lib/apt/lists/*; \
-    a2enmod rewrite headers
+    a2enmod rewrite headers; \
+    mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 
 # Le domaine du site est le dossier public/ : le reste du code — la
 # configuration, les gabarits, le schéma — n'est jamais servi.

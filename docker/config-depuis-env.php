@@ -69,5 +69,6 @@ file_put_contents(
     . 'return ' . var_export($config, true) . ";\n"
 );
 
-// Lisible par PHP seulement : il porte les clés de paiement.
+// Lisible par son propriétaire seulement : il porte les clés de paiement.
+// L'entrypoint le donne ensuite à l'utilisateur d'Apache, qui doit le lire.
 chmod($chemin, 0o600);

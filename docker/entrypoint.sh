@@ -17,6 +17,12 @@ port="${PORT:-10000}"
 echo "→ Configuration depuis l'environnement"
 php docker/config-depuis-env.php
 
+# Le fichier est écrit par ce script, qui tourne en root ; c'est Apache, en
+# www-data, qui devra le lire. Sans ce changement de propriétaire, le site
+# répond « Permission denied » dès la première page.
+chown www-data:www-data config/config.php
+chmod 600 config/config.php
+
 echo "→ Démarrage de MariaDB"
 mkdir -p /run/mysqld
 chown -R mysql:mysql /run/mysqld /var/lib/mysql
