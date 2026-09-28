@@ -14,16 +14,18 @@ use Bouge\Support\Usage;
 use Bouge\Support\Pricing;
 use Bouge\Support\View;
 
-// Visuels de catégorie : la mascotte de la marque plutôt que des pictogrammes
-// génériques. La charte n'en fournit que trois — haltères, course, serviette —
-// donc la quatrième vignette reprend la grenouille à la serviette, retournée
-// et sur un autre fond : la répétition se lit alors comme un rythme, pas comme
-// un oubli. Une quatrième illustration de la charte réglerait cela.
+// Visuels de catégorie : la mascotte de la marque, équipée du rayon qu'elle
+// illustre. Chaque accessoire est dessiné par-dessus une illustration de la
+// charte (voir bin/habiller-les-mascottes/ pour les tracés) plutôt qu'à côté :
+// la grenouille porte son bonnet, elle ne pose pas avec.
+//
+// Bonnets et maillots partagent la grenouille à la serviette : la charte n'en
+// fournit que trois, et l'accessoire suffit à les distinguer.
 $categoryImages = [
-    'bonnets'     => ['/assets/brand/mascotte-course.png', 'sky'],
-    'lunettes'    => ['/assets/brand/mascotte-03.png', 'jade'],
-    'accessoires' => ['/assets/brand/mascotte-02.png', 'sable'],
-    'maillots'    => ['/assets/brand/mascotte-course.png', 'accent'],
+    'bonnets'     => ['/assets/brand/mascotte-bonnet.png', 'sky'],
+    'lunettes'    => ['/assets/brand/mascotte-lunettes.png', 'jade'],
+    'accessoires' => ['/assets/brand/mascotte-palmes.png', 'accent'],
+    'maillots'    => ['/assets/brand/mascotte-maillot.png', 'sable'],
     // Le livre garde sa vraie couverture : il n'a pas besoin d'illustration.
     'livre'       => ['/assets/images/livre/couverture.jpg', 'couverture'],
 ];
@@ -84,14 +86,20 @@ $freeAbove = $shop['shipping']['free_above_cents'];
                                             <?= $copie ? 'aria-hidden="true"' : '' ?>>
                                             <a href="/produit/<?= e($article['slug']) ?>"
                                                <?= $copie ? 'tabindex="-1"' : '' ?>>
-                                                <?php /* Rien que la photo : un nom sous
-                                                         chaque vignette hacherait la bande,
-                                                         et le produit se lit mieux à l'image.
-                                                         Le texte de remplacement porte le nom
-                                                         pour qui ne voit pas l'image. */ ?>
+                                                <?php /* La photo et le prix, rien d'autre :
+                                                         un nom de produit sous chaque vignette
+                                                         hacherait la bande, alors qu'un prix
+                                                         tient sur une ligne et répond à la
+                                                         seule question qu'on se pose en
+                                                         regardant passer un catalogue.
+                                                         Le nom reste dans le texte de
+                                                         remplacement. */ ?>
                                                 <img src="<?= e($article['cover']['url']) ?>"
                                                      alt="<?= $copie ? '' : e($article['name']) ?>"
                                                      loading="lazy" width="400" height="400">
+                                                <?= View::partial('partials/price', [
+                                                    'price' => Pricing::effective($article),
+                                                ]) ?>
                                             </a>
                                         </li>
                                     <?php endforeach; ?>
@@ -261,7 +269,7 @@ $freeAbove = $shop['shipping']['free_above_cents'];
             <?php foreach ($categories as $category): ?>
                 <?php
                 [$visuel, $ton] = $categoryImages[$category['slug']]
-                    ?? ['/assets/brand/mascotte-02.png', 'sable'];
+                    ?? ['/assets/brand/mascotte-palmes.png', 'sable'];
                 ?>
                 <li>
                     <a href="/boutique/<?= e($category['slug']) ?>" style="text-decoration:none">

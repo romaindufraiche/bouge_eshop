@@ -1478,6 +1478,22 @@ form:has(#mode-relais:checked) .champs-retrait { display: none; }
   mix-blend-mode: multiply;
 }
 
+/* Le prix, petit et centré sous la photo. Il tient sur une ligne : la hauteur
+   des articles reste constante, et le calage de la boucle avec elle. */
+.vitrine__article .price {
+  justify-content: center;
+  gap: 0.35rem;
+  margin-top: 0.3rem;
+  font-size: 0.75rem;
+}
+
+.vitrine__article .price__now { font-weight: 600; }
+.vitrine__article .price__was { font-size: 0.7rem; }
+
+/* La pastille de remise écraserait la vignette : la promotion se voit déjà au
+   prix barré, et la fiche produit porte le pourcentage. */
+.vitrine__article .pill { display: none; }
+
 /* Un mouvement perpétuel gêne, voire rend malade. Respecté sans discussion :
    la vitrine devient une colonne qu'on fait défiler soi-même. */
 @media (prefers-reduced-motion: reduce) {
@@ -1492,11 +1508,14 @@ form:has(#mode-relais:checked) .champs-retrait { display: none; }
 }
 
 /* --- Vignettes de catégorie -------------------------------------------------
-   La mascotte de la marque sur un aplat, un ton par rayon. Les illustrations
-   arrivent en trait noir sur fond blanc : le fondu multiplié les pose sur
-   l'aplat sans découpe ni halo.
+   La mascotte de la marque sur un aplat, un ton par rayon.
 
-   Les aplats sont des teintes de la charte très diluées dans le crème : assez
+   Pas de fondu multiplié ici : les illustrations sont détourées, et leurs
+   accessoires sont en couleur. Un multiply assombrirait le bonnet bleu contre
+   son fond bleu et le maillot rouge contre le sable — les teintes doivent
+   rester franches.
+
+   Les aplats sont des couleurs de la charte très diluées dans le crème : assez
    pour distinguer les rayons d'un coup d'œil, pas assez pour concurrencer les
    photos produits qui les entourent. */
 
@@ -1514,7 +1533,6 @@ form:has(#mode-relais:checked) .champs-retrait { display: none; }
   width: 100%;
   height: 100%;
   object-fit: contain;
-  mix-blend-mode: multiply;
   transition: transform 0.25s ease;
 }
 
@@ -1527,15 +1545,10 @@ a:hover .vignette img { transform: scale(1.06); }
 .vignette--accent { background: color-mix(in srgb, var(--accent) 16%, var(--cream)); }
 .vignette--sable  { background: var(--sand); }
 
-/* La même grenouille que « Bonnets » : retournée, elle ne se lit plus comme
-   une répétition. */
-.vignette--accent img { transform: scaleX(-1); }
-a:hover .vignette--accent img { transform: scaleX(-1) scale(1.06); }
-
 /* La couverture du livre est une image composée : elle se montre entière,
-   bord à bord, sans aplat derrière ni fondu qui la délaverait. */
+   bord à bord, sans marge autour. */
 .vignette--couverture { padding: 0; background: var(--sand); }
-.vignette--couverture img { object-fit: cover; mix-blend-mode: normal; }
+.vignette--couverture img { object-fit: cover; }
 
 @media (prefers-reduced-motion: reduce) {
   .vignette img { transition: none; }
