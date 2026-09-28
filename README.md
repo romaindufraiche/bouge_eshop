@@ -26,6 +26,7 @@ les fichiers, on importe la base, c'est en ligne.
 - [Chez un autre hébergeur](#chez-un-autre-hébergeur)
 - [Aperçu statique sur GitHub Pages](#aperçu-statique-sur-github-pages)
 - [Livraison : qui fait quoi](#livraison--qui-fait-quoi)
+- [Démonstration en ligne sur Render](#démonstration-en-ligne-sur-render)
 - [Le catalogue de démonstration](#le-catalogue-de-démonstration)
 - [Structure du site](#structure-du-site)
 - [Le compte client](#le-compte-client)
@@ -548,6 +549,66 @@ toujours redemandée au transporteur** avant d'enregistrer la commande : sans
 cela, un client pourrait faire imprimer l'étiquette pour l'adresse de son
 choix. Elle est ensuite recopiée sur la commande, pour rester lisible dans
 dix ans même si le commerce a fermé.
+
+## Démonstration en ligne sur Render
+
+Pour montrer la boutique à quelqu'un sans acheter d'hébergement ni de domaine,
+le dépôt contient de quoi la déployer sur [Render](https://render.com) en un
+clic : un `Dockerfile`, un `render.yaml`, et trois scripts dans `docker/`.
+
+> **Ce n'est pas une mise en production.** Render ne propose pas de base MySQL
+> managée — la leur est PostgreSQL — donc l'image embarque MariaDB à côté
+> d'Apache. Les données ne survivent pas à un redémarrage, et l'offre gratuite
+> endort le service après quinze minutes sans visite. Pour ouvrir la boutique
+> pour de vrai, voir [Mettre en ligne chez OVH](#mettre-en-ligne-chez-ovh).
+
+Pour une démonstration, ce défaut est une qualité : le catalogue repart propre
+à chaque réveil, quoi qu'ait fait le visiteur précédent.
+
+### Déployer
+
+1. Sur Render, **New → Blueprint**, et désignez ce dépôt. Le `render.yaml` est
+   lu tout seul.
+2. Render tire au sort le mot de passe de l'administration. Relevez-le dans
+   l'onglet **Environment** du service, sous `BOUGE_ADMIN_PASSWORD`.
+3. Le premier démarrage prend quelques minutes, le temps de construire
+   l'image. Les suivants sont rapides.
+
+L'adresse ressemble à `https://bouge-club-demo.onrender.com`, et
+l'administration est sur `/admin/connexion`.
+
+### Ce que la démonstration montre
+
+Le catalogue versionné : cinq catégories, quatorze produits, leurs visuels
+provisoires. **Pas celui d'arena** — ces photos ne nous appartiennent pas et ne
+sont pas dans le dépôt.
+
+Les points relais sont activés en mode démonstration
+(`BOUGE_CARRIER_DRIVER=demonstration`) : le tunnel de commande se déroule en
+entier, avec des commerces inventés autour du code postal saisi.
+
+Le paiement s'arrête sur un message explicite tant que Stripe n'est pas
+renseigné. Pour dérouler un achat complet, ajoutez vos clés de **test** dans
+les variables `STRIPE_*` du service.
+
+### Les variables d'environnement
+
+Aucun mot de passe ne vit dans l'image : `docker/config-depuis-env.php`
+fabrique `config/config.php` au démarrage à partir de l'environnement, que
+Render chiffre.
+
+| Variable | Rôle |
+| --- | --- |
+| `BOUGE_ADMIN_EMAIL` / `BOUGE_ADMIN_PASSWORD` | Le compte d'administration, recréé à chaque démarrage. Douze caractères minimum. |
+| `BOUGE_SITE_URL` | L'adresse publique. Vide, celle que Render annonce est reprise. |
+| `BOUGE_CARRIER_DRIVER` | `demonstration` pour des points relais inventés, `boxtal` pour de vrais. |
+| `STRIPE_*`, `BOXTAL_*` | Les clés, si vous voulez dérouler un paiement ou un achat d'étiquette. |
+| `BOUGE_DB_*` | Pour pointer vers une vraie base MySQL au lieu de celle du conteneur. |
+
+Au démarrage, `docker/preparer.php` pose le schéma et le catalogue si les
+tables manquent, puis **supprime tout compte d'administration autre que celui
+de l'environnement** : `seed.php` en crée un dont le mot de passe est écrit en
+clair dans ce dépôt, et une adresse publique n'en veut pas.
 
 ## Le catalogue de démonstration
 

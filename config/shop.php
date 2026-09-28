@@ -69,7 +69,12 @@ return [
     // promesse.
     'carrier' => [
         // '' pour aucun, 'boxtal' une fois le compte ouvert.
-        'driver' => '',
+        //
+        // La variable d'environnement permet de changer de pilote sans
+        // toucher au fichier : c'est ainsi que la démonstration sur Render
+        // active les points relais inventés. En local et sur un mutualisé,
+        // elle n'existe pas et la valeur ci-dessous s'applique.
+        'driver' => getenv('BOUGE_CARRIER_DRIVER') ?: '',
 
         // Adresse d'expédition, imprimée sur l'étiquette et point de départ
         // du calcul de tarif. C'est celle de la salle.

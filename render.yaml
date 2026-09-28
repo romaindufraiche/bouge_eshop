@@ -1,0 +1,44 @@
+# ---------------------------------------------------------------------------
+# Démonstration de la boutique sur Render.
+#
+# Un seul service, qui embarque Apache, PHP et MariaDB : Render ne propose pas
+# de base MySQL managée, et réécrire toutes les requêtes pour PostgreSQL
+# coûterait plus cher que la démonstration ne vaut.
+#
+# À ne pas confondre avec une mise en production : les données repartent de
+# zéro à chaque réveil du service. Pour ouvrir la boutique pour de vrai, voir
+# « Mettre en ligne chez OVH » dans le README.
+# ---------------------------------------------------------------------------
+
+services:
+  - type: web
+    name: bouge-club-demo
+    runtime: docker
+    plan: free
+    region: frankfurt
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /
+
+    envVars:
+      # Compte d'administration, recréé à chaque démarrage. Le mot de passe est
+      # tiré au sort par Render et jamais écrit dans le dépôt ; il se lit dans
+      # l'onglet « Environment » du service.
+      - key: BOUGE_ADMIN_EMAIL
+        value: demo@bouge.fr
+      - key: BOUGE_ADMIN_PASSWORD
+        generateValue: true
+
+      # Points relais inventés : de quoi montrer le tunnel de commande en
+      # entier sans compte transporteur. Jamais sur une vraie boutique.
+      - key: BOUGE_CARRIER_DRIVER
+        value: demonstration
+
+      # Laissées vides : le paiement s'arrête alors sur un message explicite
+      # plutôt que sur une erreur. Renseignez les clés de TEST de Stripe pour
+      # dérouler un paiement de bout en bout.
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_PUBLISHABLE_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
