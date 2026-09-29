@@ -526,6 +526,25 @@ plausibles autour du code postal saisi.
 n'existe pas. Le pilote refuse d'ailleurs de fabriquer des étiquettes, et son
 nom le rappelle dans l'administration.
 
+### Le plan du concept store
+
+Le bloc « le lieu » affiche un plan, sous la mascotte. Il vient
+d'**OpenStreetMap** plutôt que de Google : il se déplace et se zoome, mais
+n'impose ni JavaScript à charger de notre côté, ni compte à ouvrir, ni
+mouchard — donc pas de bannière de consentement.
+
+Les coordonnées sont dans `config/shop.php`, sous `store.map`. Laisser `lat`
+ou `lon` vide masque le plan.
+
+> Les valeurs livrées sont celles du **centre de Courbevoie**, pas de la
+> salle : « rue de la Piscine » n'existe pas dans cette commune, l'adresse du
+> fichier est un exemple. Cherchez la vraie adresse sur openstreetmap.org,
+> clic droit sur le point, « Afficher l'adresse », et recopiez la latitude et
+> la longitude.
+
+Le plan ne se charge qu'une fois la section atteinte : une page d'accueil n'a
+pas à appeler un service tiers avant d'être lue.
+
 ### Le poids des produits
 
 Le transporteur facture au poids. Chaque fiche produit a donc un champ

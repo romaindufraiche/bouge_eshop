@@ -35,14 +35,35 @@ return [
         // enseigne de plus. Une chaîne simple fonctionne aussi, pour qui veut
         // un seul paragraphe.
         'pitch'   => [
-            "BOUGE est une salle de sport doublée d'un concept store. On y pousse de la fonte, on y nage, on y boit un café, et on y croise du monde. C'est un lieu avant d'être une marque, et c'est là que tout a commencé.",
-            "BOUGE Club en est le rayon matériel, ouvert quand la salle ne l'est pas. Il existe pour deux raisons. D'abord pour que ceux qui s'entraînent ici trouvent de quoi s'équiper correctement, sans courir les magasins la veille d'une séance : ce qu'on vend, c'est ce qu'on utilise soi-même au bassin.",
+            "BOUGE est un concept store dans lequel on peut faire du sport : on y pousse de la fonte, on y boit un café, on peut récupérer avec un ostéo. C'est un lieu avant d'être une marque, et c'est là que tout a commencé.",
+            "BOUGE Club en est le rayon matériel. Il existe pour deux raisons. D'abord pour que ceux qui s'entraînent ici trouvent de quoi s'équiper correctement, sans courir les magasins la veille d'une séance : ce qu'on vend, c'est ce qu'on utilise soi-même au bassin.",
             "Ensuite pour que ceux qui tiennent au lieu puissent le soutenir. Une commande passée ici ne part pas chez une enseigne : elle fait vivre la salle, sa programmation et les gens qui l'animent.",
             "Le reste se vit sur place. Poussez la porte, on vous fera visiter.",
         ],
         'url'     => '',
         'address' => '12 rue de la Piscine, 92400 Courbevoie',
         'hours'   => 'Du mardi au samedi, 10h – 19h',
+
+        // Le plan affiché sous la mascotte. Il vient d'OpenStreetMap : pas de
+        // JavaScript à charger, pas de compte à ouvrir, et aucun mouchard —
+        // contrairement à l'équivalent chez Google, qui imposerait une
+        // bannière de consentement.
+        //
+        // ATTENTION : ces coordonnées sont celles du centre de Courbevoie.
+        // « Rue de la Piscine » n'existe pas dans cette commune — l'adresse
+        // ci-dessus est un exemple. Remplacez les deux valeurs par celles de
+        // la vraie salle : cherchez l'adresse sur openstreetmap.org, faites un
+        // clic droit sur le point, « Afficher l'adresse », et recopiez la
+        // latitude et la longitude.
+        //
+        // Laisser 'lat' ou 'lon' vide masque le plan.
+        'map' => [
+            'lat'  => '48.8953',
+            'lon'  => '2.2562',
+            // Plus le nombre est grand, plus on est près. 15 montre le
+            // quartier, 17 la rue.
+            'zoom' => 15,
+        ],
     ],
 
     'shipping' => [

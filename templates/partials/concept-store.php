@@ -60,11 +60,67 @@ if (($store['name'] ?? '') === '') {
                 </div>
             </div>
 
-            <?php /* La mascotte plutôt qu'une photo de salle : nous n'en avons
-                     pas, et en inventer une serait mentir sur le lieu. */ ?>
-            <div class="concept-store__visuel">
-                <img src="<?= e(asset('/assets/brand/mascotte-02.png')) ?>"
-                     alt="" width="720" height="720" loading="lazy">
+            <div>
+                <?php /* La mascotte plutôt qu'une photo de salle : nous n'en
+                         avons pas, et en inventer une serait mentir sur le
+                         lieu. */ ?>
+                <div class="concept-store__visuel">
+                    <img src="<?= e(asset('/assets/brand/mascotte-02.png')) ?>"
+                         alt="" width="720" height="720" loading="lazy">
+                </div>
+
+                <?php
+                $plan = $store['map'] ?? [];
+                $lat = (string) ($plan['lat'] ?? '');
+                $lon = (string) ($plan['lon'] ?? '');
+                ?>
+                <?php if ($lat !== '' && $lon !== ''): ?>
+                    <?php
+                    // OpenStreetMap attend un cadrage, pas un niveau de zoom.
+                    // On le fabrique autour du point : plus le zoom est grand,
+                    // plus la fenêtre est étroite.
+                    $zoom = max(10, min(18, (int) ($plan['zoom'] ?? 15)));
+                    $largeur = 0.36 / (2 ** ($zoom - 12));
+                    $hauteur = $largeur * 0.6;
+
+                    $cadre = implode(',', [
+                        (float) $lon - $largeur,
+                        (float) $lat - $hauteur,
+                        (float) $lon + $largeur,
+                        (float) $lat + $hauteur,
+                    ]);
+
+                    $embarque = 'https://www.openstreetmap.org/export/embed.html?'
+                        . http_build_query([
+                            'bbox'   => $cadre,
+                            'layer'  => 'mapnik',
+                            'marker' => $lat . ',' . $lon,
+                        ]);
+
+                    $grand = 'https://www.openstreetmap.org/?'
+                        . http_build_query(['mlat' => $lat, 'mlon' => $lon, 'zoom' => $zoom]);
+                    ?>
+                    <?php /* Un plan d'OpenStreetMap plutôt que de Google :
+                             celui-ci se déplace et se zoome sans qu'on ait de
+                             JavaScript à charger, sans compte à ouvrir, et
+                             sans mouchard — donc sans bannière de
+                             consentement à imposer au visiteur.
+
+                             Chargé en différé : il ne part qu'une fois la
+                             section atteinte, et une page d'accueil n'a pas à
+                             appeler un service tiers avant d'être lue. */ ?>
+                    <div class="concept-store__plan">
+                        <iframe src="<?= e($embarque) ?>" loading="lazy"
+                                title="Plan de <?= e($store['name']) ?>, <?= e($store['address'] ?? '') ?>"
+                                referrerpolicy="no-referrer"></iframe>
+                    </div>
+                    <p class="t-xs" style="margin-top:.75rem">
+                        <a href="<?= e($grand) ?>" target="_blank" rel="noopener">
+                            Voir le plan en grand <span aria-hidden="true">&rarr;</span>
+                            <span class="sr-only">(nouvel onglet)</span>
+                        </a>
+                    </p>
+                <?php endif; ?>
             </div>
         </div>
     </div>
