@@ -536,14 +536,18 @@ mouchard — donc pas de bannière de consentement.
 Les coordonnées sont dans `config/shop.php`, sous `store.map`. Laisser `lat`
 ou `lon` vide masque le plan.
 
-> Les valeurs livrées sont celles du **centre de Courbevoie**, pas de la
-> salle : « rue de la Piscine » n'existe pas dans cette commune, l'adresse du
-> fichier est un exemple. Cherchez la vraie adresse sur openstreetmap.org,
-> clic droit sur le point, « Afficher l'adresse », et recopiez la latitude et
-> la longitude.
+Les valeurs livrées visent le **8 rue Albert Simonin**, relevées au numéro
+près auprès du géocodeur de l'IGN plutôt qu'au centre de la rue. Pour une
+autre adresse :
 
-Le plan ne se charge qu'une fois la section atteinte : une page d'accueil n'a
-pas à appeler un service tiers avant d'être lue.
+```bash
+curl "https://data.geopf.fr/geocodage/search?q=VOTRE+ADRESSE&limit=1"
+```
+
+Le plan se déplace et se zoome : c'est une carte MapLibre servie par
+OpenStreetMap, pas une image. Il ne se charge qu'une fois la section
+atteinte — une page d'accueil n'a pas à appeler un service tiers avant
+d'être lue.
 
 ### Le poids des produits
 

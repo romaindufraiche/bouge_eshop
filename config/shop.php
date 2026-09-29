@@ -41,7 +41,7 @@ return [
             "Le reste se vit sur place. Poussez la porte, on vous fera visiter.",
         ],
         'url'     => '',
-        'address' => '12 rue de la Piscine, 92400 Courbevoie',
+        'address' => '8 rue Albert Simonin, 92400 Courbevoie',
         'hours'   => 'Du mardi au samedi, 10h – 19h',
 
         // Le plan affiché sous la mascotte. Il vient d'OpenStreetMap : pas de
@@ -49,20 +49,20 @@ return [
         // contrairement à l'équivalent chez Google, qui imposerait une
         // bannière de consentement.
         //
-        // ATTENTION : ces coordonnées sont celles du centre de Courbevoie.
-        // « Rue de la Piscine » n'existe pas dans cette commune — l'adresse
-        // ci-dessus est un exemple. Remplacez les deux valeurs par celles de
-        // la vraie salle : cherchez l'adresse sur openstreetmap.org, faites un
-        // clic droit sur le point, « Afficher l'adresse », et recopiez la
-        // latitude et la longitude.
+        // Coordonnées du 8 rue Albert Simonin, relevées au numéro près auprès
+        // du géocodeur de l'IGN (data.geopf.fr) plutôt qu'au centre de la rue.
+        //
+        // Pour une autre adresse : https://data.geopf.fr/geocodage/search?q=...
+        // renvoie la latitude et la longitude ; sur openstreetmap.org, un clic
+        // droit sur le point puis « Afficher l'adresse » donne la même chose.
         //
         // Laisser 'lat' ou 'lon' vide masque le plan.
         'map' => [
-            'lat'  => '48.8953',
-            'lon'  => '2.2562',
-            // Plus le nombre est grand, plus on est près. 15 montre le
-            // quartier, 17 la rue.
-            'zoom' => 15,
+            'lat'  => '48.8958110',
+            'lon'  => '2.2554090',
+            // Plus le nombre est grand, plus on est près : 15 montre le
+            // quartier, 17 la rue, 18 le pâté de maisons.
+            'zoom' => 17,
         ],
     ],
 

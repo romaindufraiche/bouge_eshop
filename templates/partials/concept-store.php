@@ -76,18 +76,32 @@ if (($store['name'] ?? '') === '') {
                 ?>
                 <?php if ($lat !== '' && $lon !== ''): ?>
                     <?php
-                    // OpenStreetMap attend un cadrage, pas un niveau de zoom.
-                    // On le fabrique autour du point : plus le zoom est grand,
-                    // plus la fenêtre est étroite.
-                    $zoom = max(10, min(18, (int) ($plan['zoom'] ?? 15)));
-                    $largeur = 0.36 / (2 ** ($zoom - 12));
-                    $hauteur = $largeur * 0.6;
+                    // OpenStreetMap attend un cadrage, pas un niveau de zoom :
+                    // on fabrique la fenêtre autour du point.
+                    //
+                    // À un niveau de zoom z, un pixel couvre
+                    // 156543 · cos(latitude) / 2^z mètres, et un degré de
+                    // longitude vaut 111320 · cos(latitude) mètres. Le cosinus
+                    // se simplifie : la largeur en degrés ne dépend que de la
+                    // largeur du cadre en pixels et du zoom.
+                    //
+                    // 480 px est la largeur retenue pour le cadre — la colonne
+                    // fait 445 px sur grand écran et un peu moins sur
+                    // téléphone. Une estimation un peu large vaut mieux qu'un
+                    // plan trop serré sur le marqueur.
+                    $zoom = max(10, min(19, (int) ($plan['zoom'] ?? 17)));
+                    $largeur = 480 * 1.40625 / (2 ** $zoom) / 2;
+
+                    // Le cadre est au format 4/3, et un degré de latitude est
+                    // plus « long » qu'un degré de longitude sous nos
+                    // latitudes : d'où le cosinus, qui ne se simplifie pas ici.
+                    $hauteur = $largeur * 0.75 * cos(deg2rad((float) $lat));
 
                     $cadre = implode(',', [
-                        (float) $lon - $largeur,
-                        (float) $lat - $hauteur,
-                        (float) $lon + $largeur,
-                        (float) $lat + $hauteur,
+                        round((float) $lon - $largeur, 6),
+                        round((float) $lat - $hauteur, 6),
+                        round((float) $lon + $largeur, 6),
+                        round((float) $lat + $hauteur, 6),
                     ]);
 
                     $embarque = 'https://www.openstreetmap.org/export/embed.html?'
