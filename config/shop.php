@@ -30,7 +30,16 @@ return [
     // pas de lien du tout.
     'store' => [
         'name'    => 'BOUGE',
-        'pitch'   => "On y pousse de la fonte, on y nage, on y boit un café, et on y croise du monde. Ce site en est le rayon matériel, ouvert quand la salle ne l'est pas — le reste se vit sur place. Poussez la porte, on vous fera visiter.",
+        // Le texte du bloc « le lieu », en paragraphes. Il explique ce que la
+        // boutique est par rapport à la salle : un prolongement, pas une
+        // enseigne de plus. Une chaîne simple fonctionne aussi, pour qui veut
+        // un seul paragraphe.
+        'pitch'   => [
+            "BOUGE est une salle de sport doublée d'un concept store. On y pousse de la fonte, on y nage, on y boit un café, et on y croise du monde. C'est un lieu avant d'être une marque, et c'est là que tout a commencé.",
+            "BOUGE Club en est le rayon matériel, ouvert quand la salle ne l'est pas. Il existe pour deux raisons. D'abord pour que ceux qui s'entraînent ici trouvent de quoi s'équiper correctement, sans courir les magasins la veille d'une séance : ce qu'on vend, c'est ce qu'on utilise soi-même au bassin.",
+            "Ensuite pour que ceux qui tiennent au lieu puissent le soutenir. Une commande passée ici ne part pas chez une enseigne : elle fait vivre la salle, sa programmation et les gens qui l'animent.",
+            "Le reste se vit sur place. Poussez la porte, on vous fera visiter.",
+        ],
         'url'     => '',
         'address' => '12 rue de la Piscine, 92400 Courbevoie',
         'hours'   => 'Du mardi au samedi, 10h – 19h',

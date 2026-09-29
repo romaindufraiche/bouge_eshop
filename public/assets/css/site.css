@@ -281,6 +281,7 @@ main { flex: 1; }
 @media (min-width: 900px) {
   .grid--3 { grid-template-columns: repeat(3, 1fr); }
   .grid--4 { grid-template-columns: repeat(4, 1fr); }
+  .grid--5 { grid-template-columns: repeat(5, 1fr); }
   .grid--split { grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; }
   .grid--aside { grid-template-columns: 1fr 20rem; gap: 3.5rem; align-items: start; }
 }
@@ -332,9 +333,12 @@ main { flex: 1; }
   letter-spacing: 0.16em;
   text-transform: uppercase;
   line-height: 1;
-  /* Le mot est décalé d'un cheveu vers le bas : le wordmark dessiné a une
-     ligne de base optique plus basse que celle du texte. */
-  transform: translateY(0.1em);
+  /* Les deux lignes de base sont alignées, pas les boîtes : centrer les
+     boîtes posait « CLUB » deux pixels sous le wordmark, dont l'encre descend
+     plus bas à cause de la jambe du « g ». Valeur mesurée sur le rendu, pas
+     estimée à l'œil — voir la ligne de base à 68,5 du wordmark contre 76,5
+     pour le texte, à taille d'affichage. */
+  transform: translateY(-0.07em);
 }
 .marque__club::before {
   content: '';

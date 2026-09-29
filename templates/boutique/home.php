@@ -238,34 +238,17 @@ $freeAbove = $shop['shipping']['free_above_cents'];
     </div>
 </section>
 
-<?php /* Entrée par l'usage, avant l'entrée par le rayon : un nageur sait
-         d'abord ce qu'il vient faire, pas dans quelle catégorie ranger son
-         besoin. C'est l'axe que Speedo et Arena mettent en avant. */ ?>
-<section class="section section--line-bottom">
-    <div class="wrap">
-        <div class="between">
-            <h2 class="t-l">Vous venez pour quoi ?</h2>
-            <a class="link-quiet t-s" href="/boutique">Tout le matériel</a>
-        </div>
-
-        <ul class="usages">
-            <?php foreach (Usage::all() as $slug => $libelle): ?>
-                <li>
-                    <a href="/usage/<?= e($slug) ?>">
-                        <span class="usages__titre"><?= e($libelle) ?></span>
-                        <span class="t-s muted"><?= e(Usage::descriptions()[$slug] ?? '') ?></span>
-                        <span class="usages__fleche" aria-hidden="true">→</span>
-                    </a>
-                </li>
-            <?php endforeach; ?>
-        </ul>
-    </div>
-</section>
-
+<?php /* Le rayon d'abord : c'est l'entrée que tout le monde sait lire, et
+         les vignettes illustrées donnent à la page sa couleur. L'entrée par
+         l'usage vient juste après, pour qui sait ce qu'il vient faire plutôt
+         que ce qu'il vient acheter. */ ?>
 <section class="section">
     <div class="wrap">
         <h2 class="t-l">Par catégorie</h2>
-        <ul class="grid grid--4" style="list-style:none;margin:2rem 0 0;padding:0">
+        <?php /* Cinq rayons sur une ligne : à quatre colonnes, le livre
+                 retombait seul sur une seconde rangée, ce qui se lit comme un
+                 oubli plutôt que comme une grille. */ ?>
+        <ul class="grid grid--5" style="list-style:none;margin:2rem 0 0;padding:0">
             <?php foreach ($categories as $category): ?>
                 <?php
                 [$visuel, $ton] = $categoryImages[$category['slug']]
@@ -284,6 +267,30 @@ $freeAbove = $shop['shipping']['free_above_cents'];
                         <?php if (!empty($category['description'])): ?>
                             <p class="t-s muted" style="margin-top:.25rem"><?= e($category['description']) ?></p>
                         <?php endif; ?>
+                    </a>
+                </li>
+            <?php endforeach; ?>
+        </ul>
+    </div>
+</section>
+
+<?php /* L'entrée par l'usage : un nageur sait souvent d'abord ce qu'il vient
+         faire, pas dans quel rayon ranger son besoin. C'est l'axe que Speedo
+         et Arena mettent en avant. */ ?>
+<section class="section section--line-bottom">
+    <div class="wrap">
+        <div class="between">
+            <h2 class="t-l">Vous venez pour quoi ?</h2>
+            <a class="link-quiet t-s" href="/boutique">Tout le matériel</a>
+        </div>
+
+        <ul class="usages">
+            <?php foreach (Usage::all() as $slug => $libelle): ?>
+                <li>
+                    <a href="/usage/<?= e($slug) ?>">
+                        <span class="usages__titre"><?= e($libelle) ?></span>
+                        <span class="t-s muted"><?= e(Usage::descriptions()[$slug] ?? '') ?></span>
+                        <span class="usages__fleche" aria-hidden="true">→</span>
                     </a>
                 </li>
             <?php endforeach; ?>

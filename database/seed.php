@@ -49,6 +49,7 @@ $plusTard = static fn (int $jours): string => date('Y-m-d', strtotime("+{$jours}
 $catalogue = [
     [
         'name' => 'Bonnets',
+        'position' => 1,
         'description' => "Silicone ou tissu, pour l'entraînement comme pour la compétition.",
         'image' => '/assets/images/demo/bonnets.svg',
         'products' => [
@@ -81,6 +82,7 @@ $catalogue = [
     ],
     [
         'name' => 'Lunettes',
+        'position' => 2,
         'description' => 'Du créneau quotidien au départ plongé.',
         'image' => '/assets/images/demo/lunettes.svg',
         'products' => [
@@ -112,6 +114,7 @@ $catalogue = [
     ],
     [
         'name' => 'Accessoires',
+        'position' => 3,
         'description' => 'Le matériel qui structure une séance.',
         'image' => '/assets/images/demo/accessoires.svg',
         'products' => [
@@ -148,6 +151,7 @@ $catalogue = [
     ],
     [
         'name' => 'Maillots',
+        'position' => 0,
         'description' => 'Maillots et jammers résistants au chlore.',
         'image' => '/assets/images/demo/maillots.svg',
         'products' => [
@@ -178,6 +182,7 @@ $catalogue = [
     ],
     [
         'name' => 'Livre',
+        'position' => 4,
         'description' => 'Le livre de Melvin Maillot, fondateur de la marque.',
         'image' => '/assets/images/demo/livre.svg',
         'products' => [
@@ -241,10 +246,18 @@ $catalogue = [
 $categoryCount = 0;
 $productCount = 0;
 
-foreach ($catalogue as $position => $category) {
+// L'ordre d'affichage est déclaré par catégorie, pas déduit de l'ordre
+// d'écriture : les maillots passent en tête parce que c'est le rayon le plus
+// vendu, sans qu'il faille déplacer trente lignes de tableau pour le dire.
+foreach ($catalogue as $rang => $category) {
     Database::run(
         'INSERT INTO categories (name, slug, description, position) VALUES (?, ?, ?, ?)',
-        [$category['name'], Slug::make($category['name']), $category['description'], $position]
+        [
+            $category['name'],
+            Slug::make($category['name']),
+            $category['description'],
+            $category['position'] ?? $rang,
+        ]
     );
     $categoryId = (int) $pdo->lastInsertId();
     $categoryCount++;

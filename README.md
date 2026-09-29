@@ -138,7 +138,8 @@ Chacune porte en tête ce qu'elle fait et si elle vous concerne. Les deux
 dernières : `004-maillots.sql` renomme la catégorie « Vêtements » en
 « Maillots » — son adresse passe de `/boutique/vetements` à
 `/boutique/maillots` ; `005-point-relais.sql` ajoute la livraison en point
-relais, le poids des produits et celui recopié sur les lignes de commande.
+relais, le poids des produits et celui recopié sur les lignes de commande ;
+`006-ordre-des-rayons.sql` met les maillots en tête du catalogue.
 
 `install.php` **recrée les tables** et efface donc tout le contenu existant,
 commandes comprises : il est fait pour une première installation.
