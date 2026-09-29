@@ -84,6 +84,9 @@ $router->get('/admin', [DashboardController::class, 'index']);
 // Les chemins fixes sont déclarés avant `{id}` : sans cela, « nouveau »
 // serait pris pour un identifiant.
 $router->get('/admin/produits', [AdminProductController::class, 'index']);
+// Avant la route « /admin/produits/{id} », sinon « export » serait pris
+// pour un identifiant.
+$router->get('/admin/produits/export', [AdminProductController::class, 'export']);
 $router->get('/admin/produits/nouveau', [AdminProductController::class, 'create']);
 $router->get('/admin/produits/{id}', [AdminProductController::class, 'edit']);
 $router->post('/admin/produits/enregistrer', [AdminProductController::class, 'save']);

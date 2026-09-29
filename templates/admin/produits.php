@@ -26,7 +26,16 @@ $sorts = [
         <h1 class="t-l">Produits</h1>
         <p class="muted t-s"><?= count($products) ?> produit<?= count($products) > 1 ? 's' : '' ?> affiché<?= count($products) > 1 ? 's' : '' ?>.</p>
     </div>
-    <a class="btn" href="/admin/produits/nouveau">Ajouter un produit</a>
+    <div class="row">
+        <?php /* L'export reprend les filtres en cours : ce qu'on voit à
+                 l'écran est ce qu'on télécharge. Un bouton qui renverrait tout
+                 le catalogue après une recherche serait une surprise. */ ?>
+        <a class="btn btn--ghost"
+           href="/admin/produits/export<?= $_GET !== [] ? '?' . e(http_build_query($_GET)) : '' ?>">
+            Exporter les stocks
+        </a>
+        <a class="btn" href="/admin/produits/nouveau">Ajouter un produit</a>
+    </div>
 </header>
 
 <?php /* Formulaire en GET : les filtres restent dans l'adresse, la page peut

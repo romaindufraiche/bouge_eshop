@@ -317,29 +317,15 @@ $saleValue = $field(
         </div>
     </section>
 
+    <?php /* Plus de champs « titre » et « description » pour Google : le site
+             reprend déjà le nom du produit et le début de sa description quand
+             ils sont vides, et personne ne remplissait deux champs de plus pour
+             y recopier ce que la fiche disait déjà.
+
+             L'adresse de la page reste : ce n'est pas du référencement
+             d'appoint, c'est l'URL du produit. */ ?>
     <section class="admin-card">
-        <h2 class="t-m">Référencement</h2>
-        <p class="field-help">
-            Facultatif : sans ces champs, le nom et le début de la description sont
-            utilisés.
-        </p>
-
-        <div class="field">
-            <label for="meta_title">Titre dans Google</label>
-            <input type="text" id="meta_title" name="meta_title" value="<?= e($field('meta_title')) ?>"
-                   maxlength="70">
-            <?php if (isset($errors['meta_title'])): ?>
-                <p class="field-error"><?= e($errors['meta_title']) ?></p>
-            <?php endif; ?>
-        </div>
-
-        <div class="field">
-            <label for="meta_description">Description dans Google</label>
-            <textarea id="meta_description" name="meta_description" rows="3" maxlength="180"><?= e($field('meta_description')) ?></textarea>
-            <?php if (isset($errors['meta_description'])): ?>
-                <p class="field-error"><?= e($errors['meta_description']) ?></p>
-            <?php endif; ?>
-        </div>
+        <h2 class="t-m">Adresse de la page</h2>
 
         <div class="field">
             <label for="slug">Adresse de la page</label>
@@ -432,7 +418,27 @@ $saleValue = $field(
 
             <div class="field">
                 <label for="photos">Ajouter des photos</label>
-                <input type="file" id="photos" name="photos[]" accept="image/jpeg,image/png,image/webp" multiple required>
+
+                <?php /* Glisser-déposer sans JavaScript : le champ de fichiers
+                         couvre toute la zone, invisible mais bien là. Déposer
+                         un fichier dessus revient donc à le déposer sur le
+                         champ, ce que les navigateurs savent faire depuis
+                         longtemps.
+
+                         La limite de l'exercice : aucun aperçu des photos
+                         avant l'envoi, et aucune réaction visuelle pendant le
+                         survol du fichier — cela demanderait du JavaScript.
+                         Le nom des fichiers choisis reste affiché par le
+                         navigateur sous la zone. */ ?>
+                <div class="depot">
+                    <input type="file" id="photos" name="photos[]"
+                           accept="image/jpeg,image/png,image/webp" multiple required>
+                    <span class="depot__texte" aria-hidden="true">
+                        <strong>Glissez vos photos ici</strong>
+                        <span>ou cliquez pour les choisir sur votre ordinateur</span>
+                    </span>
+                </div>
+
                 <p class="field-help">
                     Formats acceptés : JPEG, PNG, WebP. 5 Mo maximum par photo.
                     La première photo de la liste sert de vignette.

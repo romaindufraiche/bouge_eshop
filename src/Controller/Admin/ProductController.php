@@ -15,6 +15,7 @@ use Bouge\Support\Usage;
 use Bouge\Support\Uploads;
 use Bouge\Support\Validator;
 use Bouge\Support\View;
+use Bouge\Support\Xlsx;
 use RuntimeException;
 
 final class ProductController
@@ -38,6 +39,77 @@ final class ProductController
             'status'     => $status,
             'sort'       => $sort,
         ], 'layout/admin');
+    }
+
+    /**
+     * État des stocks, en classeur Excel.
+     *
+     * Le filtre en cours est repris : ce qu'on voit à l'écran est ce qu'on
+     * exporte. Un bouton qui renverrait tout le catalogue alors qu'on vient de
+     * chercher « bonnet » serait une mauvaise surprise.
+     */
+    public function export(): string
+    {
+        Auth::require();
+
+        $produits = (new ProductRepository())->forAdmin(
+            trim((string) ($_GET['recherche'] ?? '')),
+            (string) ($_GET['statut'] ?? ''),
+            (string) ($_GET['tri'] ?? 'recent')
+        );
+
+        $lignes = [];
+
+        foreach ($produits as $produit) {
+            $aDesDeclinaisons = (int) $produit['variant_count'] > 0;
+
+            // Le stock qui compte est celui des déclinaisons dès qu'il y en a :
+            // c'est la règle de la boutique, l'export doit dire la même chose.
+            $stock = $aDesDeclinaisons
+                ? (int) $produit['variant_stock']
+                : (int) $produit['stock'];
+
+            $prix = (int) $produit['price_cents'] / 100;
+            $promo = $produit['sale_price_cents'] === null
+                ? null
+                : (int) $produit['sale_price_cents'] / 100;
+
+            $lignes[] = [
+                $produit['name'],
+                $produit['category_name'],
+                Status::productStatuses()[$produit['status']] ?? $produit['status'],
+                $stock,
+                $aDesDeclinaisons ? (int) $produit['variant_count'] : null,
+                $prix,
+                $promo,
+                $prix * $stock,
+                $produit['weight_grams'] === null ? null : (int) $produit['weight_grams'],
+                $produit['demo_source'] === null ? '' : 'Démo',
+            ];
+        }
+
+        $classeur = Xlsx::build(
+            [
+                'Produit', 'Rayon', 'Statut', 'Stock', 'Déclinaisons',
+                'Prix (€)', 'Prix promo (€)', 'Valeur du stock (€)',
+                'Poids (g)', 'Origine',
+            ],
+            $lignes,
+            'Stocks au ' . date('d-m-Y')
+        );
+
+        $nom = 'stocks-bouge-club-' . date('Y-m-d') . '.xlsx';
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="' . $nom . '"');
+        header('Content-Length: ' . strlen($classeur));
+        // Un état des stocks daté n'a pas à être servi depuis le cache du
+        // navigateur : il serait faux dès le lendemain.
+        header('Cache-Control: no-store, must-revalidate');
+
+        echo $classeur;
+
+        return '';
     }
 
     public function create(): string
@@ -99,6 +171,9 @@ final class ProductController
             ->inList('status', [Status::PRODUCT_DRAFT, Status::PRODUCT_PUBLISHED], 'Statut invalide.')
             ->maxLength('meta_title', 70, 'Titre trop long (70 caractères maximum).')
             ->maxLength('meta_description', 180, 'Description trop longue (180 caractères maximum).');
+        // Les deux champs ci-dessus ne sont plus dans le formulaire : la
+        // validation reste, au cas où ils y reviendraient, mais leur valeur
+        // n'est écrite que si elle est envoyée (voir plus bas).
 
         $priceCents = Money::fromInput($validator->value('price'));
         if ($validator->value('price') !== '' && $priceCents === null) {
@@ -183,8 +258,15 @@ final class ProductController
             // Usages cochés dans le formulaire ; les valeurs inconnues sont
             // écartées par Usage::toStorage().
             'usages'             => Usage::toStorage((array) ($_POST['usages'] ?? [])),
-            'meta_title'         => $validator->value('meta_title') ?: null,
-            'meta_description'   => $validator->value('meta_description') ?: null,
+            // Le formulaire ne porte plus ces deux champs. Les écrire à NULL
+            // effacerait ce qu'un ancien formulaire avait pu enregistrer : on
+            // ne les touche que s'ils sont réellement envoyés.
+            ...(array_key_exists('meta_title', $_POST)
+                ? ['meta_title' => $validator->value('meta_title') ?: null]
+                : []),
+            ...(array_key_exists('meta_description', $_POST)
+                ? ['meta_description' => $validator->value('meta_description') ?: null]
+                : []),
         ];
 
         if ($existing !== null) {

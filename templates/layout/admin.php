@@ -11,6 +11,7 @@
  * @var string|null          $title
  */
 
+use Bouge\Support\AdminAlerts;
 use Bouge\Support\Auth;
 use Bouge\Support\Csrf;
 use Bouge\Support\Session;
@@ -23,12 +24,27 @@ $flash = Session::takeFlash('admin');
 // /admin/produits/12 garde « Produits » souligné.
 $path = strtok((string) ($_SERVER['REQUEST_URI'] ?? '/admin'), '?') ?: '/admin';
 
+// Les points de retrait ferment la liste : on les règle une fois à
+// l'ouverture, alors que les produits et les commandes se consultent tous les
+// jours.
 $sections = [
     '/admin'            => 'Tableau de bord',
     '/admin/produits'   => 'Produits',
+    '/admin/commandes'  => 'Commandes',
     '/admin/categories' => 'Catégories',
     '/admin/points-de-retrait' => 'Points de retrait',
-    '/admin/commandes'  => 'Commandes',
+];
+
+// Ce qui réclame l'attention, en pastille. Rien n'est affiché quand il n'y a
+// rien à signaler : une pastille à zéro est un bruit, pas une information.
+$pastilles = [
+    '/admin/produits'  => AdminAlerts::outOfStock(),
+    '/admin/commandes' => AdminAlerts::newOrders(),
+];
+
+$pastilleTitres = [
+    '/admin/produits'  => 'produit(s) en rupture',
+    '/admin/commandes' => 'commande(s) à préparer',
 ];
 ?>
 <!DOCTYPE html>
@@ -62,9 +78,20 @@ $sections = [
                         ? $path === '/admin' || $path === '/admin/'
                         : str_starts_with($path, $href);
                     ?>
+                    <?php $compte = $pastilles[$href] ?? 0; ?>
                     <li>
                         <a href="<?= e($href) ?>"<?= $active ? ' aria-current="page"' : '' ?>>
-                            <?= e($label) ?>
+                            <span><?= e($label) ?></span>
+                            <?php if ($compte > 0): ?>
+                                <?php /* Le nombre est lu par les lecteurs
+                                         d'écran avec ce qu'il compte : une
+                                         pastille qui ne dit que « 3 » ne veut
+                                         rien dire à l'oreille. */ ?>
+                                <span class="pastille">
+                                    <span aria-hidden="true"><?= $compte > 99 ? '99+' : (int) $compte ?></span>
+                                    <span class="sr-only"><?= (int) $compte ?> <?= e($pastilleTitres[$href] ?? '') ?></span>
+                                </span>
+                            <?php endif; ?>
                         </a>
                     </li>
                 <?php endforeach; ?>

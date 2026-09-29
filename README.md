@@ -31,6 +31,7 @@ les fichiers, on importe la base, c'est en ligne.
 - [Structure du site](#structure-du-site)
 - [Le compte client](#le-compte-client)
 - [Utiliser l'administration](#utiliser-ladministration)
+- [Dans l'administration](#dans-ladministration)
 - [Direction artistique](#direction-artistique)
 - [Organisation du code](#organisation-du-code)
 - [Choix techniques](#choix-techniques)
@@ -811,6 +812,65 @@ Quelques principes de fonctionnement utiles à connaître :
 - Supprimer un produit ne touche pas aux commandes déjà passées : elles
   gardent le nom et le prix pratiqués au moment de l'achat.
 - Les suppressions demandent toujours une confirmation, en deux temps.
+
+## Dans l'administration
+
+### L'état des stocks, en classeur Excel
+
+Sur la page **Produits**, le bouton « Exporter les stocks » télécharge un
+vrai `.xlsx` : une ligne par produit, avec le rayon, le statut, le stock, les
+prix et la **valeur du stock** — cette dernière colonne se somme d'un clic.
+L'en-tête est figé et filtrable, de quoi trier par stock croissant sans rien
+configurer.
+
+Les filtres en cours sont repris : ce qu'on voit à l'écran est ce qu'on
+télécharge.
+
+Le classeur est écrit par `src/Support/Xlsx.php`, sans bibliothèque — un
+`.xlsx` n'est qu'une archive ZIP de quelques fichiers XML. Ajouter
+PhpSpreadsheet aurait chargé une centaine de fichiers dans `vendor/` pour dix
+colonnes. Un CSV aurait été plus court encore, mais Excel francophone s'y
+trompe régulièrement sur le séparateur décimal, et un état des stocks dont on
+ne peut pas faire la somme ne sert à rien. Seule exigence : l'extension PHP
+`zip`, présente sur tous les hébergements courants.
+
+### Les pastilles de notification
+
+La barre latérale porte deux compteurs rouges, à la manière d'un téléphone :
+
+| Section | Ce qui est compté |
+| --- | --- |
+| **Produits** | les fiches en ligne dont il ne reste rien à vendre |
+| **Commandes** | les commandes payées qu'on n'a pas encore commencé à préparer |
+
+Un produit à déclinaisons compte pour épuisé quand **toutes** ses tailles le
+sont — la même règle que celle appliquée à la boutique, sans quoi la pastille
+annoncerait des ruptures que le client ne voit pas.
+
+Rien n'est affiché quand il n'y a rien à signaler : une pastille à zéro est un
+bruit, pas une information.
+
+### Le dépôt des photos
+
+La zone « Glissez vos photos ici » accepte les fichiers déposés **sans une
+ligne de JavaScript** : le champ de fichiers couvre toute la zone, invisible
+mais bien là, et déposer un fichier dessus revient à le déposer sur le champ.
+
+Ce qu'on n'a pas, faute de script : l'aperçu des photos avant l'envoi, et la
+réaction visuelle pendant qu'un fichier survole la zone. Les deux
+demanderaient du JavaScript dans l'administration, que le projet n'a nulle
+part.
+
+### Ce qui a été retiré
+
+Les champs « titre » et « description » pour Google ont disparu de la fiche
+produit. Le site reprend déjà le nom du produit et le début de sa description
+quand ils sont vides, et deux champs de plus à remplir pour y recopier ce que
+la fiche dit déjà, c'est deux champs de trop dans une administration destinée
+à quelqu'un qui n'est pas technicien.
+
+Les colonnes restent en base, et une valeur déjà saisie n'est pas effacée par
+un enregistrement.
 
 ## Direction artistique
 

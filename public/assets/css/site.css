@@ -1250,8 +1250,16 @@ textarea[aria-invalid='true'] { border-color: var(--accent); }
 .admin-side .btn--ghost:hover { background: var(--cream); color: var(--ink); }
 
 .admin-nav ul { display: flex; flex-wrap: wrap; gap: 0.25rem; list-style: none; margin: 0; padding: 0; }
+/* Sur grand écran la barre est une colonne : chaque lien prend toute la
+   largeur et pousse sa pastille à droite. */
+@media (min-width: 960px) {
+  .admin-nav ul { flex-direction: column; gap: 0.15rem; }
+  .admin-nav a { justify-content: space-between; width: 100%; }
+}
 .admin-nav a {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
   padding: 0.45rem 0.8rem;
   border: 1px solid transparent;
   border-radius: var(--radius-control);
@@ -1259,6 +1267,31 @@ textarea[aria-invalid='true'] { border-color: var(--accent); }
   color: color-mix(in srgb, var(--cream) 75%, transparent);
   text-decoration: none;
 }
+
+/* La pastille de notification, à la manière d'un téléphone : un disque rouge
+   et son nombre. Elle n'apparaît que s'il y a quelque chose à signaler — une
+   pastille à zéro est un bruit, pas une information.
+
+   Le rouge n'est pas dans la charte, et c'est voulu : il ne sert qu'ici, pour
+   dire « regardez ça », et il ne doit ressembler à rien d'autre sur le site. */
+.pastille {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.35rem;
+  height: 1.35rem;
+  padding: 0 0.35rem;
+  border-radius: 999px;
+  background: #d7263d;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+/* Sur l'onglet actif le fond devient crème : le rouge y perdrait son
+   contraste, on l'assombrit juste ce qu'il faut. */
+.admin-nav a[aria-current='page'] .pastille { background: #b81e32; }
 .admin-nav a:hover { color: var(--cream); text-decoration: none; }
 .admin-nav a[aria-current='page'] { background: var(--cream); color: var(--ink); font-weight: 600; }
 
@@ -1652,4 +1685,55 @@ a:hover .vignette img { transform: scale(1.06); }
 
 @media (prefers-reduced-motion: reduce) {
   .vignette img { transition: none; }
+}
+
+/* --- Zone de dépôt des photos ------------------------------------------------
+   Le champ de fichiers couvre toute la zone, invisible mais bien là : déposer
+   un fichier dessus revient à le déposer sur le champ, ce que les navigateurs
+   font nativement. Aucun JavaScript n'est nécessaire, ce qui vaut aussi pour
+   l'administration.
+
+   Ce qu'on n'a pas, faute de script : l'aperçu avant l'envoi, et la réaction
+   visuelle pendant qu'un fichier survole la zone. */
+
+.depot {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 9rem;
+  padding: 1.5rem;
+  border: 2px dashed var(--line);
+  border-radius: var(--radius-surface);
+  background: var(--cream);
+  text-align: center;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.depot input[type='file'] {
+  position: absolute;
+  /* Débordement de la bordure : « inset: 0 » s'arrête à la boîte de
+     remplissage, et les deux pixels du pointillé restaient hors d'atteinte —
+     un fichier lâché pile dessus manquait le champ. */
+  inset: -2px;
+  width: calc(100% + 4px);
+  height: calc(100% + 4px);
+  /* Invisible, mais présent : c'est lui qui reçoit le fichier déposé. */
+  opacity: 0;
+  cursor: pointer;
+}
+
+/* `focus-within` couvre le clavier, `hover` la souris : les deux manières
+   d'arriver sur la zone donnent le même retour. */
+.depot:hover,
+.depot:focus-within {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 7%, var(--cream));
+}
+
+.depot__texte { display: grid; gap: 0.35rem; pointer-events: none; }
+.depot__texte strong { font-size: 1rem; color: var(--ink); }
+.depot__texte span { font-size: 0.875rem; color: var(--ink-soft); }
+
+@media (prefers-reduced-motion: reduce) {
+  .depot { transition: none; }
 }
