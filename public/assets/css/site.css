@@ -352,6 +352,59 @@ main { flex: 1; }
 }
 .marque--creme { color: var(--cream); }
 
+/* --- Le nom de la marque au fil d'un texte ----------------------------------
+   Le wordmark est un dessin : pour « écrire BOUGE » dans un titre, il faut y
+   poser l'image. Elle est dimensionnée en em, donc elle suit la taille du
+   texte qui l'entoure, et calée sur sa ligne de base — valeur mesurée sur le
+   rendu, comme pour le verrou de l'en-tête. */
+
+.marque-inline {
+  display: inline-flex;
+  align-items: baseline;
+  /* Le fichier porte déjà 14,7 % de marge de chaque côté : un écart nul ici
+     laisse tout de même de l'air avant « CLUB ». */
+  gap: 0;
+  /* Le nom ne doit jamais être coupé en fin de ligne. */
+  white-space: nowrap;
+  /* Le fichier porte 14,7 % de marge à gauche, soit 0,41em à la taille
+     affichée : sans rattrapage, l'espace avant le nom paraît double. */
+  margin-left: -0.26em;
+}
+
+/* Quand le mot « Club » ne suit pas, c'est l'image qui termine le nom : sa
+   marge droite détacherait la ponctuation qui vient après. */
+.marque-inline:not(:has(.marque-inline__club)) { margin-right: -0.3em; }
+
+.marque-inline img {
+  /* Le fichier porte 30 % de marge en haut et en bas : à 1,35em affiché,
+     l'encre fait environ 0,52em — l'ordre de grandeur d'une capitale. */
+  height: 1.35em;
+  width: auto;
+  /* Une image s'aligne par son bord bas, pas par une ligne de base : sans
+     correction, le wordmark flotte au-dessus du texte. Sa ligne de base tombe
+     à 61,6 % de la hauteur du fichier, donc 38,4 % de la hauteur affichée
+     séparent cette ligne du bord bas — c'est ce qu'on rattrape ici. */
+  transform: translateY(0.519em);
+}
+
+.marque-inline__club {
+  margin-left: 0.12em;
+  font-family: 'Manrope', system-ui, sans-serif;
+  font-size: 0.42em;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.marque-inline--creme { color: var(--cream); }
+
+/* Un titre qui porte le wordmark a besoin d'air : l'image dépasse la hauteur
+   d'une capitale, et l'interligne serré des grands titres la ferait chevaucher
+   la ligne suivante. */
+h1:has(.marque-inline),
+h2:has(.marque-inline),
+h3:has(.marque-inline) { line-height: 1.3; }
+
 /* La mise en ligne des listes ne vise que la barre principale : les colonnes
    du panneau déroulant, elles, s'empilent (voir section 5 bis). */
 .site-nav a { text-decoration: none; }
@@ -1124,11 +1177,28 @@ textarea[aria-invalid='true'] { border-color: var(--accent); }
    l'iframe d'OpenStreetMap, elle, arrive avec une bordure que rien d'autre
    sur le site ne porte. */
 .concept-store__plan {
+  position: relative;
   margin-top: 1.25rem;
   overflow: hidden;
   border-radius: var(--radius-surface);
   background: var(--cream);
   aspect-ratio: 4 / 3;
+}
+
+/* Le repère de la marque, au centre du cadre — là où le cadrage pose
+   l'adresse. `pointer-events: none` est la clé : sans lui, le repère avalerait
+   le clic et la carte ne se déplacerait plus. */
+.concept-store__repere {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 3rem;
+  height: auto;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  /* Le monogramme est sombre par endroits et la carte est claire : l'ombre
+     portée le détache quel que soit ce qu'il y a dessous. */
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.35));
 }
 
 .concept-store__plan iframe {

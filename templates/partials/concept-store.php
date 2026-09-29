@@ -12,6 +12,8 @@
  * @var array<string, mixed> $shop
  */
 
+use Bouge\Support\View;
+
 $store = $shop['store'] ?? [];
 
 if (($store['name'] ?? '') === '') {
@@ -23,9 +25,19 @@ if (($store['name'] ?? '') === '') {
         <div class="concept-store__grille">
             <div>
                 <p class="eyebrow">Le lieu</p>
+                <?php /* Les deux noms sont composés dans leur propre
+                         typographie : le wordmark est un dessin, pas une
+                         police, et l'écrire en capitales ordinaires reviendrait
+                         à citer la marque sans la montrer. */ ?>
                 <h2 class="t-l" style="margin-top:.75rem">
-                    Derrière <?= e($shop['name']) ?>,<br>
-                    il y a <?= e($store['name']) ?>.
+                    Derrière <?= View::partial('partials/marque-inline', [
+                        'shop' => $shop, 'club' => true, 'ton' => 'creme',
+                    ]) ?>,<br>
+                    <?php /* Pas de point après le second nom : le wordmark en
+                             porte un, et l'ajouter en donnerait deux. */ ?>
+                    il y a <?= View::partial('partials/marque-inline', [
+                        'shop' => $shop, 'club' => false, 'ton' => 'creme',
+                    ]) ?>
                 </h2>
 
                 <?php /* Le premier paragraphe est composé plus grand : il porte
@@ -104,11 +116,13 @@ if (($store['name'] ?? '') === '') {
                         round((float) $lat + $hauteur, 6),
                     ]);
 
+                    // Pas de paramètre « marker » : l'épingle d'OpenStreetMap
+                    // est remplacée par le monogramme de la marque, posé
+                    // au-dessus du cadre.
                     $embarque = 'https://www.openstreetmap.org/export/embed.html?'
                         . http_build_query([
-                            'bbox'   => $cadre,
-                            'layer'  => 'mapnik',
-                            'marker' => $lat . ',' . $lon,
+                            'bbox'  => $cadre,
+                            'layer' => 'mapnik',
                         ]);
 
                     $grand = 'https://www.openstreetmap.org/?'
@@ -127,6 +141,19 @@ if (($store['name'] ?? '') === '') {
                         <iframe src="<?= e($embarque) ?>" loading="lazy"
                                 title="Plan de <?= e($store['name']) ?>, <?= e($store['address'] ?? '') ?>"
                                 referrerpolicy="no-referrer"></iframe>
+
+                        <?php /* Le monogramme de la marque plutôt que l'épingle
+                                 d'OpenStreetMap. Le cadrage est centré sur
+                                 l'adresse, donc le repère tombe pile dessus au
+                                 chargement.
+
+                                 Il ne capte pas la souris : on peut déplacer et
+                                 zoomer la carte au travers. En revanche il reste
+                                 au centre du cadre — c'est un repère, pas une
+                                 épingle accrochée au terrain. */ ?>
+                        <img class="concept-store__repere"
+                             src="<?= e(asset('/assets/brand/monogramme-orange.png')) ?>"
+                             alt="" width="512" height="512" loading="lazy">
                     </div>
                     <p class="t-xs" style="margin-top:.75rem">
                         <a href="<?= e($grand) ?>" target="_blank" rel="noopener">

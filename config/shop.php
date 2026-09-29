@@ -36,8 +36,8 @@ return [
         // un seul paragraphe.
         'pitch'   => [
             "BOUGE est un concept store dans lequel on peut faire du sport : on y pousse de la fonte, on y boit un café, on peut récupérer avec un ostéo. C'est un lieu avant d'être une marque, et c'est là que tout a commencé.",
-            "BOUGE Club en est le rayon matériel. Il existe pour deux raisons. D'abord pour que ceux qui s'entraînent ici trouvent de quoi s'équiper correctement, sans courir les magasins la veille d'une séance : ce qu'on vend, c'est ce qu'on utilise soi-même au bassin.",
-            "Ensuite pour que ceux qui tiennent au lieu puissent le soutenir. Une commande passée ici ne part pas chez une enseigne : elle fait vivre la salle, sa programmation et les gens qui l'animent.",
+            "BOUGE Club en est le rayon matériel : de quoi s'équiper sans courir les magasins la veille d'une séance. Ce qu'on vend, c'est ce qu'on utilise au bassin.",
+            "Et une commande passée ici ne part pas chez une enseigne : elle fait vivre le lieu.",
             "Le reste se vit sur place. Poussez la porte, on vous fera visiter.",
         ],
         'url'     => '',
