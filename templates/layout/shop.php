@@ -99,6 +99,18 @@ $flash = Session::takeFlash('shop');
             </form>
 
             <div class="row">
+                <?php /* Quand un administrateur est connecté, la boutique lui
+                         tend la porte de l'administration. Sans ce raccourci,
+                         il faut connaître /admin par cœur, et rien sur le site
+                         ne l'indique. La session d'administration est distincte
+                         de celle des clients : les deux peuvent coexister. */ ?>
+                <?php if (\Bouge\Support\Auth::check()): ?>
+                    <a class="compte-link compte-link--admin" href="/admin">
+                        <span aria-hidden="true">⚙</span>
+                        <span class="compte-link__texte">Administration</span>
+                    </a>
+                <?php endif; ?>
+
                 <?php /* Le compte n'est jamais un passage obligé : le lien est
                          offert, la commande reste possible sans. */ ?>
                 <?php if ($client !== null): ?>

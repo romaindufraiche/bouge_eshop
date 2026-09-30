@@ -329,3 +329,23 @@ CREATE TABLE `order_items` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 SET FOREIGN_KEY_CHECKS = 1;
+
+-- --- Réinitialisation des mots de passe ---------------------------------------
+
+DROP TABLE IF EXISTS `password_resets`;
+CREATE TABLE `password_resets` (
+  `id`          INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `customer_id` INT UNSIGNED NOT NULL,
+  -- Empreinte SHA-256 du jeton envoyé par courriel, jamais le jeton lui-même.
+  `token_hash`  CHAR(64) NOT NULL,
+  `expires_at`  DATETIME NOT NULL,
+  -- Renseignée à la première utilisation : un lien ne sert qu'une fois.
+  `used_at`     DATETIME DEFAULT NULL,
+  `created_at`  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `password_resets_token` (`token_hash`),
+  KEY `password_resets_customer` (`customer_id`),
+  CONSTRAINT `password_resets_customer_fk` FOREIGN KEY (`customer_id`)
+    REFERENCES `customers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

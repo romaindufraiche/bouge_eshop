@@ -6,6 +6,7 @@ namespace Bouge\Controller;
 
 use Bouge\Repository\OrderRepository;
 use Bouge\Support\Config;
+use Bouge\Support\Mailer;
 use Stripe\Exception\SignatureVerificationException;
 use Stripe\Webhook;
 use Throwable;
@@ -68,10 +69,17 @@ final class WebhookController
                 case 'checkout.session.async_payment_succeeded':
                     if (($session->payment_status ?? '') === 'paid') {
                         $paymentIntent = $session->payment_intent ?? null;
-                        $orders->markPaid(
+                        $venaitDePasser = $orders->markPaid(
                             $orderId,
                             is_string($paymentIntent) ? $paymentIntent : ($paymentIntent->id ?? null)
                         );
+
+                        // markPaid ne renvoie vrai qu'une fois : Stripe rejoue
+                        // volontiers le même événement, et le client n'a pas à
+                        // recevoir trois accusés pour une commande.
+                        if ($venaitDePasser) {
+                            $this->accuserReception($orders, $orderId);
+                        }
                     }
                     break;
 
@@ -94,5 +102,32 @@ final class WebhookController
         }
 
         return json_encode(['received' => true]) ?: '';
+    }
+
+    /**
+     * Envoie l'accusé de commande.
+     *
+     * Enfermé dans son propre try : un serveur de courriel muet ne doit pas
+     * faire échouer le webhook, sinon Stripe rejouerait l'événement et le
+     * paiement resterait « en attente » alors qu'il est encaissé.
+     */
+    private function accuserReception(OrderRepository $orders, int $orderId): void
+    {
+        try {
+            $commande = $orders->find($orderId);
+
+            if ($commande === null) {
+                return;
+            }
+
+            Mailer::send(
+                (string) $commande['email'],
+                'Votre commande ' . $commande['reference'],
+                'commande-confirmee',
+                ['commande' => $commande]
+            );
+        } catch (Throwable $e) {
+            error_log("Accusé de commande {$orderId} non envoyé : " . $e);
+        }
     }
 }

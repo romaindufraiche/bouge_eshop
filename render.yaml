@@ -42,3 +42,26 @@ services:
         sync: false
       - key: STRIPE_WEBHOOK_SECRET
         sync: false
+
+      # Transporteur. Vides, le pilote « demonstration » ci-dessus continue
+      # d'inventer les points relais. Renseignées avec un compte de TEST
+      # Boxtal, passez BOUGE_CARRIER_DRIVER à « boxtal » pour dérouler
+      # l'achat d'étiquette sans rien payer.
+      - key: BOXTAL_USER
+        sync: false
+      - key: BOXTAL_PASSWORD
+        sync: false
+      - key: BOXTAL_TEST
+        value: "1"
+
+      # Courriels. Sans BOUGE_MAIL_FROM, la démonstration n'écrit à personne :
+      # c'est ce qu'on veut d'une démonstration. Les renseigner suffit à
+      # activer l'accusé de commande et le lien de mot de passe oublié.
+      - key: BOUGE_MAIL_FROM
+        sync: false
+      - key: BOUGE_SMTP_HOST
+        sync: false
+      - key: BOUGE_SMTP_USER
+        sync: false
+      - key: BOUGE_SMTP_PASSWORD
+        sync: false

@@ -35,6 +35,10 @@ use Bouge\Support\Csrf;
             </div>
 
             <button class="btn btn--accent btn--block btn--lg" type="submit">Se connecter</button>
+
+            <p class="t-s" style="margin-top:1rem;text-align:center">
+                <a class="link-quiet" href="/compte/mot-de-passe-oublie">Mot de passe oublié&nbsp;?</a>
+            </p>
         </form>
 
         <div class="divider" style="margin-top:2.5rem;padding-top:2rem">
@@ -51,6 +55,12 @@ use Bouge\Support\Csrf;
         <p class="t-s muted" style="margin-top:2rem">
             <?php /* Le compte n'est pas un passage obligé : le dire évite de
                      perdre un client au moment de payer. */ ?>
+            <?php /* L'administration a sa propre porte et ses propres comptes :
+                     essayer ses identifiants d'administrateur ici ne mène à
+                     rien, et rien ne le disait. */ ?>
+            Vous gérez la boutique&nbsp;? L'administration se trouve
+            <a href="/admin/connexion">à cette adresse</a>.
+            <br><br>
             Vous pouvez aussi <a href="/panier">commander sans compte</a> :
             rien ne l'exige.
         </p>

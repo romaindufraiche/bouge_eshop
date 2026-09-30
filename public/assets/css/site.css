@@ -1089,6 +1089,22 @@ textarea[aria-invalid='true'] { border-color: var(--accent); }
   .compte-link span[aria-hidden] { font-size: 1rem; }
 }
 
+/* Le raccourci vers l'administration, visible seulement quand une session
+   d'administration est ouverte. Encadré pour qu'on ne le confonde pas avec
+   le lien du compte client juste à côté : ce ne sont pas les mêmes clés. */
+.compte-link--admin {
+  border: 1px solid var(--accent-deep);
+  border-radius: 999px;
+  padding: 0.2rem 0.65rem;
+  color: var(--accent-deep);
+  font-weight: 600;
+}
+.compte-link--admin:hover { background: var(--accent-deep); color: #fff; }
+.compte-link--admin:hover span[aria-hidden] { color: #fff; }
+@media (max-width: 520px) {
+  .compte-link--admin { padding: 0.2rem 0.45rem; }
+}
+
 .compte { display: grid; gap: 2.5rem; margin-top: 2.5rem; }
 @media (min-width: 960px) {
   .compte { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 3rem; align-items: start; }

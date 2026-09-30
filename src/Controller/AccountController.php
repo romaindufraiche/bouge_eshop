@@ -5,9 +5,13 @@ declare(strict_types=1);
 namespace Bouge\Controller;
 
 use Bouge\Repository\CustomerRepository;
+use Bouge\Support\Auth;
 use Bouge\Support\Cart;
+use Bouge\Support\Config;
 use Bouge\Support\CustomerAuth;
 use Bouge\Support\Csrf;
+use Bouge\Support\Mailer;
+use Bouge\Support\PasswordReset;
 use Bouge\Support\Session;
 use Bouge\Support\Validator;
 use Bouge\Support\View;
@@ -50,7 +54,33 @@ final class AccountController
         // Le message ne distingue jamais « adresse inconnue » de « mot de
         // passe incorrect » : le préciser renseignerait sur l'existence du
         // compte.
-        if ($email === '' || $password === '' || !CustomerAuth::attempt($email, $password)) {
+        if ($email === '' || $password === '') {
+            return $this->renderLogin('Adresse ou mot de passe incorrect.', $email);
+        }
+
+        if (!CustomerAuth::attempt($email, $password)) {
+            // Les identifiants d'administration ouvrent l'administration,
+            // depuis ce formulaire aussi. La boutique n'affiche qu'un seul
+            // « se connecter » ; s'y faire répondre « mot de passe
+            // incorrect » alors que le couple est juste n'a aucun sens pour
+            // la personne qui tient le magasin.
+            //
+            // Ce qui s'ouvre reste la session d'administration, jamais un
+            // compte client : les deux clés de session ne se croisent pas,
+            // et le mot de passe est vérifié par le même `password_verify`
+            // que sur /admin/connexion. Rien n'est relâché ici — la
+            // temporisation ci-dessus s'applique d'ailleurs aussi, ce que le
+            // formulaire d'administration ne fait pas.
+            if (Auth::attempt($email, $password)) {
+                // La tentative « client » qui vient d'échouer ne doit pas
+                // compter : le couple était bon, au mauvais guichet.
+                Session::forget('login_failures');
+
+                redirect('/admin');
+
+                return '';
+            }
+
             return $this->renderLogin('Adresse ou mot de passe incorrect.', $email);
         }
 
@@ -126,6 +156,15 @@ final class AccountController
         // déjà acheté.
         $rattachees = $repository->claimOrders($id, $email);
 
+        // Le courriel de bienvenue ne conditionne rien : s'il échoue, le
+        // compte existe quand même et le client est déjà connecté.
+        Mailer::send(
+            $email,
+            'Bienvenue chez ' . Config::shop('name', 'la boutique'),
+            'bienvenue',
+            ['client' => ['email' => $email, 'name' => $validator->value('name')]]
+        );
+
         CustomerAuth::login($id);
 
         Session::flash('shop', $rattachees > 0
@@ -135,6 +174,161 @@ final class AccountController
         redirect('/compte');
 
         return '';
+    }
+
+    // --- Mot de passe oublié -------------------------------------------------
+
+    public function showForgot(): string
+    {
+        return $this->renderForgot();
+    }
+
+    /**
+     * Ouvre une demande de réinitialisation.
+     *
+     * La réponse est la même que l'adresse soit connue ou non. Dire « compte
+     * inconnu » offrirait à n'importe qui le moyen de savoir qui est client de
+     * la boutique, une adresse à la fois.
+     */
+    public function forgot(): string
+    {
+        if (!Csrf::isValid($_POST['_token'] ?? null)) {
+            return $this->renderForgot(['email' => 'Votre session a expiré. Réessayez.'], $_POST);
+        }
+
+        $validator = new Validator($_POST);
+        $validator
+            ->required('email', 'Indiquez votre adresse électronique.')
+            ->email('email', 'Cette adresse ne semble pas valide.');
+
+        if (!$validator->passes()) {
+            http_response_code(422);
+
+            return $this->renderForgot($validator->errors(), $validator->values());
+        }
+
+        PasswordReset::purge();
+
+        $email = mb_strtolower($validator->value('email'));
+        $client = (new CustomerRepository())->findByEmail($email);
+
+        if ($client !== null) {
+            $jeton = PasswordReset::open((int) $client['id']);
+
+            Mailer::send(
+                $email,
+                'Réinitialiser votre mot de passe',
+                'mot-de-passe',
+                [
+                    'lien'   => url('/compte/nouveau-mot-de-passe?jeton=' . $jeton),
+                    'heures' => PasswordReset::HOURS,
+                ]
+            );
+        }
+
+        return $this->message(
+            'Regardez vos courriels',
+            "Si un compte existe avec cette adresse, un lien vient d'y être envoyé. "
+            . 'Il est valable ' . PasswordReset::HOURS . ' heures et ne fonctionnera qu\'une fois. '
+            . "Pensez à vérifier vos indésirables."
+        );
+    }
+
+    public function showReset(): string
+    {
+        $jeton = (string) ($_GET['jeton'] ?? '');
+
+        if (PasswordReset::resolve($jeton) === null) {
+            return $this->lienMort();
+        }
+
+        return $this->renderReset($jeton);
+    }
+
+    public function reset(): string
+    {
+        if (!Csrf::isValid($_POST['_token'] ?? null)) {
+            return $this->renderReset((string) ($_POST['jeton'] ?? ''), ['password' => 'Votre session a expiré. Réessayez.']);
+        }
+
+        $jeton = (string) ($_POST['jeton'] ?? '');
+        $client = PasswordReset::resolve($jeton);
+
+        if ($client === null) {
+            return $this->lienMort();
+        }
+
+        $motDePasse = (string) ($_POST['password'] ?? '');
+        $erreurs = [];
+
+        // La même règle qu'à l'inscription : la longueur protège mieux qu'un
+        // mélange imposé de majuscules et de chiffres.
+        if (mb_strlen($motDePasse) < 12) {
+            $erreurs['password'] = 'Douze caractères minimum. Une phrase courte fait très bien l\'affaire.';
+        }
+
+        if ($motDePasse !== (string) ($_POST['password_confirm'] ?? '')) {
+            $erreurs['password_confirm'] = 'Les deux mots de passe ne correspondent pas.';
+        }
+
+        if ($erreurs !== []) {
+            http_response_code(422);
+
+            return $this->renderReset($jeton, $erreurs);
+        }
+
+        PasswordReset::complete((int) $client['reset_id'], (int) $client['id'], $motDePasse);
+
+        // On connecte directement : demander de ressaisir le mot de passe
+        // qu'on vient de choisir n'apporte rien.
+        CustomerAuth::login((int) $client['id']);
+
+        Session::flash('shop', 'Votre mot de passe a été changé.');
+        redirect('/compte');
+
+        return '';
+    }
+
+    private function lienMort(): string
+    {
+        return $this->message(
+            'Ce lien n\'est plus valable',
+            "Il a peut-être expiré, ou déjà servi. Demandez-en un nouveau : c'est sans conséquence, "
+            . 'votre mot de passe actuel reste en place jusqu\'à ce que vous en choisissiez un autre.'
+        );
+    }
+
+    /** @param array<string, string> $errors */
+    private function renderForgot(array $errors = [], array $values = []): string
+    {
+        return View::render('compte/mot-de-passe-oublie', [
+            'title'     => 'Mot de passe oublié',
+            'canonical' => '/compte/mot-de-passe-oublie',
+            'noindex'   => true,
+            'errors'    => $errors,
+            'values'    => $values,
+        ]);
+    }
+
+    /** @param array<string, string> $errors */
+    private function renderReset(string $jeton, array $errors = []): string
+    {
+        return View::render('compte/nouveau-mot-de-passe', [
+            'title'   => 'Nouveau mot de passe',
+            'noindex' => true,
+            'jeton'   => $jeton,
+            'errors'  => $errors,
+        ]);
+    }
+
+    private function message(string $titre, string $corps): string
+    {
+        return View::render('boutique/message', [
+            'title'   => $titre,
+            'noindex' => true,
+            'heading' => $titre,
+            'body'    => $corps,
+        ]);
     }
 
     public function logout(): string

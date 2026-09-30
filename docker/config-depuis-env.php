@@ -57,6 +57,23 @@ $config = [
         'password' => $lire('BOXTAL_PASSWORD'),
         'test'     => $lire('BOXTAL_TEST', '1') !== '0',
     ],
+
+    // Sans BOUGE_MAIL_FROM, aucun courriel ne part : ni l'accusé de commande,
+    // ni le lien de réinitialisation du mot de passe. C'est volontaire — une
+    // démonstration n'a pas à écrire à qui que ce soit, et un expéditeur
+    // emprunté partirait droit dans les indésirables.
+    'mail' => [
+        'from'      => $lire('BOUGE_MAIL_FROM'),
+        'from_name' => $lire('BOUGE_MAIL_FROM_NAME', 'BOUGE Club'),
+        'reply_to'  => $lire('BOUGE_MAIL_REPLY_TO'),
+        'smtp' => [
+            'host'       => $lire('BOUGE_SMTP_HOST'),
+            'port'       => (int) $lire('BOUGE_SMTP_PORT', '587'),
+            'encryption' => $lire('BOUGE_SMTP_ENCRYPTION', 'tls'),
+            'user'       => $lire('BOUGE_SMTP_USER'),
+            'password'   => $lire('BOUGE_SMTP_PASSWORD'),
+        ],
+    ],
 ];
 
 $chemin = dirname(__DIR__) . '/config/config.php';

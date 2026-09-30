@@ -21,11 +21,12 @@ les fichiers, on importe la base, c'est en ligne.
 - [Démarrer en local](#démarrer-en-local)
 - [Sur un Mac, en partant de zéro](#sur-un-mac-en-partant-de-zéro)
 - [Configuration](#configuration)
-- [Brancher Stripe](#brancher-stripe)
+- [Brancher Stripe](#brancher-stripe) — et le [tutoriel détaillé](GUIDE-STRIPE.md)
+- [Les courriels](#les-courriels)
 - [Mettre en ligne chez OVH](#mettre-en-ligne-chez-ovh)
 - [Chez un autre hébergeur](#chez-un-autre-hébergeur)
 - [Aperçu statique sur GitHub Pages](#aperçu-statique-sur-github-pages)
-- [Livraison : qui fait quoi](#livraison--qui-fait-quoi)
+- [Livraison : qui fait quoi](#livraison--qui-fait-quoi) — et le [tutoriel Boxtal détaillé](GUIDE-BOXTAL.md)
 - [Démonstration en ligne sur Render](#démonstration-en-ligne-sur-render)
 - [Le catalogue de démonstration](#le-catalogue-de-démonstration)
 - [Structure du site](#structure-du-site)
@@ -185,6 +186,11 @@ pas de lien.
 
 ## Brancher Stripe
 
+> **Première installation ?** Suivez plutôt **[GUIDE-STRIPE.md](GUIDE-STRIPE.md)** :
+> la marche à suivre y est détaillée écran par écran, de la création du compte
+> au premier vrai paiement, avec les cartes de test et les pannes courantes.
+> Ce qui suit en est le résumé.
+
 1. Créer un compte sur [stripe.com](https://stripe.com) et récupérer les clés
    de test dans « Développeurs » → « Clés API ».
 2. Les reporter dans `config/config.php`.
@@ -216,6 +222,64 @@ stock ne doit être décompté qu'une fois.
 
 En mode test, utiliser la carte `4242 4242 4242 4242`, n'importe quelle date
 future et n'importe quel cryptogramme.
+
+## Les courriels
+
+La boutique envoie trois messages, et pas un de plus :
+
+| Quand | Ce qu'il dit |
+| --- | --- |
+| Le paiement est confirmé par Stripe | L'accusé de commande : la référence, les articles, le total, et le point relais choisi avec ses horaires. |
+| Un compte vient d'être créé | La bienvenue, et le rappel de l'adresse qui sert d'identifiant. |
+| Un client a oublié son mot de passe | Un lien valable deux heures. |
+
+Le reçu de paiement, lui, reste l'affaire de Stripe : activez-le dans son
+tableau de bord, « Paramètres » → « Reçus par e-mail ». Le client reçoit donc
+deux messages qui ne disent pas la même chose — la boutique confirme la
+commande, Stripe atteste du paiement.
+
+### Les régler
+
+Tout tient dans le bloc `mail` de `config/config.php` :
+
+```php
+'mail' => [
+    'from'      => 'contact@votre-domaine.fr',  // obligatoire
+    'from_name' => 'BOUGE Club',
+    'reply_to'  => '',                           // vide : la même que 'from'
+    'smtp' => [
+        'host'       => 'ssl0.ovh.net',          // chez OVH
+        'port'       => 587,
+        'encryption' => 'tls',
+        'user'       => 'contact@votre-domaine.fr',
+        'password'   => '…',
+    ],
+],
+```
+
+**Passez par SMTP.** Sans `smtp.host`, PHP poste le message depuis le serveur
+web sans s'authentifier, et Gmail comme Outlook le rangent en indésirable —
+quand ils ne le refusent pas. Les réglages SMTP sont ceux de votre boîte,
+chez votre hébergeur.
+
+**L'adresse d'expédition doit appartenir à votre domaine.** Un expéditeur en
+`@gmail.com` envoyé depuis votre serveur est refusé par la plupart des
+messageries : c'est exactement ce que fait un hameçonnage.
+
+Sans `mail.from`, aucun message ne part : la boutique le note dans le journal
+d'erreurs et continue de fonctionner. Une commande n'est jamais perdue pour
+un serveur de courriel muet — c'est délibéré : perdre un accusé de réception
+est ennuyeux, perdre la commande le serait bien davantage.
+
+### Mot de passe oublié
+
+Le lien envoyé est valable **deux heures** et ne sert **qu'une fois**. La
+demande répond toujours la même chose, que l'adresse existe ou non : dire
+« compte inconnu » offrirait à n'importe qui le moyen de savoir qui est
+client de la boutique.
+
+Les demandes sont stockées hachées, comme un mot de passe. Celles de plus de
+sept jours sont effacées au fil de l'eau.
 
 ## Mettre en ligne chez OVH
 
@@ -455,6 +519,10 @@ La boutique propose trois modes de remise :
 | **Livraison en point relais** | La même chose, en moins cher — mais il faut un transporteur branché pour que le client puisse choisir son point. |
 
 ### Brancher Boxtal
+
+> **Première installation ?** Suivez plutôt **[GUIDE-BOXTAL.md](GUIDE-BOXTAL.md)** :
+> compte de test, accès API, poids des produits, achat d'une première
+> étiquette, bascule en production. Ce qui suit en est le résumé.
 
 Boxtal est un courtier plutôt qu'un transporteur : **un seul compte** donne
 Mondial Relay, Colissimo et Chronopost, à domicile comme en point relais,
@@ -751,6 +819,17 @@ transporteur : il montre le numéro, à reporter sur le site de celui-ci.
 
 **L'adresse est `/admin`** — par exemple `https://votre-domaine.fr/admin`.
 Sans session ouverte, elle renvoie vers `/admin/connexion`.
+
+Vos identifiants marchent aussi depuis le **« Se connecter » de la
+boutique** : la boutique n'affiche qu'un seul bouton de connexion, et s'y
+faire répondre « mot de passe incorrect » alors que le couple est juste
+n'aurait aucun sens pour la personne qui tient le magasin. Reconnus, ils
+ouvrent l'administration — jamais un compte client : les deux sessions
+restent séparées, comme elles l'ont toujours été.
+
+Une fois la session d'administration ouverte, un bouton **⚙ Administration**
+apparaît dans l'en-tête de la boutique. Il n'existe que pour vous : un
+visiteur, et même un client connecté, ne le voit pas.
 
 Les identifiants sont ceux donnés au script d'installation :
 

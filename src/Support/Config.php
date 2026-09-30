@@ -42,6 +42,18 @@ final class Config
         return self::dig(self::$shop, $key, $default);
     }
 
+    /**
+     * Tout `config/shop.php`, pour les gabarits qui reçoivent `$shop` entier
+     * plutôt qu'une clé — les courriels, notamment, qui sont rendus hors du
+     * cycle normal des pages.
+     *
+     * @return array<string, mixed>
+     */
+    public static function shopAll(): array
+    {
+        return self::$shop ??= self::load('shop.php', false);
+    }
+
     /** @return array<string, mixed> */
     private static function load(string $file, bool $required): array
     {

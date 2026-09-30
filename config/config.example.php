@@ -28,11 +28,15 @@ return [
     // --- Stripe -------------------------------------------------------------
     // Clés disponibles sur https://dashboard.stripe.com/apikeys
     'stripe' => [
-        'secret_key'     => 'sk_test_...',
+        'secret_key'      => 'sk_test_...',
+        // Inutilisée aujourd'hui : le paiement passe par la page hébergée par
+        // Stripe, et la boutique n'exécute aucun code Stripe dans le
+        // navigateur. Le champ attend le jour où l'on intégrerait le
+        // formulaire de carte dans la page.
         'publishable_key' => 'pk_test_...',
         // Donné par le tableau de bord Stripe au moment de créer le webhook,
         // dont l'adresse est <site_url>/webhook/stripe
-        'webhook_secret' => 'whsec_...',
+        'webhook_secret'  => 'whsec_...',
     ],
 
     // --- Transporteur (Boxtal) ----------------------------------------------
@@ -52,10 +56,41 @@ return [
     ],
 
     // --- Courriels ----------------------------------------------------------
-    // La boutique n'envoie aucun courriel elle-même : c'est Stripe qui
-    // adresse le reçu de paiement au client (à activer dans le tableau de
-    // bord Stripe, « Paramètres » → « Reçus par e-mail »). Vous suivez les
-    // commandes à préparer depuis l'administration.
+    // La boutique envoie trois courriels : l'accusé de commande, la bienvenue
+    // à l'ouverture d'un compte, et le lien de réinitialisation du mot de
+    // passe.
+    'mail' => [
+        // Obligatoire. Sans cette adresse, aucun courriel ne part.
+        // Elle doit appartenir à votre domaine : un expéditeur en @gmail.com
+        // envoyé depuis votre serveur est refusé par la plupart des messageries.
+        'from'      => 'contact@votre-domaine.fr',
+        'from_name' => 'BOUGE Club',
+        // Où arrivent les réponses des clients. Vide : la même que ci-dessus.
+        'reply_to'  => '',
+
+        // SMTP : fortement recommandé. Sans lui, PHP poste le courriel depuis
+        // le serveur web sans authentification, et Gmail comme Outlook le
+        // rangent souvent en indésirable.
+        //
+        // Chez OVH, ce sont les réglages de votre boîte : ssl0.ovh.net,
+        // port 587, chiffrement « tls », et l'adresse complète en identifiant.
+        // Laisser 'host' vide retombe sur la fonction mail() de PHP.
+        'smtp' => [
+            'host'       => '',
+            'port'       => 587,
+            // 'tls' pour le port 587, 'ssl' pour le 465, '' pour aucun.
+            'encryption' => 'tls',
+            'user'       => '',
+            'password'   => '',
+            'timeout'    => 12,
+        ],
+    ],
+
+    // Le reçu de paiement, lui, reste l'affaire de Stripe : activez-le dans
+    // le tableau de bord, « Paramètres » → « Reçus par e-mail ». Le client
+    // reçoit donc deux messages, qui ne disent pas la même chose — la
+    // boutique confirme la commande et le point de retrait, Stripe atteste
+    // du paiement.
 
     // --- Affichage des erreurs ----------------------------------------------
     // true en développement seulement. En production, laissez false : une
