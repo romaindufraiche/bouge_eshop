@@ -110,7 +110,7 @@ return [
         // du calcul de tarif. C'est celle de la salle.
         'from' => [
             'company'     => 'BOUGE',
-            'address'     => '12 rue de la Piscine',
+            'address'     => '8 rue Albert Simonin',
             'postal_code' => '92400',
             'city'        => 'Courbevoie',
             'country'     => 'FR',

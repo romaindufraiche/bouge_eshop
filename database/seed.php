@@ -320,7 +320,7 @@ if ($existing === 0) {
     Database::run(
         'INSERT INTO pickup_points (name, address_line1, postal_code, city, hours, position)
          VALUES (?, ?, ?, ?, ?, 0)',
-        ['Le concept store BOUGE', '12 rue de la Piscine', '92400', 'Courbevoie', 'Du mardi au samedi, 10h – 19h']
+        ['Le concept store BOUGE', '8 rue Albert Simonin', '92400', 'Courbevoie', 'Du mardi au samedi, 10h – 19h']
     );
     echo "✓ Point de retrait de démonstration créé\n";
 }
