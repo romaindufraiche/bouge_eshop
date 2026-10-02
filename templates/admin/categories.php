@@ -57,27 +57,70 @@ $value = static function (string $key) use ($values, $editing): string {
                                 <?php endif; ?>
                             </td>
                             <td class="ta-right nums"><?= (int) $category['product_count'] ?></td>
-                            <td class="ta-right">
+                            <td class="ta-right admin-table__actions">
                                 <a class="link-quiet t-s" href="/admin/categories?modifier=<?= (int) $category['id'] ?>#formulaire">
                                     Modifier
                                 </a>
 
-                                <?php if ((int) $category['product_count'] === 0): ?>
-                                    <?php /* Confirmation en deux temps, sans JavaScript. */ ?>
-                                    <details class="confirm confirm--inline">
-                                        <summary class="link-danger t-s">Supprimer</summary>
-                                        <form method="post" action="/admin/categories/supprimer">
-                                            <?= Csrf::field() ?>
-                                            <input type="hidden" name="id" value="<?= (int) $category['id'] ?>">
+                                <?php
+                                $nombre = (int) $category['product_count'];
+                                // Les autres rayons, candidats à l'accueil des produits.
+                                $ailleurs = array_filter(
+                                    $categories,
+                                    static fn (array $c): bool => (int) $c['id'] !== (int) $category['id']
+                                );
+                                ?>
+                                <?php /* Confirmation en deux temps, sans JavaScript. */ ?>
+                                <details class="confirm confirm--inline">
+                                    <summary class="link-danger t-s">Supprimer</summary>
+                                    <form method="post" action="/admin/categories/supprimer" class="stack-s">
+                                        <?= Csrf::field() ?>
+                                        <input type="hidden" name="id" value="<?= (int) $category['id'] ?>">
+
+                                        <?php if ($nombre === 0): ?>
                                             <p class="t-xs">Supprimer « <?= e($category['name']) ?> » ?</p>
-                                            <button class="btn btn--danger btn--sm" type="submit">Oui, supprimer</button>
-                                        </form>
-                                    </details>
-                                <?php else: ?>
-                                    <?php /* Une catégorie encore utilisée ne peut pas partir :
-                                             ses produits se retrouveraient sans rayon. */ ?>
-                                    <span class="t-xs muted">Contient des produits</span>
-                                <?php endif; ?>
+                                        <?php else: ?>
+                                            <?php /* Une catégorie pleine ne se refuse plus : elle
+                                                     demande ce que deviennent ses produits. Les
+                                                     refuser revenait à ne jamais pouvoir supprimer
+                                                     un rayon. */ ?>
+                                            <p class="t-xs">
+                                                « <?= e($category['name']) ?> » contient
+                                                <?= $nombre ?> produit<?= $nombre > 1 ? 's' : '' ?>.
+                                                Qu'en faire&nbsp;?
+                                            </p>
+
+                                            <?php if ($ailleurs !== []): ?>
+                                                <label class="choix t-xs">
+                                                    <input type="radio" name="produits" value="deplacer" checked>
+                                                    <span>
+                                                        Les déplacer vers
+                                                        <select name="destination" aria-label="Catégorie d'accueil">
+                                                            <?php foreach ($ailleurs as $autre): ?>
+                                                                <option value="<?= (int) $autre['id'] ?>"><?= e($autre['name']) ?></option>
+                                                            <?php endforeach; ?>
+                                                        </select>
+                                                    </span>
+                                                </label>
+                                            <?php endif; ?>
+
+                                            <label class="choix t-xs">
+                                                <input type="radio" name="produits" value="supprimer"
+                                                       <?= $ailleurs === [] ? 'checked' : '' ?>>
+                                                <span>
+                                                    Les supprimer avec la catégorie
+                                                    <span class="d-block muted">
+                                                        Définitif. Les commandes déjà passées gardent
+                                                        leur libellé&nbsp;: l'historique des ventes
+                                                        ne bouge pas.
+                                                    </span>
+                                                </span>
+                                            </label>
+                                        <?php endif; ?>
+
+                                        <button class="btn btn--danger btn--sm" type="submit">Oui, supprimer</button>
+                                    </form>
+                                </details>
                             </td>
                         </tr>
                     <?php endforeach; ?>

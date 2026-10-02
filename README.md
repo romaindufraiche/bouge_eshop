@@ -67,6 +67,10 @@ php database/install.php contact@bouge.fr bouge-dev-2026
 # 4. Un catalogue de démonstration (facultatif)
 php database/seed.php
 
+# 4 bis. Des commandes de démonstration (facultatif) : un écran de commandes
+#        vide ne montre ni les statuts, ni les pastilles de notification
+php database/seed-commandes.php
+
 # 5. Le serveur de développement
 php -S localhost:8000 -t public dev-server.php
 ```
@@ -128,6 +132,7 @@ La boutique répond sur <http://localhost:8000>, l'administration sur
 | `php database/install.php <email> <mot-de-passe>` | **Crée les tables** à partir de `database/schema.sql`, puis le compte d'administration. Le catalogue reste vide. C'est le script d'une vraie installation. |
 | `php database/seed.php [email] [mot-de-passe]` | Remplit un catalogue de démonstration (5 catégories, 14 produits). Les tables doivent déjà exister. |
 | `php database/seed-demo.php` | Ajoute une soixantaine de produits réels avec leurs visuels, pour une démonstration parlante. Voir [Le catalogue de démonstration](#le-catalogue-de-démonstration). |
+| `php database/seed-commandes.php [--vider]` | Crée une douzaine de commandes plausibles, réparties sur les six statuts et les trois modes de remise. Pour voir à quoi ressemble l'administration une fois qu'elle sert. |
 
 Sur une base **déjà installée**, les évolutions du schéma sont dans
 `database/migrations/`, à jouer dans l'ordre :
@@ -149,6 +154,13 @@ commandes comprises : il est fait pour une première installation.
 `seed.php` peut être relancé à volonté pour remettre le catalogue de
 démonstration à zéro : les **commandes ne sont jamais touchées**, elles
 conservent les libellés et les prix recopiés au moment de l'achat.
+
+`seed-commandes.php` passe par le même chemin que les vraies commandes —
+création en attente de paiement, puis `markPaid` —, ce qui **décompte le
+stock** comme le ferait un paiement réel. Relancé, il ajoute ; avec
+`--vider`, il efface d'abord les commandes existantes. Sur une boutique en
+service, il n'a rien à faire : il écrirait de fausses ventes dans
+l'historique.
 
 ## Configuration
 
@@ -893,6 +905,25 @@ Quelques principes de fonctionnement utiles à connaître :
 - Les suppressions demandent toujours une confirmation, en deux temps.
 
 ## Dans l'administration
+
+### Supprimer une catégorie
+
+Le bouton existait, mais ne s'affichait que sur une catégorie **vide** — et
+comme chaque rayon contenait des produits, il n'apparaissait jamais. Vider un
+rayon produit par produit, sans outil pour le faire, n'était pas une option :
+supprimer une catégorie était en pratique impossible.
+
+La confirmation pose donc la seule question qui vaille : **que deviennent les
+produits ?**
+
+- **Les déplacer** vers un autre rayon, choisi dans la liste. C'est le choix
+  par défaut, et celui qui ne perd rien.
+- **Les supprimer** avec la catégorie. Définitif — photos et déclinaisons
+  comprises. Les **commandes déjà passées ne bougent pas** : elles gardent le
+  nom, le prix et l'image recopiés au moment de l'achat, et l'historique des
+  ventes reste lisible même quand le produit a disparu du catalogue.
+
+Une catégorie vide, elle, part sans question.
 
 ### L'état des stocks, en classeur Excel
 

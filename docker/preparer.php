@@ -90,6 +90,16 @@ if ($tables === 0) {
         // suppression en cascade.
         echo "✓ {$retires} produits sans photo retirés\n";
     }
+
+    // Des commandes, enfin : un écran d'administration vide ne montre ni les
+    // statuts, ni les trois modes de remise, ni les pastilles de
+    // notification. Elles ne partent que sur une base neuve — jamais sur une
+    // boutique déjà installée, où elles seraient de fausses ventes.
+    passthru(sprintf('%s %s/database/seed-commandes.php', escapeshellarg(PHP_BINARY), escapeshellarg($racine)), $code);
+
+    if ($code !== 0) {
+        fwrite(STDERR, "Les commandes de démonstration n'ont pas pu être créées ; la boutique démarre sans elles.\n");
+    }
 } else {
     echo "✓ Base déjà installée, rien à refaire\n";
 }

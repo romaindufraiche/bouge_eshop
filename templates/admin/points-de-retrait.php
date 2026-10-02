@@ -78,7 +78,7 @@ $isActive = $resubmitted
                                     <?= (int) $point['is_active'] === 1 ? 'Oui' : 'Non' ?>
                                 </span>
                             </td>
-                            <td class="ta-right">
+                            <td class="ta-right admin-table__actions">
                                 <a class="link-quiet t-s" href="/admin/points-de-retrait?modifier=<?= (int) $point['id'] ?>#formulaire">
                                     Modifier
                                 </a>

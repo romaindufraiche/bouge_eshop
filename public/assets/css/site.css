@@ -432,7 +432,16 @@ h3:has(.marque-inline) { line-height: 1.3; }
   .burger { display: block; }
 }
 
-.cart-link { display: inline-flex; align-items: center; gap: 0.4rem; text-decoration: none; }
+/* Même corps que les liens voisins : à 16px contre leurs 14px, « Panier »
+   portait une ligne de base plus basse et semblait décroché de la rangée,
+   alors que les boîtes, elles, étaient bien centrées. */
+.cart-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.875rem;
+  text-decoration: none;
+}
 .cart-count {
   display: inline-flex;
   min-width: 1.25rem;
@@ -1311,7 +1320,10 @@ textarea[aria-invalid='true'] { border-color: var(--accent); }
 .admin-nav a:hover { color: var(--cream); text-decoration: none; }
 .admin-nav a[aria-current='page'] { background: var(--cream); color: var(--ink); font-weight: 600; }
 
-.admin-main { padding: 2rem var(--gutter) 5rem; max-width: 72rem; }
+/* Même raison que pour `.admin-columns` : colonne de grille, donc
+   `min-width: auto` par défaut. Un tableau large poussait toute la zone
+   principale sous la fenêtre au lieu de défiler à l'intérieur. */
+.admin-main { padding: 2rem var(--gutter) 5rem; max-width: 72rem; min-width: 0; }
 
 @media (min-width: 960px) {
   .admin-shell { display: grid; grid-template-columns: 15rem 1fr; }
@@ -1358,6 +1370,11 @@ a.admin-stat:hover { border-color: var(--ink); text-decoration: none; }
 /* Colonnes --------------------------------------------------------------------- */
 
 .admin-columns { display: grid; gap: 2.5rem; margin-top: 2.5rem; }
+/* Un élément de grille vaut `min-width: auto` : il refuse de descendre sous
+   la largeur minimale de son contenu. Un tableau large le poussait donc hors
+   de la page, et son `overflow-x` ne servait à rien puisque c'était le
+   conteneur, et non le tableau, qui débordait. */
+.admin-columns > * { min-width: 0; }
 @media (min-width: 1100px) {
   .admin-columns { grid-template-columns: 1fr 1fr; }
   .admin-columns--aside { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); }
@@ -1374,7 +1391,13 @@ a.admin-stat:hover { border-color: var(--ink); text-decoration: none; }
    qu'un tableau qui déborde et cache justement le prix et le stock. Les
    tableaux de détail, eux, défilent horizontalement. */
 @media (max-width: 719px) {
-  .admin-table:not(.admin-table--stack) { display: block; overflow-x: auto; }
+  /* `position: relative` n'est pas décoratif : sans lui, un enfant en
+     position absolue — les libellés `.sr-only` des champs, par exemple —
+     prend le document pour repère, échappe au défilement du tableau et
+     élargit la page de toute la largeur cachée. Un fantôme de 40 px et une
+     barre de défilement horizontale sur toute la page, pour un libellé
+     invisible. */
+  .admin-table:not(.admin-table--stack) { display: block; position: relative; overflow-x: auto; }
 
   .admin-table--stack thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); }
   .admin-table--stack tbody tr {
@@ -1414,6 +1437,10 @@ a.admin-stat:hover { border-color: var(--ink); text-decoration: none; }
 /* Les colonnes chiffrées ne se coupent jamais en plusieurs lignes : sur
    mobile c'est le tableau qui défile, pas « 11,90 € » qui s'empile. */
 .admin-table td.ta-right, .admin-table td .pill { white-space: nowrap; }
+/* « Modifier » et « Supprimer » sur une seule ligne : empilés, ils donnaient
+   une colonne d'actions en escalier d'une ligne à l'autre. */
+.admin-table__actions .confirm--inline { display: inline-block; }
+.admin-table__actions .confirm--inline > summary { display: inline; }
 .ta-right { text-align: right !important; }
 .d-block { display: block; }
 
@@ -1491,8 +1518,60 @@ a.admin-stat:hover { border-color: var(--ink); text-decoration: none; }
   border-radius: var(--radius-surface);
   background: var(--cream);
 }
+/* Ouverte, la confirmation sort du flux.
+   Dans le flux, elle élargissait sa colonne jusqu'à 605 px : la colonne des
+   noms tombait à 114 px, le tableau débordait de sa grille et passait sous la
+   carte de droite. Posée en surcouche, elle ne pèse plus sur la largeur des
+   colonnes — le tableau ne bouge pas d'un pixel quand on la déplie. */
 .confirm--inline[open] { display: block; margin-top: 0.5rem; text-align: left; }
+
+@media (min-width: 721px) {
+  .admin-table__actions { position: relative; }
+
+  /* C'est le formulaire qui flotte, pas le bloc entier : le mot
+     « Supprimer » doit rester sur sa ligne, à côté de « Modifier ». En
+     déplaçant le <details>, c'est lui qui partait dans le panneau, et la
+     ligne perdait son action. */
+  .admin-table__actions .confirm--inline[open] {
+    /* `display: inline-block` est répété ici : la règle générique
+       `.confirm--inline[open]` passe à `block`, et « Supprimer » tomberait
+       sous « Modifier » dès qu'on déplie le panneau. */
+    display: inline-block;
+    padding: 0;
+    border: 0;
+    background: none;
+  }
+  .admin-table__actions .confirm--inline[open] > summary { margin-bottom: 0; }
+  .admin-table__actions .confirm--inline[open] > form {
+    position: absolute;
+    /* La cellule est en `nowrap` pour que « 11,90 € » ne s'empile pas ; le
+       panneau, lui, est fait de phrases, et héritait de ce nowrap : son texte
+       sortait tout droit par la bordure droite. */
+    white-space: normal;
+    text-align: left;
+    top: 100%;
+    right: 0;
+    z-index: 5;
+    width: 19rem;
+    margin-top: 0.35rem;
+    padding: 0.85rem;
+    border: 1px solid color-mix(in srgb, var(--accent-deep) 40%, var(--line));
+    border-radius: var(--radius-surface);
+    background: var(--white);
+    box-shadow: 0 12px 28px rgb(0 0 0 / 14%);
+  }
+}
 .confirm__body > * + * { margin-top: 0.75rem; }
+
+/* Un choix à cocher dans une confirmation. La case est alignée sur le haut
+   du libellé, et non centrée : le libellé tient parfois sur trois lignes, et
+   une case flottant au milieu ne désignerait plus rien. */
+.confirm .choix { display: flex; align-items: flex-start; gap: 0.5rem; }
+.confirm .choix > span { min-width: 0; }
+.confirm .choix input[type="radio"] { flex: none; margin-top: 0.25rem; }
+/* Le menu passe à la ligne : « Les déplacer vers » suivi d'un menu sur la
+   même ligne tiendrait mal dans un panneau de 19 rem. */
+.confirm .choix select { display: block; width: 100%; margin-top: 0.35rem; }
 
 /* Photos ----------------------------------------------------------------------------- */
 

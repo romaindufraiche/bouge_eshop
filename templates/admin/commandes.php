@@ -22,7 +22,12 @@ use Bouge\Support\Status;
     <div class="field">
         <label for="statut">Statut</label>
         <select id="statut" name="statut">
-            <option value="">Commandes payées</option>
+            <?php /* Le libellé dit ce que le filtre fait vraiment : le choix
+                     par défaut masque les paniers abandonnés au moment de
+                     payer, et montre tout le reste — y compris les expédiées
+                     et les annulées. « Commandes payées » le laissait croire
+                     à un filtre sur le seul statut « Payée ». */ ?>
+            <option value="">Toutes sauf les impayées</option>
             <?php foreach (Status::orderStatuses() as $value => $label): ?>
                 <option value="<?= e($value) ?>"<?= $status === $value ? ' selected' : '' ?>>
                     <?= e($label) ?>

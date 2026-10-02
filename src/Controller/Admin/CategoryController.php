@@ -6,6 +6,7 @@ namespace Bouge\Controller\Admin;
 
 use Bouge\Repository\CategoryRepository;
 use Bouge\Support\Auth;
+use Bouge\Support\Uploads;
 use Bouge\Support\Session;
 use Bouge\Support\Validator;
 use Bouge\Support\View;
@@ -60,6 +61,15 @@ final class CategoryController
         return '';
     }
 
+    /**
+     * Supprime une catégorie.
+     *
+     * Une catégorie vide part sans question. Une catégorie pleine pose la
+     * seule qui vaille : que deviennent les produits ? Les refuser purement
+     * et simplement, comme avant, revenait à ne jamais pouvoir supprimer un
+     * rayon — il aurait fallu vider la catégorie produit par produit, sans
+     * outil pour le faire.
+     */
     public function delete(): string
     {
         Auth::require();
@@ -70,16 +80,53 @@ final class CategoryController
         $category = $repository->find($id);
 
         if ($category === null) {
+            Session::flash('admin', "Cette catégorie n'existe plus.");
             redirect('/admin/categories');
         }
 
-        // Refusé si la catégorie contient encore des produits : ils se
-        // retrouveraient sans rayon.
-        if ($repository->delete($id)) {
-            Session::flash('admin', "La catégorie « {$category['name']} » a été supprimée.");
-        } else {
-            Session::flash('admin', "« {$category['name']} » contient encore des produits : déplacez-les d'abord.");
+        $nom = (string) $category['name'];
+
+        if ($repository->productCount($id) === 0) {
+            $repository->delete($id);
+            Session::flash('admin', "La catégorie « {$nom} » a été supprimée.");
+            redirect('/admin/categories');
         }
+
+        if (($_POST['produits'] ?? '') === 'supprimer') {
+            // Les fichiers avant les lignes : en cas d'incident, on préfère
+            // une image orpheline sur le disque à une fiche qui pointe vers
+            // du vide.
+            foreach ($repository->productImageUrls($id) as $url) {
+                Uploads::delete($url);
+            }
+
+            $supprimes = $repository->deleteWithProducts($id);
+            Session::flash(
+                'admin',
+                "« {$nom} » a été supprimée avec ses {$supprimes} produit"
+                . ($supprimes > 1 ? 's' : '') . '.'
+            );
+            redirect('/admin/categories');
+        }
+
+        $destination = (int) ($_POST['destination'] ?? 0);
+
+        // La destination doit exister et ne pas être la catégorie qu'on
+        // supprime : un formulaire bricolé ne doit pas pouvoir y déplacer les
+        // produits juste avant de l'effacer.
+        if ($destination === $id || $repository->find($destination) === null) {
+            Session::flash('admin', "Choisissez la catégorie qui accueillera les produits de « {$nom} ».");
+            redirect('/admin/categories');
+        }
+
+        $vers = (string) $repository->find($destination)['name'];
+        $deplaces = $repository->deleteMovingProductsTo($id, $destination);
+
+        Session::flash(
+            'admin',
+            "« {$nom} » a été supprimée ; ses {$deplaces} produit" . ($deplaces > 1 ? 's sont' : ' est')
+            . " maintenant dans « {$vers} »."
+        );
 
         redirect('/admin/categories');
 

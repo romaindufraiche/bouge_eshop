@@ -84,16 +84,97 @@ final class CategoryRepository
      */
     public function delete(int $id): bool
     {
-        $count = (int) Database::run('SELECT COUNT(*) FROM products WHERE category_id = ?', [$id])
-            ->fetchColumn();
-
-        if ($count > 0) {
+        if ($this->productCount($id) > 0) {
             return false;
         }
 
         Database::run('DELETE FROM categories WHERE id = ?', [$id]);
 
         return true;
+    }
+
+    public function productCount(int $id): int
+    {
+        return (int) Database::run('SELECT COUNT(*) FROM products WHERE category_id = ?', [$id])
+            ->fetchColumn();
+    }
+
+    /**
+     * Déplace les produits d'une catégorie vers une autre, puis supprime la
+     * première. Les deux en une transaction : une catégorie vidée mais pas
+     * supprimée laisserait un rayon fantôme, et des produits déplacés vers
+     * une catégorie disparue ne pointeraient plus sur rien.
+     *
+     * @return int Le nombre de produits déplacés.
+     */
+    public function deleteMovingProductsTo(int $id, int $destination): int
+    {
+        $pdo = Database::connection();
+        $pdo->beginTransaction();
+
+        try {
+            $deplaces = Database::run(
+                'UPDATE products SET category_id = ? WHERE category_id = ?',
+                [$destination, $id]
+            )->rowCount();
+
+            Database::run('DELETE FROM categories WHERE id = ?', [$id]);
+
+            $pdo->commit();
+
+            return $deplaces;
+        } catch (\Throwable $e) {
+            $pdo->rollBack();
+
+            throw $e;
+        }
+    }
+
+    /**
+     * Les photos des produits d'une catégorie, pour que l'appelant retire les
+     * fichiers du disque avant de supprimer les lignes. Dans l'autre ordre, un
+     * incident laisserait des images orphelines que plus rien ne désigne.
+     *
+     * @return list<string>
+     */
+    public function productImageUrls(int $id): array
+    {
+        $lignes = Database::all(
+            'SELECT i.url FROM product_images i
+             JOIN products p ON p.id = i.product_id
+             WHERE p.category_id = ?',
+            [$id]
+        );
+
+        return array_map(static fn (array $l): string => (string) $l['url'], $lignes);
+    }
+
+    /**
+     * Supprime la catégorie avec ses produits.
+     *
+     * Les photos et les déclinaisons partent en cascade ; les lignes de
+     * commande, elles, gardent le nom et le prix recopiés au moment de
+     * l'achat — l'historique des ventes survit à la disparition du produit.
+     *
+     * @return int Le nombre de produits supprimés.
+     */
+    public function deleteWithProducts(int $id): int
+    {
+        $pdo = Database::connection();
+        $pdo->beginTransaction();
+
+        try {
+            $supprimes = Database::run('DELETE FROM products WHERE category_id = ?', [$id])->rowCount();
+            Database::run('DELETE FROM categories WHERE id = ?', [$id]);
+
+            $pdo->commit();
+
+            return $supprimes;
+        } catch (\Throwable $e) {
+            $pdo->rollBack();
+
+            throw $e;
+        }
     }
 
     private function uniqueSlug(string $name, ?int $ignoreId): string
