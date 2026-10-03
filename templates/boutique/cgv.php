@@ -3,6 +3,10 @@
 
 use Bouge\Support\Money;
 
+$legal = $shop['legal'] ?? [];
+$mediateur = $legal['mediator'] ?? [];
+$mediateurManquant = trim((string) ($mediateur['name'] ?? '')) === '';
+
 $flatRate = (int) $shop['shipping']['flat_rate_cents'];
 $freeAbove = $shop['shipping']['free_above_cents'];
 ?>
@@ -11,18 +15,26 @@ $freeAbove = $shop['shipping']['free_above_cents'];
         <h1 class="t-xl">Conditions générales de vente</h1>
 
         <div class="stack-l muted" style="margin-top:2.5rem">
+            <?php /* Les informations de société sont renseignées ; le texte,
+                     lui, n'a pas été relu par un juriste. Les deux avertissements
+                     ne disent pas la même chose, et seul le second subsiste. */ ?>
             <p class="notice notice--accent">
-                <strong>À compléter avant la mise en ligne.</strong>
-                Ce texte est un gabarit de travail, pas un document juridique validé.
-                Faites-le relire avant l'ouverture de la boutique.
+                <strong>À faire relire avant l'ouverture.</strong>
+                Ce texte couvre les mentions obligatoires mais n'a pas été validé par un
+                juriste. Les conditions de retour et de garantie engagent la société.
             </p>
 
             <section>
                 <h2 class="t-s" style="color:var(--ink)">1. Objet</h2>
                 <p style="margin-top:.5rem">
                     Les présentes conditions régissent les ventes conclues sur le site
-                    <?= e($shop['name']) ?> entre [dénomination sociale] et toute personne
-                    physique non commerçante effectuant un achat.
+                    <?= e($shop['name']) ?> entre <?= e((string) ($legal['company'] ?? '')) ?>,
+                    <?= e((string) ($legal['form'] ?? '')) ?> au capital de
+                    <?= e((string) ($legal['capital'] ?? '')) ?>, dont le siège est situé
+                    <?= e((string) ($legal['address'] ?? '')) ?>, immatriculée au RCS de
+                    <?= e((string) ($legal['rcs'] ?? '')) ?> sous le numéro
+                    <?= e((string) ($legal['siren'] ?? '')) ?>, et toute personne physique non
+                    commerçante effectuant un achat.
                 </p>
             </section>
 
@@ -50,7 +62,8 @@ $freeAbove = $shop['shipping']['free_above_cents'];
                     <li>
                         Livraison en France métropolitaine : <?= e(Money::format($flatRate)) ?><?php if ($freeAbove !== null): ?>,
                         offerte à partir de <?= e(Money::format((int) $freeAbove)) ?> d'achat<?php endif; ?>.
-                        Délai indicatif : [X] jours ouvrés.
+                        Expédition sous 48 heures ouvrées ; comptez deux à trois jours
+                        ouvrés de plus pour l'acheminement.
                     </li>
                     <li>
                         Retrait sur place, sans frais. Vous êtes prévenu par courriel dès que
@@ -84,7 +97,12 @@ $freeAbove = $shop['shipping']['free_above_cents'];
                 <p style="margin-top:.5rem">
                     Pour toute réclamation, écrivez à <?= e($shop['email']) ?>. À défaut
                     d'accord, vous pouvez recourir gratuitement à un médiateur de la
-                    consommation : [nom et coordonnées du médiateur].
+                    consommation<?php if ($mediateurManquant): ?> — dont les coordonnées
+                    seront indiquées ici<?php else: ?> :
+                    <?= e((string) $mediateur['name']) ?><?php if (($mediateur['url'] ?? '') !== ''): ?>,
+                    <a href="<?= e((string) $mediateur['url']) ?>"><?= e((string) $mediateur['url']) ?></a><?php endif; ?><?php endif; ?>.
+                    La plateforme européenne de règlement en ligne des litiges est accessible
+                    à l'adresse <a href="https://ec.europa.eu/consumers/odr">ec.europa.eu/consumers/odr</a>.
                 </p>
             </section>
         </div>

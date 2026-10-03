@@ -8,6 +8,7 @@
  * @var array<int, array<string,mixed>> $orders
  * @var string                          $status
  * @var string                          $fulfilment
+ * @var string                          $search
  */
 
 use Bouge\Support\Money;
@@ -15,10 +16,24 @@ use Bouge\Support\Status;
 ?>
 <header class="admin-head">
     <h1 class="t-l">Commandes</h1>
-    <p class="muted t-s"><?= count($orders) ?> commande<?= count($orders) > 1 ? 's' : '' ?> affichée<?= count($orders) > 1 ? 's' : '' ?>.</p>
+    <p class="muted t-s">
+        <?= count($orders) ?> commande<?= count($orders) > 1 ? 's' : '' ?> affichée<?= count($orders) > 1 ? 's' : '' ?><?php if ($search !== ''): ?>
+            pour « <?= e($search) ?> » — <a class="link-quiet" href="/admin/commandes">tout afficher</a><?php endif; ?>.
+    </p>
 </header>
 
 <form class="admin-filters" method="get" action="/admin/commandes">
+    <?php /* La recherche d'abord : c'est le geste le plus fréquent dès que la
+             boutique tourne — un client appelle avec sa référence, ou son nom.
+             Elle porte sur la référence, le nom, l'adresse électronique et le
+             numéro de suivi, et ne masque pas les commandes impayées : c'est
+             souvent celles-là qu'on cherche. */ ?>
+    <div class="field field--grow">
+        <label for="q">Rechercher</label>
+        <input type="search" id="q" name="q" value="<?= e($search) ?>"
+               placeholder="Référence, nom, adresse ou n° de suivi">
+    </div>
+
     <div class="field">
         <label for="statut">Statut</label>
         <select id="statut" name="statut">

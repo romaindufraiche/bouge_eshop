@@ -7,6 +7,7 @@
  * @var int                             $panier
  */
 
+use Bouge\Shipping\Tracking;
 use Bouge\Support\Csrf;
 use Bouge\Support\Money;
 use Bouge\Support\Status;
@@ -69,9 +70,17 @@ use Bouge\Support\Status;
                                     </p>
 
                                     <?php if (!empty($commande['tracking_number'])): ?>
+                                        <?php $lienSuivi = Tracking::lien(
+                                            (string) $commande['tracking_carrier'],
+                                            (string) $commande['tracking_number']
+                                        ); ?>
                                         <p class="t-s">
-                                            Suivi <?= e($commande['tracking_carrier'] ?: '') ?>
-                                            <span class="nums"><?= e($commande['tracking_number']) ?></span>
+                                            Suivi <?= e(Tracking::nom((string) $commande['tracking_carrier'])) ?>
+                                            <?php if ($lienSuivi !== null): ?>
+                                                <a class="nums" href="<?= e($lienSuivi) ?>" rel="noopener" target="_blank"><?= e($commande['tracking_number']) ?></a>
+                                            <?php else: ?>
+                                                <span class="nums"><?= e($commande['tracking_number']) ?></span>
+                                            <?php endif; ?>
                                         </p>
                                     <?php endif; ?>
 
@@ -91,44 +100,62 @@ use Bouge\Support\Status;
                         transmis à qui que ce soit.
                     </p>
 
+                    <?php
+                    // La valeur affichée : celle du compte, et à défaut celle
+                    // de la dernière commande. Rien n'est enregistré tant que
+                    // la personne n'a pas validé.
+                    $valeur = static function (string $cle) use ($client, $suggere): string {
+                        $propre = trim((string) ($client[$cle] ?? ''));
+
+                        return $propre !== '' ? $propre : trim((string) ($suggere[$cle] ?? ''));
+                    };
+                    ?>
+
+                    <?php if ($suggere !== null): ?>
+                        <p class="notice t-xs" style="margin-top:1rem">
+                            Préremplies avec l'adresse de votre dernière commande.
+                            Vérifiez-les, puis enregistrez.
+                        </p>
+                    <?php endif; ?>
+
                     <form method="post" action="/compte/coordonnees" class="stack" style="margin-top:1.25rem">
                         <?= Csrf::field() ?>
 
                         <div class="field">
                             <label for="name">Nom</label>
-                            <input type="text" id="name" name="name" value="<?= e($client['name']) ?>"
+                            <input type="text" id="name" name="name" value="<?= e($valeur('name')) ?>"
                                    maxlength="120" required>
                         </div>
 
                         <div class="field">
                             <label for="phone">Téléphone</label>
-                            <input type="tel" id="phone" name="phone" value="<?= e($client['phone'] ?? '') ?>"
+                            <input type="tel" id="phone" name="phone" value="<?= e($valeur('phone')) ?>"
                                    maxlength="30">
                         </div>
 
                         <div class="field">
                             <label for="address_line1">Adresse</label>
                             <input type="text" id="address_line1" name="address_line1"
-                                   value="<?= e($client['address_line1'] ?? '') ?>" maxlength="200">
+                                   value="<?= e($valeur('address_line1')) ?>" maxlength="200">
                         </div>
 
                         <div class="field">
                             <label for="address_line2">Complément</label>
                             <input type="text" id="address_line2" name="address_line2"
-                                   value="<?= e($client['address_line2'] ?? '') ?>" maxlength="200">
+                                   value="<?= e($valeur('address_line2')) ?>" maxlength="200">
                         </div>
 
                         <div class="field-row">
                             <div class="field">
                                 <label for="postal_code">Code postal</label>
                                 <input type="text" id="postal_code" name="postal_code" inputmode="numeric"
-                                       value="<?= e($client['postal_code'] ?? '') ?>" maxlength="5">
+                                       value="<?= e($valeur('postal_code')) ?>" maxlength="5">
                             </div>
 
                             <div class="field">
                                 <label for="city">Ville</label>
                                 <input type="text" id="city" name="city"
-                                       value="<?= e($client['city'] ?? '') ?>" maxlength="120">
+                                       value="<?= e($valeur('city')) ?>" maxlength="120">
                             </div>
                         </div>
 

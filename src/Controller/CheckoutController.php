@@ -192,6 +192,7 @@ final class CheckoutController
                     'image_url'        => $line['image_url'],
                     'unit_price_cents' => $line['unit_price_cents'],
                     'weight_grams'     => $line['weight_grams'],
+                    'vat_rate_bp'      => $line['vat_rate_bp'],
                     'quantity'         => $line['quantity'],
                     'line_total_cents' => $line['line_total_cents'],
                 ],
@@ -202,15 +203,28 @@ final class CheckoutController
         // Le client connecté retrouvera ses coordonnées préremplies la fois
         // suivante — sans avoir eu à les enregistrer explicitement.
         $customerId = CustomerAuth::id();
-        if ($customerId !== null && $fulfilment === Status::DELIVERY) {
-            (new CustomerRepository())->updateProfile($customerId, [
-                'name'          => $validator->value('customer_name'),
-                'phone'         => $validator->value('phone') ?: null,
-                'address_line1' => $validator->value('shipping_address_line1'),
-                'address_line2' => $validator->value('shipping_address_line2') ?: null,
-                'postal_code'   => $validator->value('shipping_postal_code'),
-                'city'          => $validator->value('shipping_city'),
-            ]);
+
+        if ($customerId !== null) {
+            // Le nom et le téléphone valent quel que soit le mode de remise :
+            // le transporteur en a besoin pour un point relais comme pour une
+            // livraison. Seule l'adresse postale est propre au domicile — une
+            // commande en point relais n'en fournit aucune, et l'écraser avec
+            // du vide ferait perdre celle de la fois précédente.
+            $profil = [
+                'name'  => $validator->value('customer_name'),
+                'phone' => $validator->value('phone') ?: null,
+            ];
+
+            if ($fulfilment === Status::DELIVERY) {
+                $profil += [
+                    'address_line1' => $validator->value('shipping_address_line1'),
+                    'address_line2' => $validator->value('shipping_address_line2') ?: null,
+                    'postal_code'   => $validator->value('shipping_postal_code'),
+                    'city'          => $validator->value('shipping_city'),
+                ];
+            }
+
+            (new CustomerRepository())->updateProfile($customerId, $profil);
         }
 
         // --- Session de paiement ------------------------------------------------

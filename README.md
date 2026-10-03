@@ -23,6 +23,8 @@ les fichiers, on importe la base, c'est en ligne.
 - [Configuration](#configuration)
 - [Brancher Stripe](#brancher-stripe) — et le [tutoriel détaillé](GUIDE-STRIPE.md)
 - [Les courriels](#les-courriels)
+- [Factures et TVA](#factures-et-tva)
+- [Identité légale](#identité-légale)
 - [Mettre en ligne chez OVH](#mettre-en-ligne-chez-ovh)
 - [Chez un autre hébergeur](#chez-un-autre-hébergeur)
 - [Aperçu statique sur GitHub Pages](#aperçu-statique-sur-github-pages)
@@ -133,6 +135,7 @@ La boutique répond sur <http://localhost:8000>, l'administration sur
 | `php database/seed.php [email] [mot-de-passe]` | Remplit un catalogue de démonstration (5 catégories, 14 produits). Les tables doivent déjà exister. |
 | `php database/seed-demo.php` | Ajoute une soixantaine de produits réels avec leurs visuels, pour une démonstration parlante. Voir [Le catalogue de démonstration](#le-catalogue-de-démonstration). |
 | `php database/seed-commandes.php [--vider]` | Crée une douzaine de commandes plausibles, réparties sur les six statuts et les trois modes de remise. Pour voir à quoi ressemble l'administration une fois qu'elle sert. |
+| `php database/purger-demo.php [--vraiment]` | Retire les produits de démonstration (arena) et leurs photos. Sans `--vraiment`, il se contente de dire ce qui partirait. Les commandes déjà passées ne bougent pas. |
 | `php database/seed-commandes.php --client=<adresse>` | Rattache cinq commandes à un compte client qui existe déjà — commande en préparation, colis en route avec son suivi, retrait au concept store, achats anciens. Pour regarder l'espace client rempli, avec ses propres identifiants. Avec `--vider`, seul l'historique de ce compte est effacé. |
 
 Sur une base **déjà installée**, les évolutions du schéma sont dans
@@ -244,6 +247,7 @@ La boutique envoie trois messages, et pas un de plus :
 | --- | --- |
 | Le paiement est confirmé par Stripe | L'accusé de commande : la référence, les articles, le total, et le point relais choisi avec ses horaires. |
 | Un compte vient d'être créé | La bienvenue, et le rappel de l'adresse qui sert d'identifiant. |
+| Le colis part | L'avis d'expédition : le transporteur, le numéro de suivi et un lien direct vers son site. Envoyé à l'achat de l'étiquette ou à la saisie du suivi — **une seule fois** : corriger un numéro ne relance pas le message. |
 | Un client a oublié son mot de passe | Un lien valable deux heures. |
 
 Le reçu de paiement, lui, reste l'affaire de Stripe : activez-le dans son
@@ -293,6 +297,56 @@ client de la boutique.
 
 Les demandes sont stockées hachées, comme un mot de passe. Celles de plus de
 sept jours sont effacées au fil de l'eau.
+
+## Factures et TVA
+
+Chaque commande payée a sa facture en PDF, téléchargeable par le client depuis
+son espace et par vous depuis la fiche de commande. C'est **le même document,
+au même numéro** : il n'y en a qu'un.
+
+### Le numéro
+
+Séquentiel et sans rupture, comme la loi l'exige : `FA-2026-0001`. Il est
+attribué à la première édition et retenu — rééditer la facture ne consomme pas
+un second numéro. Ni la référence de commande (tirée au sort pour être lisible
+au téléphone) ni l'identifiant de commande (qui saute à chaque panier
+abandonné) ne pouvaient servir.
+
+### Le taux de TVA
+
+Il se règle **par produit**, dans le formulaire de l'administration : 20 % pour
+le matériel, 5,5 % pour les livres. Il est recopié sur la ligne de commande à
+l'achat, comme le prix et le poids : changer le taux d'un produit ne réécrit
+pas les factures déjà émises.
+
+La facture récapitule la base et la TVA **par taux**, puis le total. Les
+montants hors taxes se déduisent du TTC — c'est lui que le client a payé, et
+c'est donc lui qui fait foi.
+
+### Le PDF
+
+Écrit à la main par `src/Support/Pdf.php`, sans bibliothèque, comme le classeur
+Excel de `Xlsx.php` : une facture tient en une page de texte et de filets, là
+où FPDF ou Dompdf chargeraient des dizaines de fichiers. Les polices sont deux
+des quatorze polices de base, présentes dans tout lecteur — rien à incorporer.
+Les chasses d'Helvetica sont dans le fichier, pour que les colonnes s'alignent
+au point près.
+
+## Identité légale
+
+Les mentions légales et les CGV puisent dans le bloc `legal` de
+`config/shop.php` : saisies une fois, affichées aux deux endroits.
+
+Les valeurs y sont celles du **répertoire officiel des entreprises**
+(`annuaire-entreprises.data.gouv.fr`) : dénomination, forme juridique, SIREN,
+SIRET du siège, adresse, code APE, date de création. Le capital social n'y
+figure pas et vient d'un annuaire d'affaires — **à confirmer**. Le numéro de
+TVA est calculé à partir du SIREN.
+
+> **Reste obligatoire avant d'ouvrir : le médiateur de la consommation.**
+> Tout vendeur en ligne doit y adhérer et publier ses coordonnées (article
+> L.612-1 du code de la consommation). Tant que `legal.mediator` est vide, les
+> deux pages l'annoncent plutôt que d'inventer un nom.
 
 ## Mettre en ligne chez OVH
 
@@ -867,6 +921,11 @@ php -r 'echo password_hash("nouveau mot de passe", PASSWORD_DEFAULT), PHP_EOL;'
 UPDATE admin_users SET password_hash = '<le hachage obtenu>' WHERE email = 'contact@votre-domaine.fr';
 ```
 
+**Après cinq tentatives ratées, la porte se ferme cinq minutes**, des deux
+côtés — l'administration comme les comptes clients. Le compteur vit dans la
+session : changer de session le remet à zéro, ce qui suffit à ralentir un
+outil automatisé, qui ne garde pas les cookies.
+
 Une fois connecté :
 
 - **Tableau de bord** — commandes à préparer, total encaissé, stocks faibles.
@@ -925,6 +984,13 @@ produits ?**
   ventes reste lisible même quand le produit a disparu du catalogue.
 
 Une catégorie vide, elle, part sans question.
+
+### Retrouver une commande
+
+Un champ de recherche en tête de la liste, qui porte sur la **référence**, le
+**nom**, l'**adresse électronique** et le **numéro de suivi** — c'est avec l'un
+des quatre qu'un client se présente au téléphone. Il ne masque pas les
+commandes impayées : c'est souvent celles-là qu'on cherche.
 
 ### L'état des stocks, en classeur Excel
 
@@ -1160,31 +1226,51 @@ installer, ni version de Node à maintenir. C'est ce qui a été retenu.
 
 ## Points à traiter avant l'ouverture
 
-- [ ] **Mentions légales et CGV** : ce sont des gabarits, pas des documents
-      juridiques validés. Les champs entre crochets sont à remplir et le tout
-      à faire relire.
-- [ ] **Photos produits** : les visuels de démonstration sont des formes
-      abstraites aux couleurs de la marque, à remplacer par de vraies photos.
-      Si `seed-demo.php` a été lancé, **purgez-le avant l'ouverture** : ces
-      visuels appartiennent à arena.
-      Seul le livre *Corps et esprit* a ses vrais visuels (couverture, doubles
-      pages, portrait), repris de la page de son éditeur.
-- [ ] **Licence de Sun Motter** : la police est livrée avec la charte et
-      hébergée avec le site, donc téléchargeable par n'importe quel visiteur.
-      Vérifier que la licence l'autorise pour un usage web avant la mise en
-      ligne.
-- [ ] **Grille tarifaire de livraison** : vérifier les montants de
-      `config/shop.php`.
-- [ ] **Points de retrait** : l'adresse en place est celle du jeu de
-      démonstration.
-- [ ] **Courriels de confirmation** : la boutique n'en envoie aucun. Activer
-      les reçus Stripe (« Paramètres » → « Reçus par e-mail ») couvre le
-      justificatif de paiement ; la confirmation de commande reste à écrire.
-- [ ] **Adresse du site de la salle** : `store.url` dans `config/shop.php`
-      est vide, faute de connaître l'adresse officielle. Le bloc « Avant
-      d'être une boutique » s'affiche sans bouton tant qu'elle manque.
-- [ ] **Courriel de bienvenue et mot de passe oublié** : la création de
-      compte n'envoie aucun courriel, et il n'y a pas encore de procédure de
-      réinitialisation — un mot de passe perdu se change aujourd'hui en base.
+### Obligatoire
+
+- [ ] **Médiateur de la consommation** : adhérer à un médiateur et renseigner
+      `legal.mediator` dans `config/shop.php`. C'est une obligation légale pour
+      tout vendeur en ligne (article L.612-1 du code de la consommation), et
+      les pages légales l'annoncent tant qu'il manque.
+- [ ] **Capital social** : la valeur en place (20 000 €) vient d'un annuaire
+      d'affaires, pas du registre officiel qui ne le publie pas. À confirmer.
+- [ ] **Faire relire les CGV** : elles couvrent les mentions obligatoires mais
+      n'ont pas été validées par un juriste. Les conditions de retour et de
+      garantie engagent la société.
 - [ ] **Certificat HTTPS** : indispensable au paiement. Tous les hébergeurs
       proposent Let's Encrypt gratuitement, souvent en une case à cocher.
+- [ ] **Clés Stripe de production** et point de terminaison du webhook : voyez
+      [GUIDE-STRIPE.md](GUIDE-STRIPE.md).
+
+### Avant de vendre quoi que ce soit
+
+- [ ] **Purger le catalogue de démonstration** : `php database/purger-demo.php
+      --vraiment`. Les cinquante-quatre articles arena et leurs photos
+      appartiennent à arena.
+- [ ] **Vérifier les taux de TVA** produit par produit : ils s'impriment sur
+      les factures. Le matériel est à 20 %, le livre à 5,5 %.
+- [ ] **Peser les produits** : le transporteur facture au poids, et un poids
+      faux donne un colis refusé au dépôt. Voyez
+      [GUIDE-BOXTAL.md](GUIDE-BOXTAL.md).
+- [ ] **Points de retrait** : l'adresse en place est celle du jeu de
+      démonstration.
+- [ ] **Grille tarifaire de livraison** : vérifier les montants de
+      `config/shop.php`. La livraison à domicile est aujourd'hui vendue à
+      perte d'environ un euro — c'est un choix, autant le faire en le sachant.
+- [ ] **Réglages SMTP** : sans eux, les courriels partent sans
+      authentification et finissent en indésirables. Bloc `mail` de
+      `config/config.php`.
+
+### À vérifier
+
+- [ ] **Licence de Sun Motter** : la police est livrée avec la charte et
+      hébergée avec le site, donc téléchargeable par n'importe quel visiteur.
+      Vérifier que la licence l'autorise pour un usage web.
+- [ ] **Adresse du site de la salle** : `store.url` dans `config/shop.php` est
+      vide. Le bloc « Avant d'être une boutique » s'affiche sans bouton tant
+      qu'elle manque.
+- [ ] **Téléphone** : vide dans `config/shop.php` et dans l'adresse
+      d'expédition du transporteur, qui le réclame parfois.
+- [ ] **Doublons du catalogue** : « Corps et esprit » existe en deux
+      exemplaires, dont un hors de la catégorie Livre — et donc au mauvais taux
+      de TVA.

@@ -15,6 +15,7 @@ use Bouge\Controller\CheckoutController;
 use Bouge\Controller\HomeController;
 use Bouge\Controller\PageController;
 use Bouge\Controller\ProductController;
+use Bouge\Controller\SitemapController;
 use Bouge\Controller\WebhookController;
 use Bouge\Controller\Admin\AuthController as AdminAuthController;
 use Bouge\Controller\Admin\CategoryController as AdminCategoryController;
@@ -34,6 +35,13 @@ $router->get('/boutique/selection/{slug}', [CatalogueController::class, 'shortcu
 $router->get('/boutique/{slug}', [CatalogueController::class, 'category']);
 $router->get('/usage/{slug}', [CatalogueController::class, 'usage']);
 $router->get('/produit/{slug}', [ProductController::class, 'show']);
+
+// --- Robots et plan du site ----------------------------------------------------
+// Fabriqués à la volée : un fichier déposé dans `public/` vieillirait au
+// premier produit ajouté.
+
+$router->get('/robots.txt', [SitemapController::class, 'robots']);
+$router->get('/sitemap.xml', [SitemapController::class, 'sitemap']);
 
 // --- Pages éditoriales --------------------------------------------------------
 
@@ -62,6 +70,7 @@ $router->post('/compte/nouveau-mot-de-passe', [AccountController::class, 'reset'
 $router->post('/compte/deconnexion', [AccountController::class, 'logout']);
 $router->post('/compte/coordonnees', [AccountController::class, 'updateProfile']);
 $router->get('/compte/commande/{reference}', [AccountController::class, 'order']);
+$router->get('/compte/commande/{reference}/facture', [AccountController::class, 'invoice']);
 $router->get('/compte', [AccountController::class, 'index']);
 
 // --- Commande ------------------------------------------------------------------
@@ -113,4 +122,5 @@ $router->get('/admin/commandes/{id}', [AdminOrderController::class, 'show']);
 $router->post('/admin/commandes/statut', [AdminOrderController::class, 'updateStatus']);
 $router->post('/admin/commandes/note', [AdminOrderController::class, 'updateNote']);
 $router->post('/admin/commandes/suivi', [AdminOrderController::class, 'updateTracking']);
+$router->get('/admin/commandes/{id}/facture', [AdminOrderController::class, 'invoice']);
 $router->post('/admin/commandes/etiquette', [AdminOrderController::class, 'buyLabel']);

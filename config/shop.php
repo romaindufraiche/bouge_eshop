@@ -22,6 +22,50 @@ return [
     // Laisser vide pour masquer la ligne dans le pied de page.
     'phone'    => '',
 
+    // --- Identité légale ----------------------------------------------------
+    // Ce qui alimente les mentions légales et les CGV. Les valeurs marquées
+    // « registre » viennent du répertoire officiel des entreprises
+    // (annuaire-entreprises.data.gouv.fr, API recherche-entreprises) ; les
+    // autres sont à confirmer par la société elle-même — un registre public
+    // ne publie ni le capital, ni le médiateur de la consommation.
+    'legal' => [
+        'company'   => 'NIGHT SWIM',          // registre
+        'form'      => 'SAS',                 // registre (nature juridique 5710)
+        // À CONFIRMER : le capital ne figure pas au répertoire officiel.
+        // 20 000 € est la valeur publiée par les annuaires d'affaires.
+        'capital'   => '20 000 €',
+        'address'   => '8 rue Albert Simonin, 92400 Courbevoie',  // registre
+        'siren'     => '840 508 840',         // registre
+        'siret'     => '840 508 840 00013',   // registre, siège
+        // Clé TVA calculée : (12 + 3 × (SIREN mod 97)) mod 97 = 86.
+        'vat'       => 'FR86 840508840',
+        // Hauts-de-Seine → greffe de Nanterre.
+        'rcs'       => 'Nanterre',
+        'ape'       => "47.64Z — Commerce de détail d'articles de sport en magasin spécialisé",
+        'created'   => '8 juin 2018',         // registre
+        // Dirigeants au registre : Marc Maillot (président), Melvin Maillot
+        // (directeur général). Le directeur de la publication est celui des
+        // deux qui assume le contenu du site.
+        'publisher' => 'Melvin Maillot',
+
+        // L'hébergeur. À changer si le site part ailleurs qu'OVH.
+        'host' => [
+            'name'    => 'OVH SAS',
+            'address' => '2 rue Kellermann, 59100 Roubaix, France',
+            'phone'   => '1007',
+        ],
+
+        // OBLIGATOIRE AVANT D'OUVRIR : tout vendeur en ligne doit adhérer à un
+        // médiateur de la consommation et publier ses coordonnées (article
+        // L.612-1 du code de la consommation). Tant que ce bloc est vide, les
+        // pages légales affichent un avertissement au lieu d'inventer un nom.
+        'mediator' => [
+            'name' => '',
+            'url'  => '',
+            'address' => '',
+        ],
+    ],
+
     // --- La salle ----------------------------------------------------------
     // BOUGE est d'abord un lieu : une salle de sport doublée d'un concept
     // store. Ce site en est le rayon matériel, ouvert à toute heure — pas

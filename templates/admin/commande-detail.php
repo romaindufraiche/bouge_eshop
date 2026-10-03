@@ -10,6 +10,7 @@
  * @var array<string, string> $statuses
  */
 
+use Bouge\Shipping\Tracking;
 use Bouge\Support\Csrf;
 use Bouge\Support\Money;
 use Bouge\Support\Status;
@@ -225,6 +226,20 @@ $isRelay = $order['fulfilment'] === Status::RELAY;
                         Expédiée le <?= e(date('d/m/Y à H\hi', strtotime((string) $order['shipped_at']))) ?>.
                     </p>
                 <?php endif; ?>
+
+                <?php /* Le même lien que le client : quand il appelle pour savoir
+                         où est son colis, la réponse est à un clic. */ ?>
+                <?php $lienSuivi = Tracking::lien(
+                    (string) ($order['tracking_carrier'] ?? ''),
+                    (string) ($order['tracking_number'] ?? '')
+                ); ?>
+                <?php if ($lienSuivi !== null): ?>
+                    <p class="t-xs" style="margin-top:.5rem">
+                        <a href="<?= e($lienSuivi) ?>" rel="noopener" target="_blank">
+                            Suivre le colis chez <?= e(Tracking::nom((string) $order['tracking_carrier'])) ?>
+                        </a>
+                    </p>
+                <?php endif; ?>
             </div>
         <?php endif; ?>
 
@@ -257,7 +272,7 @@ $isRelay = $order['fulfilment'] === Status::RELAY;
                     <?= e((string) $order['relay_postal_code']) ?> <?= e((string) $order['relay_city']) ?>
                 </p>
                 <p class="t-xs muted" style="margin-top:1rem">
-                    Transporteur : <?= e((string) $order['relay_operator']) ?><br>
+                    Transporteur : <?= e(Tracking::nom((string) $order['relay_operator'])) ?><br>
                     Code du point : <code><?= e((string) $order['relay_code']) ?></code>
                 </p>
                 <p class="t-xs muted" style="margin-top:1rem">
@@ -298,6 +313,14 @@ $isRelay = $order['fulfilment'] === Status::RELAY;
                 </p>
                 <p class="field-help">
                     À communiquer au support Stripe en cas de litige ou de remboursement.
+                </p>
+            
+                <p style="margin-top:1rem">
+                    <?php /* La même facture que celle du client, au même
+                             numéro : il n'y en a qu'une. */ ?>
+                    <a class="btn btn--ghost btn--sm" href="/admin/commandes/<?= (int) $order['id'] ?>/facture">
+                        Télécharger la facture
+                    </a>
                 </p>
             </div>
         <?php endif; ?>

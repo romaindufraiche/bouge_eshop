@@ -48,7 +48,7 @@ $commandes = new OrderRepository();
 // --- Le catalogue dans lequel puiser ----------------------------------------
 
 $produits = Database::all(
-    "SELECT p.id, p.name, p.price_cents, p.weight_grams,
+    "SELECT p.id, p.name, p.price_cents, p.weight_grams, p.vat_rate_bp,
             (SELECT url FROM product_images i WHERE i.product_id = p.id ORDER BY i.position LIMIT 1) AS image_url
      FROM products p
      WHERE p.status = ?
@@ -162,6 +162,7 @@ foreach ($scenarios as $i => [$nom, $courriel, $mode, $statut, $nombre, $jours, 
             'image_url'        => $produit['image_url'],
             'unit_price_cents' => $prix,
             'weight_grams'     => (int) ($produit['weight_grams'] ?? 0),
+            'vat_rate_bp'      => (int) ($produit['vat_rate_bp'] ?? 2000),
             'quantity'         => $quantite,
             'line_total_cents' => $prix * $quantite,
         ];

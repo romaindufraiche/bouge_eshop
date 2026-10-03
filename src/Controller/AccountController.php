@@ -10,6 +10,7 @@ use Bouge\Support\Cart;
 use Bouge\Support\Config;
 use Bouge\Support\CustomerAuth;
 use Bouge\Support\Csrf;
+use Bouge\Support\Invoice;
 use Bouge\Support\Mailer;
 use Bouge\Support\PasswordReset;
 use Bouge\Support\Session;
@@ -350,10 +351,21 @@ final class AccountController
         $client = CustomerAuth::user();
         $repository = new CustomerRepository();
 
+        // Des coordonnées vides alors que les commandes en portent une :
+        // on propose la dernière connue plutôt qu'un formulaire blanc. Rien
+        // n'est enregistré tant que la personne n'a pas validé — c'est une
+        // proposition, pas une décision prise à sa place.
+        $suggere = null;
+
+        if (trim((string) ($client['address_line1'] ?? '')) === '') {
+            $suggere = $repository->lastShippingAddress((int) $client['id']);
+        }
+
         return View::render('compte/tableau', [
             'title'    => 'Mon compte',
             'noindex'  => true,
             'client'   => $client,
+            'suggere'  => $suggere,
             'commandes' => $repository->orders((int) $client['id']),
             'panier'   => Cart::count(),
         ]);
@@ -384,6 +396,43 @@ final class AccountController
     }
 
     /** Coordonnées : nom, téléphone, adresse de livraison par défaut. */
+    /**
+     * La facture d'une commande, en PDF.
+     *
+     * Même garde que la fiche de commande : on ne sert que les commandes du
+     * compte connecté, jamais celles d'un autre, et jamais une commande qui
+     * n'a pas été payée.
+     */
+    public function invoice(array $params): string
+    {
+        CustomerAuth::require();
+
+        // La même lecture que la fiche de commande : c'est elle qui vérifie
+        // que la commande appartient bien au compte connecté.
+        $depot = new CustomerRepository();
+        $client = CustomerAuth::user();
+        $commande = $depot->order((int) $client['id'], (string) $params['reference']);
+
+        if ($commande === null || $commande['paid_at'] === null) {
+            http_response_code(404);
+
+            return $this->message(
+                'Facture introuvable',
+                "Cette commande n'existe pas, n'est pas la vôtre, ou n'a pas encore été payée."
+            );
+        }
+
+        $pdf = Invoice::render($commande);
+        // Relu après l'édition : c'est elle qui a pu attribuer le numéro.
+        $commande = $depot->order((int) $client['id'], (string) $params['reference']);
+
+        header('Content-Type: application/pdf');
+        header('Content-Disposition: attachment; filename="' . Invoice::filename($commande) . '"');
+        header('Content-Length: ' . strlen($pdf));
+
+        return $pdf;
+    }
+
     public function updateProfile(): string
     {
         CustomerAuth::require();

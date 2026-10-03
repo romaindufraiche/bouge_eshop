@@ -5,6 +5,7 @@
  * @var array<string, mixed> $commande
  */
 
+use Bouge\Shipping\Tracking;
 use Bouge\Support\Money;
 use Bouge\Support\Status;
 
@@ -125,8 +126,11 @@ $annulee = $commande['status'] === Status::ORDER_CANCELLED;
                             <?= e((string) $commande['relay_postal_code']) ?> <?= e((string) $commande['relay_city']) ?>
                         </p>
                         <p class="t-xs muted" style="margin-top:1rem">
-                            <?= e((string) $commande['relay_operator']) ?> vous préviendra dès que le colis
-                            sera arrivé. Pensez à une pièce d'identité pour le retirer.
+                            <?php /* Le nom commercial, pas le code à quatre lettres de
+                                     l'API : le client lisait « MONR vous préviendra ». */ ?>
+                            <?= e(Tracking::nom((string) $commande['relay_operator']) ?: 'Le transporteur') ?>
+                            vous préviendra dès que le colis sera arrivé. Pensez à une pièce
+                            d'identité pour le retirer.
                         </p>
                     <?php elseif ($estRetrait): ?>
                         <?php if ($commande['pickup_name'] === null): ?>
@@ -155,9 +159,19 @@ $annulee = $commande['status'] === Status::ORDER_CANCELLED;
                     <?php if (!empty($commande['tracking_number'])): ?>
                         <div class="divider" style="margin-top:1.25rem;padding-top:1.25rem">
                             <p class="eyebrow">Suivi du colis</p>
+                            <?php $lienSuivi = Tracking::lien(
+                                (string) $commande['tracking_carrier'],
+                                (string) $commande['tracking_number']
+                            ); ?>
                             <p class="t-s" style="margin-top:.5rem">
-                                <?= e($commande['tracking_carrier'] ?: 'Transporteur') ?><br>
-                                <span class="nums"><?= e($commande['tracking_number']) ?></span>
+                                <?= e(Tracking::nom((string) $commande['tracking_carrier']) ?: 'Transporteur') ?><br>
+                                <?php if ($lienSuivi !== null): ?>
+                                    <a class="nums" href="<?= e($lienSuivi) ?>" rel="noopener" target="_blank">
+                                        <?= e($commande['tracking_number']) ?>
+                                    </a>
+                                <?php else: ?>
+                                    <span class="nums"><?= e($commande['tracking_number']) ?></span>
+                                <?php endif; ?>
                             </p>
                             <?php if (!empty($commande['shipped_at'])): ?>
                                 <p class="t-xs muted" style="margin-top:.35rem">
@@ -165,8 +179,12 @@ $annulee = $commande['status'] === Status::ORDER_CANCELLED;
                                 </p>
                             <?php endif; ?>
                             <p class="field-help">
-                                Reportez ce numéro sur le site du transporteur pour
-                                situer le colis.
+                                <?php if ($lienSuivi !== null): ?>
+                                    Le numéro ouvre le suivi chez le transporteur.
+                                <?php else: ?>
+                                    Reportez ce numéro sur le site du transporteur pour
+                                    situer le colis.
+                                <?php endif; ?>
                             </p>
                         </div>
                     <?php elseif (!$estRetrait && !$annulee): ?>
@@ -175,6 +193,23 @@ $annulee = $commande['status'] === Status::ORDER_CANCELLED;
                         </p>
                     <?php endif; ?>
                 </div>
+
+                <?php if (!empty($commande['paid_at'])): ?>
+                    <?php /* Pas de facture sans paiement : la pièce circulerait
+                             sans contrepartie. */ ?>
+                    <div class="admin-card" style="margin-top:0">
+                        <h2 class="t-m">Facture</h2>
+                        <p class="t-s muted">
+                            Document PDF, avec le détail de la TVA.
+                        </p>
+                        <p style="margin-top:1rem">
+                            <a class="btn btn--ghost btn--sm"
+                               href="/compte/commande/<?= e($commande['reference']) ?>/facture">
+                                Télécharger la facture
+                            </a>
+                        </p>
+                    </div>
+                <?php endif; ?>
 
                 <div class="admin-card" style="margin-top:0">
                     <h2 class="t-m">Une question ?</h2>

@@ -57,6 +57,35 @@ final class CustomerRepository
     }
 
     /** @param array<string, mixed> $data */
+    /**
+     * La dernière adresse de livraison connue de ce client, prise sur ses
+     * commandes.
+     *
+     * Elle sert à préremplir des coordonnées encore vides : un compte créé
+     * avant que le tunnel ne les enregistre, ou créé après coup sur une
+     * adresse ayant déjà commandé, affichait un formulaire blanc alors que
+     * l'adresse figurait sur chacune de ses commandes.
+     *
+     * @return array<string, string>|null
+     */
+    public function lastShippingAddress(int $id): ?array
+    {
+        return Database::first(
+            "SELECT customer_name AS name, phone,
+                    shipping_address_line1 AS address_line1,
+                    shipping_address_line2 AS address_line2,
+                    shipping_postal_code AS postal_code,
+                    shipping_city AS city
+             FROM orders
+             WHERE customer_id = ?
+               AND shipping_address_line1 IS NOT NULL
+               AND shipping_address_line1 <> ''
+             ORDER BY created_at DESC
+             LIMIT 1",
+            [$id]
+        );
+    }
+
     public function updateProfile(int $id, array $data): void
     {
         $assignments = implode(', ', array_map(

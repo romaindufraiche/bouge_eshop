@@ -251,6 +251,12 @@ final class ProductController
             'weight_grams'       => ((int) $validator->value('weight_grams')) > 0
                 ? (int) $validator->value('weight_grams')
                 : null,
+            // Un taux hors de la liste serait une saisie forgée : on retombe
+            // sur le taux normal plutôt que d'écrire n'importe quoi sur une
+            // facture.
+            'vat_rate_bp'        => in_array((int) ($_POST['vat_rate_bp'] ?? 2000), [2000, 1000, 550, 210, 0], true)
+                ? (int) $_POST['vat_rate_bp']
+                : 2000,
             'featured'           => isset($_POST['featured']) ? 1 : 0,
             'external_url'       => $externalUrl ?: null,
             'external_label'     => $validator->value('external_label') ?: null,

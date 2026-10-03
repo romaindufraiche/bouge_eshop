@@ -40,8 +40,9 @@ final class OrderRepository
             $statement = $pdo->prepare(
                 'INSERT INTO order_items
                    (order_id, product_id, variant_id, product_name, variant_label,
-                    image_url, unit_price_cents, weight_grams, quantity, line_total_cents)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+                    image_url, unit_price_cents, vat_rate_bp, weight_grams, quantity,
+                    line_total_cents)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
             );
 
             foreach ($items as $item) {
@@ -53,6 +54,7 @@ final class OrderRepository
                     $item['variant_label'],
                     $item['image_url'],
                     $item['unit_price_cents'],
+                    $item['vat_rate_bp'] ?? 2000,
                     $item['weight_grams'],
                     $item['quantity'],
                     $item['line_total_cents'],
@@ -103,15 +105,33 @@ final class OrderRepository
      *
      * @return array<int, array<string, mixed>>
      */
-    public function forAdmin(string $status = '', string $fulfilment = ''): array
+    public function forAdmin(string $status = '', string $fulfilment = '', string $search = ''): array
     {
         $sql = 'SELECT o.*, (SELECT COUNT(*) FROM order_items i WHERE i.order_id = o.id) AS item_count
                 FROM orders o WHERE 1 = 1';
         $params = [];
 
+        // Une référence, un nom, une adresse électronique ou un numéro de
+        // suivi : c'est avec l'un des quatre qu'un client se présente au
+        // téléphone, et il n'y avait aucun moyen de retrouver sa commande
+        // autrement qu'en la cherchant à l'œil dans la liste.
+        $search = trim($search);
+
+        if ($search !== '') {
+            $sql .= ' AND (o.reference LIKE ? OR o.customer_name LIKE ? OR o.email LIKE ?
+                           OR o.tracking_number LIKE ?)';
+            $motif = '%' . $search . '%';
+            array_push($params, $motif, $motif, $motif, $motif);
+        }
+
         if ($status !== '' && array_key_exists($status, Status::orderStatuses())) {
             $sql .= ' AND o.status = ?';
             $params[] = $status;
+        } elseif ($search !== '') {
+            // Quand on cherche une commande précise, on la veut même si elle
+            // n'a jamais été payée : c'est souvent justement pour ça qu'on la
+            // cherche.
+            $sql .= '';
         } else {
             // Par défaut on masque les commandes jamais payées : ce sont des
             // paniers abandonnés au moment du paiement, pas des commandes.

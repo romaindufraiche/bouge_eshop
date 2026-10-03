@@ -66,6 +66,9 @@ CREATE TABLE `products` (
 
   -- Prix de vente normal, en centimes.
   `price_cents`      INT UNSIGNED NOT NULL DEFAULT 0,
+  -- Taux de TVA en points de base : 2000 = 20,00 %, 550 = 5,50 % pour les
+  -- livres. Des entiers, comme les prix — aucun flottant dans un calcul d'argent.
+  `vat_rate_bp`      SMALLINT UNSIGNED NOT NULL DEFAULT 2000,
 
   -- Promotion. NULL = pas de promotion en cours.
   -- Elle n'est active que si un prix promo est renseigné ET que la date du
@@ -258,6 +261,10 @@ CREATE TABLE `orders` (
   `stripe_session_id`        VARCHAR(190) DEFAULT NULL,
   `stripe_payment_intent_id` VARCHAR(190) DEFAULT NULL,
   `paid_at`                  DATETIME DEFAULT NULL,
+  -- Numéro de facture, séquentiel et sans rupture : attribué à la première
+  -- édition et retenu, pour qu'une réédition ne consomme pas un numéro.
+  `invoice_number`   INT UNSIGNED DEFAULT NULL,
+  `invoiced_at`      DATETIME DEFAULT NULL,
 
   -- Client connecté au moment de la commande, s'il y en avait un. NULL pour
   -- une commande passée sans compte : on ne force personne à s'inscrire.
@@ -267,6 +274,9 @@ CREATE TABLE `orders` (
   `tracking_carrier` VARCHAR(60) DEFAULT NULL,
   `tracking_number`  VARCHAR(80) DEFAULT NULL,
   `shipped_at`       DATETIME DEFAULT NULL,
+  -- Date d'envoi de l'avis d'expédition, pour qu'il ne parte qu'une fois :
+  -- corriger un numéro de suivi ne doit pas déclencher un second message.
+  `shipping_email_sent_at` DATETIME DEFAULT NULL,
 
   -- Étiquette achetée auprès du transporteur : de quoi la réimprimer sans la
   -- racheter.
@@ -280,6 +290,7 @@ CREATE TABLE `orders` (
 
   PRIMARY KEY (`id`),
   UNIQUE KEY `orders_reference` (`reference`),
+  UNIQUE KEY `orders_invoice_number` (`invoice_number`),
   UNIQUE KEY `orders_stripe_session` (`stripe_session_id`),
   KEY `orders_status` (`status`),
   KEY `orders_created` (`created_at`),
@@ -312,6 +323,9 @@ CREATE TABLE `order_items` (
   `image_url`     VARCHAR(500) DEFAULT NULL,
 
   `unit_price_cents` INT UNSIGNED NOT NULL,
+  -- Recopié à l'achat, comme le prix et le libellé : changer le taux d'un
+  -- produit ne doit pas réécrire les factures déjà émises.
+  `vat_rate_bp`      SMALLINT UNSIGNED NOT NULL DEFAULT 2000,
   -- Poids recopié à l'achat, comme le libellé et le prix : la commande doit
   -- rester expédiable même si le produit quitte le catalogue.
   `weight_grams`     INT UNSIGNED DEFAULT NULL,

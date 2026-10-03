@@ -253,6 +253,17 @@ main { flex: 1; }
 .section--line-bottom { border-bottom: 1px solid var(--line); }
 .section--sand { background: var(--sand); }
 
+.stack > * + * { margin-top: 1rem; }
+.stack-s > * + * { margin-top: 0.5rem; }
+.stack-l > * + * { margin-top: 2rem; }
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
 /* --- La section « À découvrir », en eau ------------------------------------
    Le bleu n'est pas inventé : c'est `--sky`, la couleur secondaire de la
    charte, simplement étirée du plus clair en haut au plus profond en bas.
@@ -1587,6 +1598,10 @@ a.admin-stat:hover { border-color: var(--ink); text-decoration: none; }
 .admin-filters .field { margin-top: 0; }
 .admin-filters .field + .field { margin-top: 0; }
 .admin-filters input, .admin-filters select { width: auto; min-width: 11rem; }
+/* Le champ de recherche prend la place qui reste : « Référence, nom, adresse
+   ou n° de suivi » ne tient pas dans 11 rem. */
+.admin-filters .field--grow { flex: 1 1 18rem; }
+.admin-filters .field--grow input { width: 100%; }
 .field--actions { display: flex; align-items: center; gap: 1rem; }
 
 /* Cartes et formulaires ---------------------------------------------------------- */

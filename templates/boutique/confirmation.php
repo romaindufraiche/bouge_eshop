@@ -4,6 +4,7 @@
  * @var array<string, mixed> $shop
  */
 
+use Bouge\Shipping\Tracking;
 use Bouge\Support\Money;
 use Bouge\Support\Status;
 
@@ -35,7 +36,7 @@ $isRelay = $order['fulfilment'] === Status::RELAY;
                         <strong><?= e((string) $order['relay_name']) ?></strong><br>
                         <?= e((string) $order['relay_address']) ?><br>
                         <?= e((string) $order['relay_postal_code']) ?> <?= e((string) $order['relay_city']) ?><br>
-                        <span class="muted">Par <?= e((string) $order['relay_operator']) ?></span>
+                        <span class="muted">Par <?= e(Tracking::nom((string) $order['relay_operator'])) ?></span>
                     <?php elseif ($isPickup): ?>
                         <?php if (!empty($order['pickup_name'])): ?>
                             <strong><?= e($order['pickup_name']) ?></strong><br>

@@ -160,6 +160,34 @@ $saleValue = $field(
                     refusé au dépôt.
                 </p>
             </div>
+
+            <div class="field">
+                <label for="vat_rate_bp">Taux de TVA</label>
+                <?php
+                // En points de base, comme les prix sont en centimes : des
+                // entiers partout, aucun flottant dans un calcul d'argent.
+                $taux = [
+                    2000 => '20 % — taux normal',
+                    1000 => '10 % — taux intermédiaire',
+                    550  => '5,5 % — livres, alimentation',
+                    210  => '2,1 % — presse',
+                    0    => '0 % — exonéré',
+                ];
+                $actuel = (int) ($field('vat_rate_bp', '2000') ?: 2000);
+                ?>
+                <select id="vat_rate_bp" name="vat_rate_bp">
+                    <?php foreach ($taux as $valeur => $libelle): ?>
+                        <option value="<?= (int) $valeur ?>"<?= $actuel === $valeur ? ' selected' : '' ?>>
+                            <?= e($libelle) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+                <p class="field-help">
+                    Il s'imprime sur la facture, et il y est recopié à l'achat : le modifier
+                    ici ne réécrit pas les factures déjà émises. Le matériel est à 20 %, le
+                    livre à 5,5 %.
+                </p>
+            </div>
         </div>
 
         <fieldset class="field-group">

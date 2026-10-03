@@ -19,9 +19,8 @@ use Bouge\Repository\CustomerRepository;
 final class CustomerAuth
 {
     private const KEY = 'customer_id';
-    /** Nombre de tentatives avant temporisation, et durée de celle-ci. */
-    private const MAX_ATTEMPTS = 5;
-    private const LOCK_SECONDS = 300;
+    /** Portée du compteur de tentatives, distincte de celle de l'administration. */
+    private const THROTTLE = 'client';
 
     public static function attempt(string $email, string $password): bool
     {
@@ -35,13 +34,13 @@ final class CustomerAuth
             // On calcule quand même un hachage : sans cela, le temps de
             // réponse révélerait quelles adresses ont un compte.
             password_verify($password, '$2y$12$invalidinvalidinvalidinvalidinvalidinvalidinvalidinv');
-            self::noteFailure();
+            LoginThrottle::noteFailure(self::THROTTLE);
 
             return false;
         }
 
         if (!password_verify($password, $client['password_hash'])) {
-            self::noteFailure();
+            LoginThrottle::noteFailure(self::THROTTLE);
 
             return false;
         }
@@ -58,7 +57,7 @@ final class CustomerAuth
         // pas rester valable après.
         Session::regenerate();
         Session::set(self::KEY, $customerId);
-        Session::forget('login_failures');
+        LoginThrottle::clear(self::THROTTLE);
 
         $repository = new CustomerRepository();
         $repository->touchLogin($customerId);
@@ -123,42 +122,16 @@ final class CustomerAuth
     }
 
     // --- Temporisation des tentatives --------------------------------------------
-    // Sans elle, un mot de passe faible tombe en quelques minutes face à un
-    // outil automatisé. Le compteur vit dans la session : c'est imparfait
-    // (changer de session le remet à zéro) mais sans table supplémentaire.
+    // La mécanique vit dans LoginThrottle, partagée avec l'administration.
+    // Ces deux méthodes restent ici parce que le contrôleur les appelle.
 
     public static function lockedOut(): bool
     {
-        $etat = Session::get('login_failures');
-
-        if (!is_array($etat) || ($etat['count'] ?? 0) < self::MAX_ATTEMPTS) {
-            return false;
-        }
-
-        return (time() - (int) ($etat['at'] ?? 0)) < self::LOCK_SECONDS;
+        return LoginThrottle::lockedOut(self::THROTTLE);
     }
 
     public static function lockRemaining(): int
     {
-        $etat = Session::get('login_failures');
-        $reste = self::LOCK_SECONDS - (time() - (int) ($etat['at'] ?? 0));
-
-        return max(0, $reste);
-    }
-
-    private static function noteFailure(): void
-    {
-        $etat = Session::get('login_failures');
-        $etat = is_array($etat) ? $etat : ['count' => 0, 'at' => 0];
-
-        // Le compteur repart à zéro si la dernière tentative est ancienne.
-        if ((time() - (int) $etat['at']) > self::LOCK_SECONDS) {
-            $etat = ['count' => 0, 'at' => 0];
-        }
-
-        Session::set('login_failures', [
-            'count' => (int) $etat['count'] + 1,
-            'at'    => time(),
-        ]);
+        return LoginThrottle::remaining(self::THROTTLE);
     }
 }

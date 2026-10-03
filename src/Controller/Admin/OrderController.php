@@ -7,9 +7,12 @@ namespace Bouge\Controller\Admin;
 use Bouge\Repository\OrderRepository;
 use Bouge\Shipping\CarrierException;
 use Bouge\Shipping\Carriers;
-use Bouge\Support\Shipping;
 use Bouge\Support\Auth;
+use Bouge\Support\Database;
+use Bouge\Support\Invoice;
+use Bouge\Support\Mailer;
 use Bouge\Support\Session;
+use Bouge\Support\Shipping;
 use Bouge\Support\Status;
 use Bouge\Support\View;
 
@@ -28,12 +31,14 @@ final class OrderController
 
         $status = (string) ($_GET['statut'] ?? '');
         $fulfilment = (string) ($_GET['remise'] ?? '');
+        $search = trim((string) ($_GET['q'] ?? ''));
 
         return View::render('admin/commandes', [
             'title'      => 'Commandes',
-            'orders'     => (new OrderRepository())->forAdmin($status, $fulfilment),
+            'orders'     => (new OrderRepository())->forAdmin($status, $fulfilment, $search),
             'status'     => $status,
             'fulfilment' => $fulfilment,
+            'search'     => $search,
         ], 'layout/admin');
     }
 
@@ -125,9 +130,13 @@ final class OrderController
             $number === '' ? null : mb_substr($number, 0, 80)
         );
 
-        Session::flash('admin', $number === ''
-            ? 'Suivi retiré.'
-            : 'Suivi enregistré : le client le voit sur sa commande.');
+        $prevenu = $number === '' ? false : $this->previenirExpedition($repository, $id);
+
+        Session::flash('admin', match (true) {
+            $number === '' => 'Suivi retiré.',
+            $prevenu       => "Suivi enregistré et avis d'expédition envoyé au client.",
+            default        => 'Suivi enregistré : le client le voit sur sa commande.',
+        });
         redirect('/admin/commandes/' . $id);
 
         return '';
@@ -180,11 +189,41 @@ final class OrderController
         }
 
         $repository->attachLabel($id, $label);
+        $prevenu = $this->previenirExpedition($repository, $id);
 
-        Session::flash('admin', 'Étiquette achetée. Imprimez-la, collez-la sur le colis, et déposez-le.');
+        Session::flash('admin', 'Étiquette achetée. Imprimez-la, collez-la sur le colis, et déposez-le.'
+            . ($prevenu ? " Le client vient de recevoir son avis d'expédition." : ''));
         redirect('/admin/commandes/' . $id);
 
         return '';
+    }
+
+    /** La facture en PDF, telle que le client la reçoit. */
+    public function invoice(array $params): string
+    {
+        Auth::require();
+
+        $repository = new OrderRepository();
+        $order = $repository->find((int) $params['id']);
+
+        if ($order === null) {
+            redirect('/admin/commandes');
+        }
+
+        if ($order['paid_at'] === null) {
+            Session::flash('admin', "Cette commande n'est pas payée : aucune facture ne peut être émise.");
+            redirect('/admin/commandes/' . (int) $params['id']);
+        }
+
+        $pdf = Invoice::render($order);
+        // Relu après l'édition : c'est elle qui a pu attribuer le numéro.
+        $order = $repository->find((int) $params['id']);
+
+        header('Content-Type: application/pdf');
+        header('Content-Disposition: attachment; filename="' . Invoice::filename($order) . '"');
+        header('Content-Length: ' . strlen($pdf));
+
+        return $pdf;
     }
 
     public function updateNote(): string
@@ -206,5 +245,45 @@ final class OrderController
         redirect('/admin/commandes/' . $id);
 
         return '';
+    }
+
+    /**
+     * Prévient le client que son colis est parti.
+     *
+     * Une seule fois : la date d'envoi est posée en base, et corriger un
+     * numéro de suivi ne redéclenche donc pas le message. Les commandes à
+     * retirer sur place n'en reçoivent pas — rien ne part.
+     *
+     * L'envoi est enfermé dans son propre try/catch : un serveur de courriel
+     * muet ne doit pas empêcher d'enregistrer une expédition qui, elle, a bien
+     * eu lieu.
+     */
+    private function previenirExpedition(OrderRepository $repository, int $id): bool
+    {
+        try {
+            $order = $repository->find($id);
+
+            if ($order === null
+                || !in_array((string) $order['fulfilment'], Status::shippedFulfilments(), true)
+                || $order['shipping_email_sent_at'] !== null
+                || trim((string) ($order['tracking_number'] ?? '')) === ''
+            ) {
+                return false;
+            }
+
+            $sujet = 'Votre commande ' . $order['reference'] . ' est en route';
+
+            if (!Mailer::send((string) $order['email'], $sujet, 'commande-expediee', ['commande' => $order])) {
+                return false;
+            }
+
+            Database::run('UPDATE orders SET shipping_email_sent_at = NOW() WHERE id = ?', [$id]);
+
+            return true;
+        } catch (\Throwable $e) {
+            error_log("Avis d'expédition non envoyé pour la commande {$id} : " . $e->getMessage());
+
+            return false;
+        }
     }
 }

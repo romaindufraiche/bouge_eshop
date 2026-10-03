@@ -30,6 +30,13 @@ final class AuthController
             return $this->fail('Votre session a expiré. Réessayez.', (string) ($_POST['email'] ?? ''));
         }
 
+        // Dire que la porte est fermée, plutôt que de laisser croire à un
+        // mot de passe faux : la personne saurait sinon que son mot de passe
+        // ne marche plus, et le changerait pour rien.
+        if (Auth::lockedOut()) {
+            return $this->fail(Auth::lockMessage(), (string) ($_POST['email'] ?? ''));
+        }
+
         $email = trim((string) ($_POST['email'] ?? ''));
         $password = (string) ($_POST['password'] ?? '');
 

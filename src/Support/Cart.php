@@ -270,6 +270,10 @@ final class Cart
                 'weight_grams'     => $product['weight_grams'] === null
                     ? null
                     : (int) $product['weight_grams'],
+                // Le taux de TVA suit le même chemin, et pour la même raison :
+                // la facture doit rester juste même si le taux du produit
+                // change ensuite.
+                'vat_rate_bp'      => (int) ($product['vat_rate_bp'] ?? 2000),
                 'compare_at_cents' => $price->compareAtCents,
                 'line_total_cents' => $price->cents * $quantity,
                 'available_stock'  => $stock,
