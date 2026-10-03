@@ -126,7 +126,16 @@ $flash = Session::takeFlash('shop');
                 <?php endif; ?>
 
                 <a class="cart-link" href="/panier">
-                    Panier
+                    <?php /* Le même trait que la loupe de la recherche : 1,6 px,
+                             `currentColor`, pour que les deux icônes de la barre
+                             soient manifestement de la même main. */ ?>
+                    <svg class="cart-link__icone" width="18" height="18" viewBox="0 0 18 18"
+                         fill="none" stroke="currentColor" stroke-width="1.6"
+                         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M3.3 5.9h11.4l-1 8.2a1.6 1.6 0 0 1-1.6 1.4H5.9a1.6 1.6 0 0 1-1.6-1.4Z"/>
+                        <path d="M6.5 5.9V4.7a2.5 2.5 0 0 1 5 0v1.2"/>
+                    </svg>
+                    <span class="cart-link__texte">Panier</span>
                     <?php if ($cartCount > 0): ?>
                         <span class="cart-count nums"><?= (int) $cartCount ?></span>
                     <?php endif; ?>

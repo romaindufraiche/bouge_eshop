@@ -31,13 +31,19 @@ use Bouge\Support\Status;
 
 $vider = in_array('--vider', $argv, true);
 
+// --client=adresse@exemple.fr : au lieu des douze personnages ci-dessous,
+// rattache une poignée de commandes à un compte qui existe déjà. De quoi
+// regarder l'espace client rempli, avec ses propres identifiants.
+$client = null;
+
+foreach ($argv as $argument) {
+    if (str_starts_with($argument, '--client=')) {
+        $client = trim(substr($argument, strlen('--client=')));
+    }
+}
+
 $commandes = new OrderRepository();
 
-if ($vider) {
-    // Les lignes partent en cascade avec leur commande (voir le schéma).
-    Database::run('DELETE FROM orders');
-    echo "✓ Commandes existantes effacées\n";
-}
 
 // --- Le catalogue dans lequel puiser ----------------------------------------
 
@@ -62,6 +68,30 @@ $clients = Database::all('SELECT id, email, name FROM customers ORDER BY id');
 // Des commandes qui se ressemblent toutes ne montrent rien. Celles-ci varient
 // le mode de remise, le statut, le nombre d'articles et l'ancienneté.
 
+$compte = null;
+
+if ($client !== null) {
+    $compte = Database::first('SELECT id, email, name FROM customers WHERE email = ?', [$client]);
+
+    if ($compte === null) {
+        fwrite(STDERR, "Aucun compte client avec l'adresse « {$client} ». Créez-le d'abord sur la boutique.\n");
+        exit(1);
+    }
+}
+
+if ($vider) {
+    // Les lignes de commande partent en cascade (voir le schéma). Avec
+    // --client, on ne touche qu'à l'historique de ce compte : effacer toute
+    // la boutique pour rejouer le sien serait disproportionné.
+    if ($compte !== null) {
+        $efface = Database::run('DELETE FROM orders WHERE customer_id = ?', [(int) $compte['id']])->rowCount();
+        echo "✓ {$efface} commande(s) de {$compte['email']} effacée(s)\n";
+    } else {
+        Database::run('DELETE FROM orders');
+        echo "✓ Commandes existantes effacées\n";
+    }
+}
+
 $scenarios = [
     // [nom, courriel, mode, statut, articles, jours d'ancienneté, note]
     ['Camille Martin',  'camille@example.com',   Status::RELAY,    Status::ORDER_PAID,       2, 0,  null],
@@ -77,6 +107,22 @@ $scenarios = [
     ['Farida Slimani',  'farida.s@example.com',  Status::PICKUP,   Status::ORDER_COLLECTED,  1, 21, null],
     ['Vincent Aubry',   'v.aubry@example.com',   Status::DELIVERY, Status::ORDER_PENDING,    2, 0,  null],
 ];
+
+if ($compte !== null) {
+    // Un historique à soi : une commande en cours de préparation, une en
+    // route avec son suivi, une retirée au concept store et une plus
+    // ancienne. De quoi voir l'espace client dans chacun de ses états.
+    $nom = (string) $compte['name'];
+    $adresse = (string) $compte['email'];
+
+    $scenarios = [
+        [$nom, $adresse, Status::RELAY,    Status::ORDER_PAID,      2, 0,  null],
+        [$nom, $adresse, Status::DELIVERY, Status::ORDER_PREPARING, 1, 2,  null],
+        [$nom, $adresse, Status::RELAY,    Status::ORDER_SHIPPED,   3, 7,  null],
+        [$nom, $adresse, Status::PICKUP,   Status::ORDER_COLLECTED, 1, 19, null],
+        [$nom, $adresse, Status::DELIVERY, Status::ORDER_SHIPPED,   2, 34, null],
+    ];
+}
 
 $relais = [
     ['Tabac Le Longchamp',  '12 avenue Marceau',       '92400', 'Courbevoie'],
@@ -220,7 +266,11 @@ foreach ($scenarios as $i => [$nom, $courriel, $mode, $statut, $nombre, $jours, 
     $cree++;
 }
 
-printf("✓ %d commandes de démonstration créées\n", $cree);
+printf(
+    "✓ %d commandes de démonstration créées%s\n",
+    $cree,
+    $compte === null ? '' : " pour {$compte['email']}"
+);
 
 $parStatut = Database::all('SELECT status, COUNT(*) AS n FROM orders GROUP BY status ORDER BY n DESC');
 

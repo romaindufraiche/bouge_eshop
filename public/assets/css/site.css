@@ -253,16 +253,53 @@ main { flex: 1; }
 .section--line-bottom { border-bottom: 1px solid var(--line); }
 .section--sand { background: var(--sand); }
 
-.stack > * + * { margin-top: 1rem; }
-.stack-s > * + * { margin-top: 0.5rem; }
-.stack-l > * + * { margin-top: 2rem; }
+/* --- La section « À découvrir », en eau ------------------------------------
+   Le bleu n'est pas inventé : c'est `--sky`, la couleur secondaire de la
+   charte, simplement étirée du plus clair en haut au plus profond en bas.
+   Deux vagues couleur crème ferment la bande en haut et en bas — c'est le
+   crème de la page qui déborde sur l'eau, pas un bleu posé sur du blanc, et
+   la section ne paraît donc pas rapportée.
 
-.row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  align-items: center;
+   Le haut reste pâle là où se trouve le titre : « À découvrir » est en
+   `--ink` et doit garder son contraste. Les vignettes produit, elles, ont
+   leur propre fond clair. */
+
+.section--ocean {
+  position: relative;
+  isolation: isolate;
+  padding-top: 5.5rem;
+  padding-bottom: 5.5rem;
+  border-top: 0;
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--sky) 18%, var(--cream)) 0%,
+      color-mix(in srgb, var(--sky) 42%, var(--cream)) 45%,
+      color-mix(in srgb, var(--sky) 72%, var(--white)) 100%
+    );
 }
+
+/* Les deux vagues. `background-repeat: repeat-x` les fait courir sur toute la
+   largeur quelle que soit la taille de l'écran, sans image à télécharger :
+   le motif tient dans l'adresse. */
+.section--ocean::before,
+.section--ocean::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: 0;
+  right: 0;
+  height: 2.75rem;
+  /* Deux crêtes par motif, et un motif large de 240 px : une houle longue,
+     pas une frise de festons. Le premier essai découpait des demi-cercles de
+     60 px et ressemblait à un napperon. */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 40' preserveAspectRatio='none'%3E%3Cpath d='M0 0H120V18C110 30 100 30 90 18 80 6 70 6 60 18 50 30 40 30 30 18 20 6 10 6 0 18Z' fill='%23fffbe8'/%3E%3C/svg%3E");
+  background-repeat: repeat-x;
+  background-size: 240px 100%;
+}
+.section--ocean::before { top: -1px; }
+.section--ocean::after { bottom: -1px; transform: scaleY(-1); }
+
 
 .between {
   display: flex;
@@ -442,6 +479,10 @@ h3:has(.marque-inline) { line-height: 1.3; }
   font-size: 0.875rem;
   text-decoration: none;
 }
+/* Le panier est la seule action de la barre : l'icône le fait repérer sans
+   lire. Elle se remplit légèrement au survol, pour confirmer le clic. */
+.cart-link__icone { flex: none; transition: transform 0.15s, color 0.15s; }
+.cart-link:hover .cart-link__icone { color: var(--accent-deep); transform: translateY(-1px); }
 .cart-count {
   display: inline-flex;
   min-width: 1.25rem;
@@ -953,19 +994,98 @@ h3:has(.marque-inline) { line-height: 1.3; }
   margin: 2rem 0 0;
   padding: 0;
 }
+/* Une couleur par usage, prise dans les secondaires de la charte. Elle ne
+   touche jamais le texte courant : seulement le filet au survol, un voile de
+   fond et la flèche — et la flèche est assombrie vers l'encre, sinon le bleu
+   ciel tomberait à 2,3:1 sur blanc, illisible. */
+.usages li:nth-child(1) a { --teinte: var(--accent-deep); }
+.usages li:nth-child(2) a { --teinte: var(--accent); }
+.usages li:nth-child(3) a { --teinte: var(--jade); }
+.usages li:nth-child(4) a { --teinte: var(--sky); }
+.usages li:nth-child(5) a { --teinte: var(--coffee); }
+
 .usages a {
+  --teinte: var(--accent-deep);
+  position: relative;
+  display: block;
+  height: 100%;
+  padding: 1.35rem 1.25rem 1.15rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-surface);
+  background: var(--white);
+  text-decoration: none;
+  /* Posée, pas dessinée : une ombre très basse suffit à décoller la tuile du
+     crème, là où le seul filet la laissait à plat. */
+  box-shadow: 0 1px 2px rgb(89 68 58 / 6%);
+  transition: transform 0.18s ease-out, box-shadow 0.18s ease-out, border-color 0.18s;
+}
+.usages a:hover,
+.usages a:focus-visible {
+  transform: translateY(-3px);
+  border-color: var(--teinte);
+  background:
+    linear-gradient(180deg, var(--white) 55%, color-mix(in srgb, var(--teinte) 10%, var(--white)) 100%);
+  box-shadow: 0 12px 22px rgb(89 68 58 / 14%);
+  text-decoration: none;
+}
+
+.usages__contenu {
   display: grid;
   gap: 0.35rem;
   height: 100%;
-  padding: 1.25rem;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-surface);
-  text-decoration: none;
-  transition: border-color 0.15s, background-color 0.15s;
+  transition: transform 0.18s ease-out;
 }
-.usages a:hover { border-color: var(--ink); background: var(--sand); text-decoration: none; }
-.usages__titre { font-weight: 600; font-size: 1.0625rem; }
-.usages__fleche { margin-top: auto; padding-top: 0.5rem; color: var(--accent-deep); }
+.usages__titre { font-weight: 600; font-size: 1.0625rem; transition: color 0.18s; }
+.usages a:hover .usages__titre { color: var(--accent-deep); }
+.usages__fleche {
+  margin-top: auto;
+  padding-top: 0.75rem;
+  /* 60 % de teinte, 40 % d'encre : à 72 % le bleu ciel tombait à 3,9:1 sur
+     blanc. À 60 %, la plus faible des cinq tient 4,9:1 et chacune garde sa
+     teinte reconnaissable. */
+  color: color-mix(in srgb, var(--teinte) 60%, var(--ink));
+  transition: transform 0.18s ease-out;
+}
+.usages a:hover .usages__fleche { transform: translateX(5px); }
+
+/* --- L'aimant ---------------------------------------------------------------
+   Neuf zones invisibles par-dessus la tuile. `:has()` dit laquelle est
+   survolée, et le contenu se décale de quelques pixels dans cette direction :
+   le texte suit le curseur comme s'il était attiré. Un vrai aimant, qui suit
+   la position exacte du pointeur, demanderait du JavaScript ; neuf zones
+   suffisent à produire la sensation, et le site n'en charge toujours pas. */
+
+.usages__zones {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  display: grid;
+  grid-template: repeat(3, 1fr) / repeat(3, 1fr);
+}
+.usages__zones > span { display: block; }
+
+.usages a:has(.usages__zones > :nth-child(1):hover) .usages__contenu { transform: translate(-6px, -5px); }
+.usages a:has(.usages__zones > :nth-child(2):hover) .usages__contenu { transform: translate(0, -5px); }
+.usages a:has(.usages__zones > :nth-child(3):hover) .usages__contenu { transform: translate(6px, -5px); }
+.usages a:has(.usages__zones > :nth-child(4):hover) .usages__contenu { transform: translate(-6px, 0); }
+.usages a:has(.usages__zones > :nth-child(6):hover) .usages__contenu { transform: translate(6px, 0); }
+.usages a:has(.usages__zones > :nth-child(7):hover) .usages__contenu { transform: translate(-6px, 5px); }
+.usages a:has(.usages__zones > :nth-child(8):hover) .usages__contenu { transform: translate(0, 5px); }
+.usages a:has(.usages__zones > :nth-child(9):hover) .usages__contenu { transform: translate(6px, 5px); }
+
+/* Sur un écran tactile il n'y a pas de survol, et l'aimant n'aurait aucun
+   sens ; les zones resteraient à intercepter des gestes pour rien. */
+@media (hover: none) {
+  .usages__zones { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .usages a,
+  .usages__contenu,
+  .usages__fleche { transition: none; }
+  .usages a:hover { transform: none; }
+  .usages__zones { display: none; }
+}
 
 /* Mise en avant de l'accueil -----------------------------------------------------
    Le produit mis en avant est aujourd'hui un livre : sa couverture est une
@@ -1093,9 +1213,12 @@ textarea[aria-invalid='true'] { border-color: var(--accent); }
 .compte-link span[aria-hidden] { font-size: 0.6em; color: var(--accent-deep); }
 @media (max-width: 520px) {
   /* Sur un petit écran, la pastille suffit : le mot pousserait le panier
-     hors de la barre. */
-  .compte-link__texte { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); }
+     hors de la barre. Le texte reste dans le document — masqué à l'œil,
+     toujours lu par un lecteur d'écran. */
+  .compte-link__texte,
+  .cart-link__texte { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); }
   .compte-link span[aria-hidden] { font-size: 1rem; }
+  .cart-link__icone { width: 20px; height: 20px; }
 }
 
 /* Le raccourci vers l'administration, visible seulement quand une session

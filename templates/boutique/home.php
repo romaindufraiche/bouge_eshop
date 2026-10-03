@@ -288,9 +288,22 @@ $freeAbove = $shop['shipping']['free_above_cents'];
             <?php foreach (Usage::all() as $slug => $libelle): ?>
                 <li>
                     <a href="/usage/<?= e($slug) ?>">
-                        <span class="usages__titre"><?= e($libelle) ?></span>
-                        <span class="t-s muted"><?= e(Usage::descriptions()[$slug] ?? '') ?></span>
-                        <span class="usages__fleche" aria-hidden="true">→</span>
+                        <?php /* Neuf zones transparentes, purement décoratives.
+                                 Elles ne servent qu'à une chose : avec `:has()`,
+                                 la tuile sait laquelle est survolée et penche son
+                                 contenu de ce côté. C'est un aimant sans une
+                                 ligne de JavaScript — le site n'en charge aucune,
+                                 et ce n'est pas un effet de survol qui va
+                                 justifier la première. */ ?>
+                        <span class="usages__zones" aria-hidden="true">
+                            <?php for ($z = 0; $z < 9; $z++): ?><span></span><?php endfor; ?>
+                        </span>
+
+                        <span class="usages__contenu">
+                            <span class="usages__titre"><?= e($libelle) ?></span>
+                            <span class="t-s muted"><?= e(Usage::descriptions()[$slug] ?? '') ?></span>
+                            <span class="usages__fleche" aria-hidden="true">→</span>
+                        </span>
                     </a>
                 </li>
             <?php endforeach; ?>
@@ -299,7 +312,7 @@ $freeAbove = $shop['shipping']['free_above_cents'];
 </section>
 
 <?php if ($products !== []): ?>
-    <section class="section section--line">
+    <section class="section section--ocean">
         <div class="wrap">
             <div class="between">
                 <h2 class="t-l">À découvrir</h2>
