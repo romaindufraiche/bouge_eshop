@@ -57,14 +57,18 @@ ob_start();
         <td style="padding:8px 0;font:400 14px/1.5 Helvetica,Arial,sans-serif;color:#59443a;">
             <?= e(Status::fulfilments()[$commande['fulfilment']] ?? 'Livraison') ?>
         </td>
-        <td align="right" style="padding:8px 0;font:400 14px/1.5 Helvetica,Arial,sans-serif;color:#59443a;">
+        <td align="right" style="padding:8px 0;white-space:nowrap;
+                                 font:400 14px/1.5 Helvetica,Arial,sans-serif;color:#59443a;">
             <?= (int) $commande['shipping_cents'] === 0 ? 'Offerte' : e(Money::format((int) $commande['shipping_cents'])) ?>
         </td>
     </tr>
     <tr>
         <td style="padding:10px 0 0;border-top:2px solid #232323;
                    font:700 16px/1.5 Helvetica,Arial,sans-serif;">Total</td>
-        <td align="right" style="padding:10px 0 0;border-top:2px solid #232323;
+        <?php /* `nowrap` : à 16 px, « 133,88 € » débordait de sa colonne et
+                 le symbole euro tombait seul à la ligne suivante. Les lignes
+                 d'articles le portaient déjà ; le total l'avait oublié. */ ?>
+        <td align="right" style="padding:10px 0 0;border-top:2px solid #232323;white-space:nowrap;
                                  font:700 16px/1.5 Helvetica,Arial,sans-serif;">
             <?= e(Money::format((int) $commande['total_cents'])) ?>
         </td>
