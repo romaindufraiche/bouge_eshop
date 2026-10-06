@@ -450,6 +450,21 @@ final class BoxtalCarrier implements Carrier
     /** @throws CarrierException */
     private function analyser(string $xml, int $codeHttp): DOMXPath
     {
+        // Un corps vide est le cas le plus courant d'identifiants refusés :
+        // Boxtal répond 401 sans rien écrire. `DOMDocument::loadXML('')` lève
+        // alors un ValueError — pas une CarrierException —, qui traversait le
+        // filet du tunnel de commande et de l'achat d'étiquette : le client
+        // voyait une erreur 500 au lieu du message prévu.
+        if (trim($xml) === '') {
+            throw new CarrierException(match (true) {
+                $codeHttp === 401, $codeHttp === 403 => 'Boxtal a refusé les identifiants. '
+                    . "Vérifiez qu'ils sont bien ceux du compte (API v1) et du bon environnement : "
+                    . 'les accès de test et de production sont distincts.',
+                $codeHttp === 0 => 'Boxtal ne répond pas : aucune réponse reçue.',
+                default => "Boxtal a renvoyé une réponse vide (HTTP {$codeHttp}).",
+            });
+        }
+
         $document = new DOMDocument();
         // Les avertissements de libxml ne nous apprennent rien d'utile ; le
         // retour de load() suffit à savoir si le document tient debout.

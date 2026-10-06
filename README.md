@@ -135,6 +135,7 @@ La boutique répond sur <http://localhost:8000>, l'administration sur
 | `php database/seed.php [email] [mot-de-passe]` | Remplit un catalogue de démonstration (5 catégories, 14 produits). Les tables doivent déjà exister. |
 | `php database/seed-demo.php` | Ajoute une soixantaine de produits réels avec leurs visuels, pour une démonstration parlante. Voir [Le catalogue de démonstration](#le-catalogue-de-démonstration). |
 | `php database/seed-commandes.php [--vider]` | Crée une douzaine de commandes plausibles, réparties sur les six statuts et les trois modes de remise. Pour voir à quoi ressemble l'administration une fois qu'elle sert. |
+| `php bin/tester-boxtal.php [code postal]` | Éprouve les identifiants Boxtal et affiche les points relais trouvés. N'achète rien. |
 | `php database/purger-demo.php [--vraiment]` | Retire les produits de démonstration (arena) et leurs photos. Sans `--vraiment`, il se contente de dire ce qui partirait. Les commandes déjà passées ne bougent pas. |
 | `php database/seed-commandes.php --client=<adresse>` | Rattache cinq commandes à un compte client qui existe déjà — commande en préparation, colis en route avec son suivi, retrait au concept store, achats anciens. Pour regarder l'espace client rempli, avec ses propres identifiants. Avec `--vider`, seul l'historique de ce compte est effacé. |
 

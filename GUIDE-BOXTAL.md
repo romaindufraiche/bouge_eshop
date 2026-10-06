@@ -91,6 +91,14 @@ où se tromper ne coûte rien.
    développez une boutique et vous avez besoin des accès API sur
    l'environnement de test.
 
+> **L'espace développeur et ses « applications » ne servent qu'à l'API v3.**
+> Y créer une application donne un identifiant d'application
+> (`app-…`) dont la boutique ne sait rien faire. L'**API v1** ne demande
+> aucune application : elle s'authentifie avec l'**identifiant et le mot de
+> passe du compte Boxtal** — c'est ce que fait leur propre bibliothèque PHP,
+> avec ses constantes `EMC_USER` et `EMC_PASS`. L'onglet « API v1 » du
+> portail est l'endroit où cet accès s'ouvre.
+
 > **Si on vous propose l'API v3 :** la boutique parle l'**API v1**, celle qui
 > échange du XML avec `envoimoinscher.com`. Les deux coexistent et v1 reste
 > documentée et maintenue ; c'est elle que nous utilisons, parce qu'elle
@@ -198,6 +206,28 @@ expédiez systématiquement plus gros, dites-le : ça se change dans
 `src/Shipping/BoxtalCarrier.php`.
 
 ---
+
+## 6 bis. Vérifier les identifiants en une commande
+
+Avant de dérouler le tunnel, une seule ligne dit si les accès fonctionnent :
+
+```bash
+php bin/tester-boxtal.php
+```
+
+Il interroge la cotation et affiche les points relais trouvés autour de
+l'adresse d'expédition. **Il n'achète rien** : seule la création d'une
+étiquette est facturée, même en production.
+
+Trois réponses possibles :
+
+| Ce qu'il affiche | Ce que ça veut dire |
+| --- | --- |
+| Une liste de commerces | Tout fonctionne. Passez à la suite. |
+| « Boxtal a refusé les identifiants » | Mauvais environnement (test et production ont des accès distincts), accès API v1 pas encore ouvert, ou identifiants d'une application v3 au lieu du couple du compte. |
+| « Aucun point relais n'est proposé » | Le compte est reconnu mais aucun transporteur à point relais n'y est activé, ou aucun ne dessert ce code postal. |
+
+Un autre code postal se passe en argument : `php bin/tester-boxtal.php 75011`.
 
 ## 7. Premier essai : les points relais
 
