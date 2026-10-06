@@ -1909,9 +1909,6 @@ form:has(#mode-relais:checked) .champs-retrait { display: none; }
   gap: 0.75rem;
   aspect-ratio: 1;
   overflow: hidden;
-  padding: 0.75rem;
-  border-radius: var(--radius-surface);
-  background: var(--sand);
 }
 
 .vitrine__colonne {
@@ -1954,8 +1951,22 @@ form:has(#mode-relais:checked) .champs-retrait { display: none; }
 
 .vitrine__article { margin-bottom: 0.75rem; }
 
+/* La vignette est une carte carrée : cadre, photo recadrée dedans, coins
+   arrondis, prix posé par-dessus. Avant, la photo flottait à sa propre
+   forme sur l'aplat de la bande et le prix pendait dessous — chaque article
+   avait sa hauteur d'encre et sa silhouette, la colonne paraissait brute. */
 .vitrine__article a {
+  position: relative;
   display: block;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: var(--radius-surface);
+  /* Le sable de la charte derrière les photos : c'est lui que le fondu
+     multiplié ci-dessous teinte, et c'est ce qui donne aux vignettes leur
+     fond commun. Sur l'anthracite du héros, elles se lisent comme des cartes
+     claires posées dessus — la même façon de faire que les cartes du site de
+     la salle sur son fond sombre. */
+  background: var(--sand);
   color: var(--ink);
   text-decoration: none;
 }
@@ -1963,30 +1974,58 @@ form:has(#mode-relais:checked) .champs-retrait { display: none; }
 .vitrine__article img {
   display: block;
   width: 100%;
-  aspect-ratio: 1;
-  object-fit: contain;
-  border-radius: var(--radius-small);
-  /* Les photos produits arrivent sur un fond uni clair. Le fondu multiplié les
-     pose directement sur l'aplat de la vitrine : sans carte blanche derrière,
-     la bande respire et les photos se lisent comme une collection plutôt que
-     comme une liste de cases. */
+  height: 100%;
+  /* Recadré, pas logé : les photos produits n'ont ni le même cadrage ni les
+     mêmes proportions, et `contain` laissait des marges inégales autour de
+     chacune. En `cover`, toutes remplissent leur carte et la colonne devient
+     une grille régulière. */
+  object-fit: cover;
+  /* Un peu au-dessus du centre : sur les photos de mannequin, un cadrage
+     centré coupe la tête pour garder les jambes. */
+  object-position: center 30%;
+  /* Les photos arrivent sur un fond uni clair, blanc ou gris. Le fondu
+     multiplié les pose sur le sable de la carte : les fonds disparaissent
+     dans un seul et même ton au lieu de jurer les uns avec les autres. */
   mix-blend-mode: multiply;
+  transition: transform 0.4s ease-out;
 }
 
-/* Le prix, petit et centré sous la photo. Il tient sur une ligne : la hauteur
-   des articles reste constante, et le calage de la boucle avec elle. */
+.vitrine__article a:hover img { transform: scale(1.04); }
+
+/* Le prix par-dessus la photo, dans une pastille, et composé dans la police
+   d'affichage de la marque — celle des titres. Posé sous la photo en Manrope,
+   il formait une troisième ligne de hauteur variable entre deux images et
+   cassait la bande. Sun Motter dessine bien les chiffres, la virgule et
+   l'euro : vérifié au rendu avant de s'en servir. */
 .vitrine__article .price {
+  position: absolute;
+  left: 50%;
+  bottom: 0.5rem;
+  transform: translateX(-50%);
   justify-content: center;
   gap: 0.35rem;
-  margin-top: 0.3rem;
-  font-size: 0.75rem;
+  margin: 0;
+  padding: 0.25rem 0.7rem;
+  border-radius: var(--radius-control);
+  background: var(--ink);
+  color: var(--cream);
+  font-family: 'Sun Motter', system-ui, sans-serif;
+  font-size: 0.9rem;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
 }
 
-.vitrine__article .price__now { font-weight: 600; }
-.vitrine__article .price__was { font-size: 0.7rem; }
+/* En promotion, c'est la pastille entière qui passe à l'orange. Le prix barré
+   et le pourcentage ne tiendraient pas dans une pastille de cette taille, et
+   la couleur dit la même chose d'un coup d'œil. */
+.vitrine__article .price--sale {
+  background: var(--accent-deep);
+  color: var(--white);
+}
+/* Sans cela, la règle générale peint le prix en orange sur l'orange. */
+.vitrine__article .price--sale .price__now { color: inherit; }
 
-/* La pastille de remise écraserait la vignette : la promotion se voit déjà au
-   prix barré, et la fiche produit porte le pourcentage. */
+.vitrine__article .price__was,
 .vitrine__article .pill { display: none; }
 
 /* Un mouvement perpétuel gêne, voire rend malade. Respecté sans discussion :
@@ -1994,12 +2033,14 @@ form:has(#mode-relais:checked) .champs-retrait { display: none; }
 @media (prefers-reduced-motion: reduce) {
   .vitrine__piste { animation: none; }
   .vitrine__colonne { overflow-y: auto; }
+  .vitrine__article img { transition: none; }
+  .vitrine__article a:hover img { transform: none; }
 }
 
 /* Navigateurs sans aspect-ratio : une hauteur fixe vaut mieux qu'un bloc plat. */
 @supports not (aspect-ratio: 1 / 1) {
   .vitrine { height: 28rem; }
-  .vitrine__article img { height: 8rem; }
+  .vitrine__article a { height: 8rem; }
 }
 
 /* --- Vignettes de catégorie -------------------------------------------------
