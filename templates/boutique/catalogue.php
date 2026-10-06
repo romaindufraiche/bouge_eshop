@@ -61,8 +61,13 @@ $filtresActifs = ($categorieFiltre !== '' && $category === null)
     || ($enPromo && $shortcut !== 'promotions')
     || $tri !== 'nouveautes';
 ?>
-<div class="wrap">
-    <div class="section">
+<?php /* --- L'en-tête de page -------------------------------------------
+         Le fil d'Ariane et le titre sur l'anthracite, pleine largeur, comme
+         le héros de l'accueil et comme les en-têtes du site de la salle. Le
+         catalogue s'ouvrait sur du texte noir posé sur le crème, sans rien
+         qui marque le début de la page. */ ?>
+<section class="entete-page">
+    <div class="wrap">
         <nav aria-label="Fil d'Ariane">
             <ol class="breadcrumb">
                 <li><a href="/">Accueil</a></li>
@@ -88,12 +93,17 @@ $filtresActifs = ($categorieFiltre !== '' && $category === null)
                 <p class="muted" style="margin-top:.75rem;max-width:42rem"><?= e($intro) ?></p>
             <?php endif; ?>
         </header>
+    </div>
+</section>
+
+<div class="wrap">
+    <div class="section" style="padding-top:2.25rem">
 
         <?php /* Le formulaire est en GET : les filtres restent dans l'adresse,
                  la page se recharge, se partage et se met en favori telle
                  quelle. Le bouton « Afficher » sert à ceux qui n'ont pas de
                  JavaScript — c'est-à-dire, ici, tout le monde. */ ?>
-        <form class="filtres" method="get" action="<?= e($action) ?>" style="margin-top:2rem">
+        <form class="filtres" method="get" action="<?= e($action) ?>">
             <?php if ($search !== ''): ?>
                 <input type="hidden" name="q" value="<?= e($search) ?>">
             <?php endif; ?>
@@ -165,7 +175,7 @@ $filtresActifs = ($categorieFiltre !== '' && $category === null)
             <?= (int) $count ?> article<?= $count > 1 ? 's' : '' ?>
         </p>
 
-        <div style="margin-top:1rem">
+        <div class="reveal" style="margin-top:1rem">
             <?php if ($products === []): ?>
                 <div class="vide">
                     <p class="t-m">Aucun article ne correspond.</p>

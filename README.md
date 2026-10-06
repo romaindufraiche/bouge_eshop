@@ -1162,6 +1162,43 @@ filtres et pastilles reprennent cette rondeur, comme les stickers de
 l'identité. Tout tient dans un jeton — passer `--radius-control` de `9999px` à
 `6px` suffit pour une allure anguleuse.
 
+### Mouvement et contraste
+
+La boutique avait les couleurs de la marque et pas son allure : tout y était
+posé à plat sur le crème, du haut de la page au pied. Le site de la salle
+(`krokow.github.io/bouge`), lui, alterne les blocs sombres, les aplats de
+couleur et les cartes qui flottent. La partie **11. Mouvement** de la feuille
+de style en reprend le vocabulaire :
+
+| Élément | Où | Ce qui est repris |
+| --- | --- | --- |
+| `.hero` | Accueil | Le bloc anthracite d'ouverture, avec un halo d'orange qui respire |
+| `.entete-page` | Catalogue, recherche, usage | Le même anthracite, en plus bas, pour ouvrir la page |
+| `.hero__pastille` | Accueil | La pastille contournée, puces entre les termes, le premier en orange |
+| `.tampon-tournant` | Accueil | Le tampon de la charte en cachet de cire, qui tourne |
+| `.ruban` | Accueil | La bande d'orange qui glisse sans fin |
+| `.promesses` | Accueil | L'aplat vert et les ronds des trois étapes |
+| `.signature` | Titres de section | L'annotation manuscrite qui coiffe les cartes d'offre |
+| `.btn--fleche` | Parcours d'achat | La flèche des boutons, qui avance au survol |
+| `.reveal` | Partout | Les blocs qui montent en entrant dans l'écran |
+
+**Aucune de ces animations n'appelle de JavaScript** — le site n'en charge
+toujours pas une ligne. Les révélations au défilement passent par
+`animation-timeline: view()`, que le navigateur calcule seul, derrière un
+`@supports` : là où il ne sait pas faire, le contenu est simplement visible,
+ce qui est le bon état de repli. Tout s'arrête sous
+`prefers-reduced-motion: reduce`.
+
+Deux points de contraste ont demandé un calcul plutôt qu'un choix à l'œil :
+
+- le **jade de la charte ne porte le crème qu'à 3,45:1**, sous le minimum de
+  4,5:1. La bande des promesses l'assombrit vers l'encre
+  (`color-mix(in srgb, var(--jade) 70%, var(--ink))`), ce qui le remonte à
+  5,3:1 en gardant la teinte ;
+- le **bouton marchand reste orange au survol** au lieu de virer au noir,
+  mais garde le ton assombri : l'orange vif ne porte le blanc qu'à 3,5:1. Le
+  halo, lui, ne porte aucun texte et peut prendre l'orange vif.
+
 ### Le titre de l'accueil
 
 `templates/boutique/home.php`, une seule ligne. Il est aujourd'hui à

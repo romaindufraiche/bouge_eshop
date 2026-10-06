@@ -20,6 +20,7 @@
      9. Panier et commande
     9 bis. Compte client et concept store
     10. Administration
+    11. Mouvement — héros, ruban, révélations
    =========================================================================== */
 
 /* --- 1. Jetons ----------------------------------------------------------- */
@@ -609,15 +610,37 @@ h3:has(.marque-inline) { line-height: 1.3; }
   padding: 0;
 }
 .site-nav--desktop > .wrap > ul > li > a {
+  position: relative;
   display: inline-block;
   padding: 0.7rem 0;
   font-size: 0.875rem;
   border-bottom: 2px solid transparent;
 }
-.site-nav--desktop > .wrap > ul > li > a:hover,
-.site-nav--desktop > .wrap > ul > li > a[aria-current='page'] {
-  border-bottom-color: var(--ink);
-  text-decoration: none;
+/* Le filet se déploie depuis la gauche plutôt que d'apparaître d'un bloc :
+   un trait qui se dessine se remarque, un trait qui s'allume non. La bordure
+   transparente reste pour réserver sa place et ne rien faire bouger. */
+.site-nav--desktop > .wrap > ul > li > a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -2px;
+  height: 2px;
+  background: var(--ink);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.2s ease-out;
+}
+.site-nav--desktop > .wrap > ul > li > a:hover::after,
+.site-nav--desktop > .wrap > ul > li > a[aria-current='page']::after {
+  transform: scaleX(1);
+}
+.site-nav--desktop > .wrap > ul > li > a:hover { text-decoration: none; }
+/* Le lien des promotions est en orange : son filet l'est aussi. */
+.site-nav--desktop > .wrap > ul > li > .lien-promo::after { background: var(--accent-deep); }
+
+@media (prefers-reduced-motion: reduce) {
+  .site-nav--desktop > .wrap > ul > li > a::after { transition: none; }
 }
 .lien-promo { color: var(--accent-deep); font-weight: 600; }
 
@@ -787,10 +810,15 @@ h3:has(.marque-inline) { line-height: 1.3; }
   letter-spacing: 0.01em;
   text-decoration: none;
   cursor: pointer;
-  transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+  transition:
+    background-color 0.15s, color 0.15s, border-color 0.15s,
+    transform 0.15s ease-out, box-shadow 0.2s ease-out;
 }
 
-.btn:hover { background: transparent; color: var(--ink); text-decoration: none; }
+/* Le bouton se soulève sous le curseur. Deux pixels suffisent : le geste est
+   rendu, la ligne de base du texte autour ne bouge pas. */
+.btn:hover { background: transparent; color: var(--ink); text-decoration: none; transform: translateY(-2px); }
+.btn:active { transform: translateY(0); }
 
 .btn--lg { padding: 0.9rem 1.85rem; font-size: 1rem; }
 .btn--block { width: 100%; }
@@ -803,7 +831,16 @@ h3:has(.marque-inline) { line-height: 1.3; }
   background: var(--accent-deep);
   color: var(--white);
 }
-.btn--accent:hover { background: var(--ink); border-color: var(--ink); color: var(--cream); }
+/* Le bouton marchand ne vire pas au noir au survol : il reste orange et
+   s'entoure d'un halo de sa propre couleur, comme « Prendre rendez-vous »
+   sur le site de la salle. Le fond garde le ton assombri — l'orange vif ne
+   porte le blanc qu'à 3,5:1, le halo, lui, ne porte aucun texte. */
+.btn--accent:hover {
+  background: var(--accent-deep);
+  border-color: var(--accent-deep);
+  color: var(--white);
+  box-shadow: 0 10px 24px color-mix(in srgb, var(--accent) 55%, transparent);
+}
 
 .btn--ghost {
   border-color: var(--ink);
@@ -922,7 +959,18 @@ h3:has(.marque-inline) { line-height: 1.3; }
   mix-blend-mode: multiply;
   transition: transform 0.4s;
 }
-.product-card a:hover .product-card__media img { transform: scale(1.03); }
+.product-card a:hover .product-card__media img { transform: scale(1.06); }
+
+/* La carte entière se soulève, pas seulement la photo : c'est le mouvement
+   des cartes du site de la salle, posées sur le fond et non dessinées dedans. */
+.product-card a { transition: transform 0.2s ease-out; }
+.product-card a:hover { transform: translateY(-4px); }
+.product-card__media { transition: box-shadow 0.25s ease-out; }
+.product-card a:hover .product-card__media { box-shadow: 0 16px 30px rgb(89 68 58 / 18%); }
+
+@media (prefers-reduced-motion: reduce) {
+  .product-card a:hover { transform: none; }
+}
 
 .product-card__badge { position: absolute; top: 0.75rem; left: 0.75rem; }
 .product-card__badge--right { left: auto; right: 0.75rem; }
@@ -2013,4 +2061,384 @@ a:hover .vignette img { transform: scale(1.06); }
 
 @media (prefers-reduced-motion: reduce) {
   .depot { transition: none; }
+}
+
+/* --- 11. Mouvement ------------------------------------------------------------
+   La boutique avait les couleurs de la marque et pas son allure : tout y
+   était posé à plat sur le crème, sans un bloc sombre, sans un aplat de
+   couleur, sans rien qui bouge en dehors de la vitrine. Cette partie
+   rapporte du site de la salle (krokow.github.io/bouge) ce qui lui donne son
+   caractère : le héros anthracite, le ruban orange, la bande verte, les
+   notes manuscrites, le tampon qui tourne.
+
+   Rien ici n'appelle de JavaScript. Les révélations au défilement passent par
+   `animation-timeline: view()`, que le navigateur sait faire seul ; là où il
+   ne sait pas, le contenu est simplement visible, ce qui est le bon
+   comportement par défaut.
+   ============================================================================ */
+
+/* --- Le héros ---------------------------------------------------------------
+   Un bloc anthracite pleine largeur en ouverture, comme le site de la salle.
+   Le crème revient juste après : le contraste fait tout le travail. */
+
+.hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  padding: 4rem 0 4.5rem;
+  background: var(--ink);
+  color: var(--cream);
+}
+
+/* Un halo d'orange derrière le texte, qui respire très lentement. C'est ce
+   qui empêche l'aplat noir de paraître mort — un dégradé fixe ne suffirait
+   pas, et une vidéo coûterait deux mégaoctets à chaque visite. */
+.hero::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: -45%;
+  left: -15%;
+  width: 48rem;
+  height: 48rem;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--accent) 30%, transparent) 0%,
+    transparent 62%
+  );
+  animation: respire 16s ease-in-out infinite alternate;
+}
+
+@keyframes respire {
+  from { transform: scale(0.9);  opacity: 0.7; }
+  to   { transform: scale(1.08); opacity: 1; }
+}
+
+/* Sur l'anthracite, le texte courant passe en crème : `--ink-soft` y
+   disparaîtrait. Le crème à 70 % tient 10:1, largement de quoi lire. */
+.hero p { color: color-mix(in srgb, var(--cream) 72%, transparent); }
+.hero h1 { color: var(--cream); }
+
+/* La signature manuscrite reprend l'orange vif de la marque : à 24 px, c'est
+   du grand texte, et 4,5:1 sur l'anthracite suffit. */
+.hero__signature {
+  margin-top: 0.75rem;
+  color: var(--accent) !important;
+  transform: rotate(-1.5deg);
+  transform-origin: left center;
+}
+
+/* Le bouton fantôme est dessiné pour le crème : sur l'anthracite il faut
+   l'inverser, comme dans la section du concept store. */
+.hero .btn--ghost { border-color: color-mix(in srgb, var(--cream) 45%, transparent); color: var(--cream); }
+.hero .btn--ghost:hover { background: var(--cream); color: var(--ink); }
+
+/* La pastille contournée du site de la salle : un filet fin, des capitales
+   espacées, des puces entre les termes, le premier en orange. */
+.hero__pastille {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.7rem;
+  margin: 0;
+  padding: 0.45rem 1.15rem;
+  border: 1px solid color-mix(in srgb, var(--cream) 32%, transparent);
+  border-radius: var(--radius-control);
+  list-style: none;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.hero__pastille li:first-child { color: var(--accent); }
+.hero__pastille li + li::before {
+  content: "•";
+  margin-right: 0.7rem;
+  color: color-mix(in srgb, var(--cream) 45%, transparent);
+}
+
+/* La vitrine garde son fond sable : sur l'anthracite, elle se lit comme une
+   carte claire posée dessus — exactement ce que font les cartes du site de
+   la salle sur son fond sombre. */
+.hero__vitrine { position: relative; }
+
+/* Le tampon de la charte, en cachet de cire sur le coin de la vitrine. Il
+   tourne sur lui-même, lentement : c'est l'emprunt le plus littéral au site
+   de la salle, et le visuel existait déjà dans la charte. */
+.tampon-tournant {
+  position: absolute;
+  z-index: 2;
+  top: -1.75rem;
+  right: -1.75rem;
+  width: 6.5rem;
+  height: 6.5rem;
+  padding: 0.3rem;
+  border-radius: 50%;
+  /* La pastille porte le fond : le coin est à cheval sur l'anthracite du
+     héros et le sable de la vitrine, et un tampon d'une seule couleur
+     s'effacerait sur l'un des deux. */
+  background: var(--cream);
+  box-shadow: 0 6px 16px rgb(0 0 0 / 28%);
+  pointer-events: none;
+  animation: tourne 30s linear infinite;
+}
+
+@keyframes tourne {
+  to { transform: rotate(360deg); }
+}
+
+/* La même rotation, sans le positionnement : pour un tampon posé dans le
+   flux, comme celui qui ferme la page d'accueil. */
+.tourne { animation: tourne 40s linear infinite; }
+
+/* En dessous de 900 px la grille se replie et la vitrine touche le bord :
+   le tampon déborderait de l'écran. */
+@media (max-width: 899px) {
+  .tampon-tournant { top: -1rem; right: -0.5rem; width: 4.5rem; height: 4.5rem; }
+  .hero { padding: 3rem 0 3.5rem; }
+}
+
+/* Sur un écran de téléphone, la pastille passait à la ligne et la puce du
+   troisième terme se retrouvait seule en début de ligne, ce qui se lit comme
+   une coquille. Resserrée, elle tient sur une ligne. */
+@media (max-width: 620px) {
+  .hero__pastille {
+    gap: 0.45rem;
+    padding: 0.4rem 0.85rem;
+    font-size: 0.6rem;
+    letter-spacing: 0.08em;
+  }
+  .hero__pastille li + li::before { margin-right: 0.45rem; }
+}
+
+/* Les plus petits écrans encore en circulation (360 px de large). */
+@media (max-width: 380px) {
+  .hero__pastille { font-size: 0.55rem; letter-spacing: 0.05em; padding: 0.4rem 0.7rem; }
+}
+
+/* En dessous de 340 px, rien ne tiendra sur une ligne. Les puces disparaissent
+   plutôt que de se retrouver seules en début de ligne — l'espacement suffit
+   alors à séparer les termes, et le repli se lit comme voulu. */
+@media (max-width: 340px) {
+  .hero__pastille { gap: 0.25rem 0.75rem; }
+  .hero__pastille li + li::before { content: none; }
+}
+
+/* --- L'en-tête de page ---------------------------------------------------------
+   Le même anthracite que le héros, en plus bas, pour ouvrir le catalogue,
+   une recherche, un usage. Il tient le même rôle que le héros : poser un
+   bord franc en haut de page, là où le crème sur crème n'en posait aucun. */
+
+.entete-page {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  padding: 2.5rem 0 3rem;
+  background: var(--ink);
+  color: var(--cream);
+}
+
+/* Un halo d'orange en coin, fixe celui-là : sur une page de catalogue, un
+   fond qui respire tirerait l'œil loin des produits. */
+.entete-page::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: -60%;
+  right: -10%;
+  width: 34rem;
+  height: 34rem;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--accent) 24%, transparent) 0%,
+    transparent 62%
+  );
+}
+
+.entete-page h1 { color: var(--cream); }
+.entete-page p { color: color-mix(in srgb, var(--cream) 72%, transparent); }
+
+/* Le fil d'Ariane est dessiné pour le crème : sur l'anthracite, son gris
+   brun tombe à 1,4:1. */
+.entete-page .breadcrumb { color: color-mix(in srgb, var(--cream) 70%, transparent); }
+.entete-page .breadcrumb [aria-current='page'] { color: var(--cream); }
+
+/* --- Le ruban ---------------------------------------------------------------
+   Une bande d'orange qui glisse sans fin, entre le héros et le crème. Même
+   mécanique que la vitrine : la liste est écrite deux fois dans le document
+   et l'animation décale la piste d'exactement sa moitié, donc le raccord ne
+   se voit pas. */
+
+.ruban {
+  overflow: hidden;
+  padding: 0.8rem 0;
+  background: var(--accent);
+  color: var(--ink);
+}
+
+.ruban__piste {
+  display: flex;
+  align-items: center;
+  width: max-content;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  animation: ruban 36s linear infinite;
+}
+
+.ruban li {
+  display: flex;
+  align-items: center;
+  font-family: 'Sun Motter', system-ui, sans-serif;
+  font-size: 1.05rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* La puce fait le séparateur et l'espacement d'un coup : avec un `gap`, la
+   moitié de la piste ne tomberait pas sur une frontière d'élément et la
+   boucle sauterait d'un interstice à chaque tour. */
+.ruban li::after {
+  content: "•";
+  margin: 0 1.75rem;
+  opacity: 0.55;
+}
+
+@keyframes ruban {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* Une bande qui défile sans fin dans le coin de l'œil fatigue, voire rend
+   malade. Arrêtée net dès que le système le demande. */
+@media (prefers-reduced-motion: reduce) {
+  .ruban__piste { animation: none; }
+  .hero::before { animation: none; }
+  .tampon-tournant,
+  .tourne { animation: none; }
+}
+
+/* --- Les trois promesses ------------------------------------------------------
+   L'aplat vert de la charte en pleine largeur, les trois promesses marquées
+   d'un rond : la bande des trois étapes du site de la salle, au contenu de
+   la boutique.
+
+   Le vert est assombri vers l'encre. Le jade tel quel ne porte le crème qu'à
+   3,45:1, sous le minimum de 4,5:1 ; à 70 % de jade il atteint 5,3:1 et la
+   teinte reste la sienne. */
+
+.promesses {
+  padding: 2.75rem 0;
+  background: color-mix(in srgb, var(--jade) 70%, var(--ink));
+  color: var(--cream);
+}
+
+.promesses__liste {
+  display: grid;
+  gap: 1.75rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+@media (min-width: 760px) {
+  .promesses__liste { grid-template-columns: repeat(3, 1fr); gap: 2.5rem; }
+}
+
+.promesses li { display: flex; align-items: flex-start; gap: 1rem; }
+.promesses h3 { margin: 0; font-weight: 600; }
+.promesses p { margin: 0; font-size: 0.875rem; color: color-mix(in srgb, var(--cream) 78%, transparent); }
+
+.promesses__rond {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 1px solid color-mix(in srgb, var(--cream) 40%, transparent);
+  border-radius: 50%;
+}
+
+/* --- La note manuscrite -------------------------------------------------------
+   Reenie Beanie au-dessus d'un titre de section, légèrement de travers : la
+   même annotation que celle qui coiffe chaque carte d'offre sur le site de
+   la salle (« pose les bases. », « une heure, un coach, vous. »).
+
+   À doser — une par section, jamais deux à la suite dans le champ de vision. */
+
+.signature {
+  font-family: 'Reenie Beanie', cursive;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: var(--accent-deep);
+  transform: rotate(-2deg);
+  transform-origin: left center;
+  margin-bottom: 0.35rem;
+}
+
+/* Le haut de la section « À découvrir » reste presque crème — c'est voulu,
+   le titre y est en encre. Le brun orangé y tient 5:1 ; le crème, lui, y
+   tombait à 1,2:1 et la note disparaissait. Elle garde donc sa couleur. */
+
+/* --- La flèche des boutons ----------------------------------------------------
+   Tous les boutons du site de la salle portent une flèche, qui avance d'un
+   cheveu au survol. Elle n'est posée que là où elle veut dire quelque chose
+   — « et ensuite ? » —, pas sur « Supprimer » ni sur « Annuler ». */
+
+.btn--fleche::after {
+  content: "→";
+  transition: transform 0.15s ease-out;
+}
+.btn--fleche:hover::after { transform: translateX(3px); }
+
+@media (prefers-reduced-motion: reduce) {
+  .btn--fleche::after { transition: none; }
+}
+
+/* --- La révélation au défilement ----------------------------------------------
+   Les blocs montent de deux centimètres en entrant dans l'écran. C'est
+   `animation-timeline: view()` qui lit la position : le navigateur fait le
+   travail, il n'y a pas d'observateur à écrire ni de script à charger.
+
+   Deux garde-fous, et ils comptent. Le `@supports` : sans lui, un navigateur
+   qui ignore `animation-timeline` jouerait l'animation sur sa durée par
+   défaut puis la figerait — au mieux un clignotement, au pire un bloc resté
+   transparent. Le `prefers-reduced-motion` : rien ne bouge si le système le
+   demande. Dans les deux cas le contenu est simplement là, visible, ce qui
+   est le bon état de repli. */
+
+@keyframes paraitre {
+  from { opacity: 0; transform: translateY(1.5rem); }
+  to   { opacity: 1; transform: none; }
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal {
+      animation: paraitre linear both;
+      animation-timeline: view();
+      /* Commencée dès que le bloc pointe, finie bien avant le milieu de
+         l'écran : au-delà, on attend que le texte finisse d'apparaître pour
+         le lire, et l'effet se retourne contre la page. */
+      animation-range: entry 5% entry 60%;
+    }
+  }
+}
+
+/* --- Les tuiles d'usage, soulevées ---------------------------------------------
+   La tuile se soulevait déjà au survol ; la vignette de rayon, elle, ne
+   bougeait que par sa mascotte. Les deux se comportent maintenant pareil. */
+
+.vignette { transition: transform 0.25s ease-out, box-shadow 0.25s ease-out; }
+a:hover .vignette {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 26px rgb(89 68 58 / 14%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vignette { transition: none; }
+  a:hover .vignette { transform: none; }
 }

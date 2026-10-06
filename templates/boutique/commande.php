@@ -291,7 +291,7 @@ $relayCost = Shipping::cents($cart['subtotal_cents'], Status::RELAY);
                     <?= View::partial('partials/cart-summary', [
                         'subtotalCents' => $cart['subtotal_cents'],
                         'shippingCents' => $shippingCents,
-                        'actions'       => '<button type="submit" class="btn btn--accent btn--lg btn--block">Payer par carte</button>'
+                        'actions'       => '<button type="submit" class="btn btn--accent btn--lg btn--block btn--fleche">Payer par carte</button>'
                             . '<p class="t-xs muted" style="margin-top:.75rem">Vous allez être redirigé vers une page de paiement sécurisée. '
                             . 'Vos coordonnées bancaires ne transitent pas par nos serveurs.</p>'
                             . '<p class="t-xs muted" style="margin-top:.5rem">En retrait sur place, les frais de port sont retirés '

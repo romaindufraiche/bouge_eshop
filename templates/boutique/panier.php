@@ -30,7 +30,7 @@ use Bouge\Support\View;
                         <?= View::partial('partials/cart-summary', [
                             'subtotalCents' => $cart['subtotal_cents'],
                             'shippingCents' => null,
-                            'actions'       => '<a class="btn btn--accent btn--lg btn--block" href="/commande">Commander</a>'
+                            'actions'       => '<a class="btn btn--accent btn--lg btn--block btn--fleche" href="/commande">Commander</a>'
                                 . '<p style="margin-top:.75rem;text-align:center"><a class="link-quiet" href="/boutique">Continuer mes achats</a></p>',
                         ]) ?>
                     </aside>
