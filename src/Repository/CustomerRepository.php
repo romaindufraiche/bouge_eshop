@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Bouge\Repository;
 
 use Bouge\Support\Database;
+use Bouge\Support\Status;
 
 /**
  * Comptes clients.
@@ -54,6 +55,124 @@ final class CustomerRepository
             'UPDATE customers SET password_hash = ? WHERE id = ?',
             [password_hash($password, PASSWORD_DEFAULT), $id]
         );
+    }
+
+
+    /**
+     * Le fichier client : tous ceux qui ont acheté ou ouvert un compte.
+     *
+     * Deux populations se recoupent sans se confondre. Les titulaires d'un
+     * compte, d'abord, qu'ils aient commandé ou non. Les acheteurs sans
+     * compte, ensuite : la boutique n'impose pas l'inscription, et leurs
+     * coordonnées ne vivent que sur leurs commandes. Un fichier bâti sur la
+     * seule table `customers` passerait donc à côté d'une bonne partie des
+     * clients — probablement la majorité.
+     *
+     * La clé de rapprochement est l'adresse électronique, en minuscules :
+     * c'est elle qui identifie une personne des deux côtés, et c'est elle que
+     * `claimOrders()` utilise déjà pour rattacher à un compte les commandes
+     * passées avant son ouverture.
+     *
+     * Les paniers abandonnés au paiement et les commandes annulées sont hors
+     * du compte : ni l'un ni l'autre n'est un achat. Quelqu'un qui n'aurait
+     * que cela à son actif reste dans le fichier s'il a un compte, avec zéro
+     * commande.
+     *
+     * Données personnelles : ce fichier en est un au sens du RGPD. Il sert la
+     * gestion de la boutique, pas la revente ; toute prospection suppose le
+     * consentement, que la boutique ne recueille pas aujourd'hui.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function fichierClient(): array
+    {
+        // Ce que les commandes disent de chaque adresse : combien d'achats,
+        // pour quel montant, du premier au dernier, et la dernière valeur
+        // connue pour le nom, le téléphone et la ville.
+        //
+        // « Dernière valeur connue » et non « valeur de la dernière commande » :
+        // un retrait en magasin ou une livraison en point relais ne porte
+        // aucune adresse de client, et l'adresse serait vide pour quiconque a
+        // commandé ainsi en dernier. GROUP_CONCAT ignorant les NULL, NULLIF
+        // écarte les champs vides, l'ordre descendant met le plus récent en
+        // tête, et SUBSTRING_INDEX en prend le premier.
+        //
+        // Le séparateur est 0x1f, le « séparateur d'unité » d'ASCII : il ne
+        // peut apparaître ni dans un nom ni dans une ville, contrairement à la
+        // virgule.
+        $commandes = Database::all(
+            'SELECT LOWER(email) AS email,
+                    COUNT(*)      AS commandes,
+                    SUM(total_cents) AS total_cents,
+                    MIN(created_at)  AS premiere,
+                    MAX(created_at)  AS derniere,
+                    SUBSTRING_INDEX(GROUP_CONCAT(NULLIF(customer_name, "") ORDER BY created_at DESC SEPARATOR 0x1f), 0x1f, 1) AS nom,
+                    SUBSTRING_INDEX(GROUP_CONCAT(NULLIF(phone, "") ORDER BY created_at DESC SEPARATOR 0x1f), 0x1f, 1) AS telephone,
+                    SUBSTRING_INDEX(GROUP_CONCAT(NULLIF(shipping_postal_code, "") ORDER BY created_at DESC SEPARATOR 0x1f), 0x1f, 1) AS code_postal,
+                    SUBSTRING_INDEX(GROUP_CONCAT(NULLIF(shipping_city, "") ORDER BY created_at DESC SEPARATOR 0x1f), 0x1f, 1) AS ville
+               FROM orders
+              WHERE status NOT IN (?, ?)
+              GROUP BY LOWER(email)',
+            [Status::ORDER_PENDING, Status::ORDER_CANCELLED]
+        );
+
+        $fichier = [];
+
+        foreach ($commandes as $ligne) {
+            $fichier[(string) $ligne['email']] = [
+                'email'       => (string) $ligne['email'],
+                'nom'         => (string) ($ligne['nom'] ?? ''),
+                'telephone'   => (string) ($ligne['telephone'] ?? ''),
+                'code_postal' => (string) ($ligne['code_postal'] ?? ''),
+                'ville'       => (string) ($ligne['ville'] ?? ''),
+                'compte'      => false,
+                'inscrit_le'  => null,
+                'derniere_visite' => null,
+                'commandes'   => (int) $ligne['commandes'],
+                'total_cents' => (int) $ligne['total_cents'],
+                'premiere'    => (string) $ligne['premiere'],
+                'derniere'    => (string) $ligne['derniere'],
+            ];
+        }
+
+        // Les comptes ensuite : ils complètent une fiche existante ou en
+        // créent une. Le nom et les coordonnées du compte l'emportent sur ceux
+        // d'une commande — c'est ce que le client a saisi pour lui-même, et
+        // c'est ce qu'il tient à jour.
+        foreach (Database::all(
+            'SELECT LOWER(email) AS email, name, phone, postal_code, city, created_at, last_login_at
+               FROM customers'
+        ) as $compte) {
+            $email = (string) $compte['email'];
+
+            $fiche = $fichier[$email] ?? [
+                'email' => $email, 'nom' => '', 'telephone' => '',
+                'code_postal' => '', 'ville' => '',
+                'commandes' => 0, 'total_cents' => 0,
+                'premiere' => null, 'derniere' => null,
+            ];
+
+            $fichier[$email] = $fiche;
+            $fichier[$email]['nom'] = (string) $compte['name'];
+            $fichier[$email]['compte'] = true;
+            $fichier[$email]['inscrit_le'] = (string) $compte['created_at'];
+            $fichier[$email]['derniere_visite'] = $compte['last_login_at'] === null
+                ? null
+                : (string) $compte['last_login_at'];
+
+            foreach (['telephone' => 'phone', 'code_postal' => 'postal_code', 'ville' => 'city'] as $cle => $colonne) {
+                if (($compte[$colonne] ?? '') !== '' && $compte[$colonne] !== null) {
+                    $fichier[$email][$cle] = (string) $compte[$colonne];
+                }
+            }
+        }
+
+        // Les meilleurs clients en tête : c'est l'ordre dans lequel on lit un
+        // fichier client, et celui qu'un tableur garde à l'ouverture.
+        uasort($fichier, static fn (array $a, array $b): int
+            => [$b['total_cents'], $b['commandes']] <=> [$a['total_cents'], $a['commandes']]);
+
+        return array_values($fichier);
     }
 
     /** @param array<string, mixed> $data */

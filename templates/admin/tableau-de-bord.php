@@ -13,10 +13,25 @@
 
 use Bouge\Support\Money;
 use Bouge\Support\Status;
+use Bouge\Support\View;
 ?>
-<header class="admin-head">
-    <h1 class="t-l">Tableau de bord</h1>
-    <p class="muted t-s">Bonjour. Voici l'état de la boutique.</p>
+<header class="admin-head between">
+    <div>
+        <h1 class="t-l">Tableau de bord</h1>
+        <p class="muted t-s">Bonjour. Voici l'état de la boutique.</p>
+    </div>
+    <div class="row">
+        <?php /* Le fichier client, au même endroit et dans le même bouton que
+                 les exports des produits et des commandes. Il est ici et non
+                 dans une section « Clients » : la boutique n'en a pas, parce
+                 qu'on peut commander sans compte. Le fichier, lui, réunit les
+                 acheteurs avec et sans compte. */ ?>
+        <?= View::partial('partials/export', [
+            'href'    => '/admin/clients/export',
+            'quoi'    => 'le fichier client',
+            'libelle' => 'Fichier client',
+        ]) ?>
+    </div>
 </header>
 
 <div class="admin-stats">

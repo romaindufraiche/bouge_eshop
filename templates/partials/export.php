@@ -12,8 +12,14 @@
  * l'écran est ce qu'on télécharge. Un bouton qui renverrait tout après une
  * recherche serait une surprise.
  *
- * @var string $href chemin de l'export, sans paramètres
- * @var string $quoi ce qui est exporté, pour les lecteurs d'écran
+ * Le libellé par défaut ne nomme pas ce qu'il exporte : sur la liste des
+ * produits comme sur celle des commandes, le titre de la page le dit déjà.
+ * Le tableau de bord, lui, ne dit rien de tel — d'où `$libelle`, qui le
+ * nomme là où le contexte ne suffit pas.
+ *
+ * @var string      $href    chemin de l'export, sans paramètres
+ * @var string      $quoi    ce qui est exporté, pour les lecteurs d'écran
+ * @var string|null $libelle texte du bouton, « Exporter en Excel » par défaut
  */
 
 // Les filtres de la page en cours, repassés tels quels à l'export.
@@ -30,6 +36,6 @@ $parametres = $_GET !== [] ? '?' . http_build_query($_GET) : '';
         <path d="M4.5 7 8 10.5 11.5 7"/>
         <path d="M2.5 13.5h11"/>
     </svg>
-    Exporter en Excel
-    <span class="sr-only">— <?= e($quoi) ?> affichés</span>
+    <?= e($libelle ?? 'Exporter en Excel') ?>
+    <span class="sr-only">— <?= e($quoi) ?>, au format Excel</span>
 </a>

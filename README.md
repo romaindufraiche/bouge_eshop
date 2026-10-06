@@ -1028,7 +1028,7 @@ qu'on voit à l'écran est ce qu'on télécharge.
 
 ### L'état des stocks, en classeur Excel
 
-Sur la page **Produits**, le bouton « Exporter les stocks » télécharge un
+Sur la page **Produits**, le bouton « Exporter en Excel » télécharge un
 vrai `.xlsx` : une ligne par produit, avec le rayon, le statut, le stock, les
 prix et la **valeur du stock** — cette dernière colonne se somme d'un clic.
 L'en-tête est figé et filtrable, de quoi trier par stock croissant sans rien
@@ -1044,6 +1044,36 @@ colonnes. Un CSV aurait été plus court encore, mais Excel francophone s'y
 trompe régulièrement sur le séparateur décimal, et un état des stocks dont on
 ne peut pas faire la somme ne sert à rien. Seule exigence : l'extension PHP
 `zip`, présente sur tous les hébergements courants.
+
+### Le fichier client, en classeur Excel
+
+Sur le **tableau de bord**, le bouton « Fichier client » télécharge une ligne
+par client : nom, adresse électronique, téléphone, ville, nombre de commandes,
+total dépensé, panier moyen, première et dernière commande, date d'inscription.
+Les meilleurs clients sont en tête.
+
+Il part du tableau de bord et non d'une section « Clients », parce qu'il n'y en
+a pas : **on peut commander sans compte**, et une liste de comptes laisserait
+croire qu'elle est la liste des clients. Le fichier, lui, réunit les deux
+populations — les titulaires d'un compte et les acheteurs qui n'en ont pas
+ouvert —, rapprochées par l'adresse électronique, la même clé que celle qui
+rattache à un compte les commandes passées avant son ouverture.
+
+Les paniers abandonnés au paiement et les commandes annulées en sont exclus :
+ni l'un ni l'autre n'est un achat. Quelqu'un qui n'aurait que cela à son actif
+reste dans le fichier s'il a un compte, avec zéro commande.
+
+L'adresse retenue est la **dernière connue**, et non celle de la dernière
+commande : un retrait en magasin ou une livraison en point relais ne porte
+aucune adresse de client, et la colonne serait vide pour quiconque a commandé
+ainsi en dernier.
+
+> **Ce fichier est un fichier de données personnelles au sens du RGPD.** Il
+> sert la gestion de la boutique — reconnaître un client, retrouver une
+> commande, mesurer une activité. L'exporter sur un poste, c'est en sortir une
+> copie : elle se protège comme l'original et se supprime quand elle ne sert
+> plus. Toute prospection commerciale suppose par ailleurs un consentement, que
+> la boutique ne recueille aujourd'hui nulle part.
 
 ### Les pastilles de notification
 

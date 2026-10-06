@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace Bouge\Controller\Admin;
 
+use Bouge\Repository\CustomerRepository;
 use Bouge\Repository\OrderRepository;
 use Bouge\Support\Auth;
 use Bouge\Support\Database;
 use Bouge\Support\Status;
 use Bouge\Support\View;
+use Bouge\Support\Xlsx;
+use DateTimeImmutable;
 
 final class DashboardController
 {
@@ -49,5 +52,90 @@ final class DashboardController
                 [Status::PRODUCT_PUBLISHED, Status::PRODUCT_PUBLISHED]
             ),
         ], 'layout/admin');
+    }
+
+    /**
+     * Le fichier client, en classeur Excel.
+     *
+     * Il part du tableau de bord et non d'une liste de clients : la boutique
+     * n'en tient pas, parce qu'on peut commander sans compte et qu'une page
+     * « Clients » laisserait croire le contraire. Le fichier, lui, réunit les
+     * deux populations — voir CustomerRepository::fichierClient().
+     *
+     * Sans filtre à reprendre, contrairement aux deux autres exports : le
+     * tableau de bord n'en porte aucun, et un fichier client s'emporte
+     * entier.
+     */
+    public function exportCustomers(): string
+    {
+        Auth::require();
+
+        $lignes = [];
+
+        foreach ((new CustomerRepository())->fichierClient() as $client) {
+            $total = $client['total_cents'] / 100;
+
+            $lignes[] = [
+                $client['nom'],
+                $client['email'],
+                $client['telephone'],
+                $client['code_postal'],
+                $client['ville'],
+                $client['compte'] ? 'Oui' : 'Non',
+                $client['commandes'],
+                $total,
+                // Le panier moyen n'est pas calculable sans commande : la
+                // cellule reste vide plutôt que d'afficher un zéro, qui se
+                // lirait comme « il achète pour rien ».
+                $client['commandes'] > 0 ? round($total / $client['commandes'], 2) : null,
+                self::dateOuRien($client['premiere']),
+                self::dateOuRien($client['derniere']),
+                self::dateOuRien($client['inscrit_le']),
+                self::dateOuRien($client['derniere_visite'] ?? null),
+            ];
+        }
+
+        $classeur = Xlsx::build(
+            [
+                'Nom', 'Adresse électronique', 'Téléphone', 'Code postal', 'Ville',
+                'Compte', 'Commandes', 'Total dépensé (€)', 'Panier moyen (€)',
+                'Première commande', 'Dernière commande', 'Inscrit le', 'Dernière connexion',
+            ],
+            $lignes,
+            'Clients au ' . date('d-m-Y')
+        );
+
+        $nom = 'clients-bouge-club-' . date('Y-m-d') . '.xlsx';
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="' . $nom . '"');
+        header('Content-Length: ' . strlen($classeur));
+        // Un fichier client daté n'a pas à rester dans le cache du navigateur :
+        // il contient des données personnelles, et il est faux dès le
+        // lendemain.
+        header('Cache-Control: no-store, must-revalidate');
+
+        echo $classeur;
+
+        return '';
+    }
+
+    /**
+     * Une date de base en date de tableur, ou rien.
+     *
+     * Le classeur attend un objet date pour écrire une vraie date, triable et
+     * formatable dans Excel. Une chaîne vide y tomberait en texte.
+     */
+    private static function dateOuRien(?string $valeur): ?DateTimeImmutable
+    {
+        if ($valeur === null || $valeur === '') {
+            return null;
+        }
+
+        try {
+            return new DateTimeImmutable($valeur);
+        } catch (\Throwable) {
+            return null;
+        }
     }
 }

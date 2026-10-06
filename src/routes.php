@@ -99,6 +99,10 @@ $router->post('/admin/connexion', [AdminAuthController::class, 'login']);
 $router->post('/admin/deconnexion', [AdminAuthController::class, 'logout']);
 
 $router->get('/admin', [DashboardController::class, 'index']);
+// Le fichier client. Il n'y a pas de liste de clients dans l'administration —
+// on peut commander sans compte, une page « Clients » laisserait croire le
+// contraire —, donc l'export part du tableau de bord.
+$router->get('/admin/clients/export', [DashboardController::class, 'exportCustomers']);
 
 // Les chemins fixes sont déclarés avant `{id}` : sans cela, « nouveau »
 // serait pris pour un identifiant.
