@@ -13,6 +13,7 @@ use Bouge\Repository\PickupPointRepository;
 use Bouge\Support\Cart;
 use Bouge\Support\Csrf;
 use Bouge\Support\CustomerAuth;
+use Bouge\Support\Invoice;
 use Bouge\Support\Session;
 use Bouge\Support\Shipping;
 use Bouge\Support\Status;
@@ -159,6 +160,9 @@ final class CheckoutController
         $orderId = $orders->create(
             [
                 'reference'     => $reference,
+                // Ouvre la fiche de commande depuis le courriel de
+                // confirmation, sans compte ni mot de passe.
+                'tracking_token' => OrderRepository::generateTrackingToken(),
                 'email'         => mb_strtolower($validator->value('email')),
                 'customer_name' => $validator->value('customer_name'),
                 'phone'         => $validator->value('phone') ?: null,
@@ -256,6 +260,74 @@ final class CheckoutController
     }
 
     /** Retour du client après paiement. */
+    /**
+     * Suivi d'une commande passée sans compte.
+     *
+     * La boutique met en avant la commande sans compte ; le courriel de
+     * confirmation doit donc proposer un lien qui s'ouvre sans compte. Le
+     * jeton tiré à la création tient lieu de preuve : il n'est connu que du
+     * destinataire du message.
+     *
+     * @param array<string, string> $params
+     */
+    public function tracking(array $params): string
+    {
+        $reference = (string) $params['reference'];
+        $jeton = (string) ($_GET['jeton'] ?? '');
+        $commande = (new OrderRepository())->findByToken($reference, $jeton);
+
+        if ($commande === null) {
+            http_response_code(404);
+
+            return View::render('boutique/404', [
+                'title'   => 'Commande introuvable',
+                'noindex' => true,
+            ]);
+        }
+
+        return View::render('compte/commande', [
+            'title'      => 'Commande ' . $commande['reference'],
+            'noindex'    => true,
+            'commande'   => $commande,
+            'base'       => self::trackingPath($reference, $jeton),
+            'avecCompte' => false,
+        ]);
+    }
+
+    /** La facture d'une commande suivie sans compte. */
+    public function trackingInvoice(array $params): string
+    {
+        $reference = (string) $params['reference'];
+        $jeton = (string) ($_GET['jeton'] ?? '');
+        $repository = new OrderRepository();
+        $commande = $repository->findByToken($reference, $jeton);
+
+        if ($commande === null || $commande['paid_at'] === null) {
+            http_response_code(404);
+
+            return View::render('boutique/404', [
+                'title'   => 'Facture introuvable',
+                'noindex' => true,
+            ]);
+        }
+
+        $pdf = Invoice::render($commande);
+        // Relu après l'édition : c'est elle qui a pu attribuer le numéro.
+        $commande = $repository->findByToken($reference, $jeton);
+
+        header('Content-Type: application/pdf');
+        header('Content-Disposition: attachment; filename="' . Invoice::filename($commande) . '"');
+        header('Content-Length: ' . strlen($pdf));
+
+        return $pdf;
+    }
+
+    /** L'adresse de suivi, construite au même endroit pour le site et les courriels. */
+    public static function trackingPath(string $reference, string $jeton): string
+    {
+        return '/suivi/' . rawurlencode($reference) . '?jeton=' . rawurlencode($jeton);
+    }
+
     public function confirmation(): string
     {
         $sessionId = (string) ($_GET['session_id'] ?? '');

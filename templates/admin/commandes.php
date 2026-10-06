@@ -15,11 +15,22 @@ use Bouge\Support\Money;
 use Bouge\Support\Status;
 ?>
 <header class="admin-head">
-    <h1 class="t-l">Commandes</h1>
-    <p class="muted t-s">
-        <?= count($orders) ?> commande<?= count($orders) > 1 ? 's' : '' ?> affichée<?= count($orders) > 1 ? 's' : '' ?><?php if ($search !== ''): ?>
-            pour « <?= e($search) ?> » — <a class="link-quiet" href="/admin/commandes">tout afficher</a><?php endif; ?>.
-    </p>
+    <div>
+        <h1 class="t-l">Commandes</h1>
+        <p class="muted t-s">
+            <?= count($orders) ?> commande<?= count($orders) > 1 ? 's' : '' ?> affichée<?= count($orders) > 1 ? 's' : '' ?><?php if ($search !== ''): ?>
+                pour « <?= e($search) ?> » — <a class="link-quiet" href="/admin/commandes">tout afficher</a><?php endif; ?>.
+        </p>
+    </div>
+    <div class="row">
+        <?php /* Comme pour les produits, l'export reprend les filtres et la
+                 recherche en cours : ce qu'on voit à l'écran est ce qu'on
+                 télécharge. */ ?>
+        <a class="btn btn--ghost"
+           href="/admin/commandes/export<?= $_GET !== [] ? '?' . e(http_build_query($_GET)) : '' ?>">
+            Exporter en Excel
+        </a>
+    </div>
 </header>
 
 <form class="admin-filters" method="get" action="/admin/commandes">

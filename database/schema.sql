@@ -223,6 +223,10 @@ CREATE TABLE `orders` (
   `id`            INT UNSIGNED NOT NULL AUTO_INCREMENT,
   -- Référence lisible communiquée au client, du type BG-7F3K2A.
   `reference`     VARCHAR(20) NOT NULL,
+  -- Ouvre la fiche de commande sans compte, depuis le lien du courriel de
+  -- confirmation. La référence seule ne suffirait pas : on lirait la
+  -- commande du voisin en changeant six caractères.
+  `tracking_token` CHAR(32) DEFAULT NULL,
   `email`         VARCHAR(190) NOT NULL,
   `customer_name` VARCHAR(120) NOT NULL,
   `phone`         VARCHAR(30) DEFAULT NULL,
@@ -290,6 +294,7 @@ CREATE TABLE `orders` (
 
   PRIMARY KEY (`id`),
   UNIQUE KEY `orders_reference` (`reference`),
+  UNIQUE KEY `orders_tracking_token` (`tracking_token`),
   UNIQUE KEY `orders_invoice_number` (`invoice_number`),
   UNIQUE KEY `orders_stripe_session` (`stripe_session_id`),
   KEY `orders_status` (`status`),

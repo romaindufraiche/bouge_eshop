@@ -122,8 +122,12 @@ final class Xlsx
             . '<fills count="2"><fill><patternFill patternType="none"/></fill>'
             . '<fill><patternFill patternType="gray125"/></fill></fills>'
             . '<borders count="1"><border/></borders>'
+            // 164 : le premier identifiant libre pour un format maison ; en
+            // dessous, les numéros sont réservés aux formats intégrés d'Excel.
+            . '<numFmts count="1"><numFmt numFmtId="164" formatCode="dd/mm/yyyy hh:mm"/></numFmts>'
             . '<cellStyleXfs count="1"><xf/></cellStyleXfs>'
-            . '<cellXfs count="2"><xf xfId="0"/><xf xfId="0" fontId="1" applyFont="1"/></cellXfs>'
+            . '<cellXfs count="3"><xf xfId="0"/><xf xfId="0" fontId="1" applyFont="1"/>'
+            . '<xf xfId="0" numFmtId="164" applyNumberFormat="1"/></cellXfs>'
             // Le style « Normal » est réclamé par les lecteurs stricts : sans
             // lui, ils se plaignent d'un classeur sans style par défaut.
             . '<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>'
@@ -173,6 +177,15 @@ final class Xlsx
                 continue;
             }
 
+            if (!$entete && $valeur instanceof \DateTimeInterface) {
+                // Excel compte les jours depuis le 30 décembre 1899, partie
+                // décimale pour l'heure. Sans cette conversion, une date
+                // partirait en texte et ne se trierait plus.
+                $xml .= '<c r="' . $reference . '" s="2"><v>'
+                    . self::serieExcel($valeur) . '</v></c>';
+                continue;
+            }
+
             if (!$entete && is_numeric($valeur) && !is_string($valeur)) {
                 // Un nombre reste un nombre : c'est tout l'intérêt d'un vrai
                 // classeur par rapport à un CSV.
@@ -188,6 +201,21 @@ final class Xlsx
     }
 
     /** 1 → A, 26 → Z, 27 → AA. */
+    /**
+     * Une date au compte d'Excel : des jours depuis le 30 décembre 1899.
+     *
+     * Ce point de départ étrange vient d'un bogue de Lotus 1-2-3, qui tenait
+     * 1900 pour bissextile ; Excel l'a recopié pour rester compatible, et
+     * tout le monde fait pareil depuis.
+     */
+    private static function serieExcel(\DateTimeInterface $date): string
+    {
+        $origine = new \DateTimeImmutable('1899-12-30 00:00:00', $date->getTimezone());
+        $secondes = $date->getTimestamp() - $origine->getTimestamp();
+
+        return rtrim(rtrim(number_format($secondes / 86400, 6, '.', ''), '0'), '.');
+    }
+
     private static function colonne(int $numero): string
     {
         $nom = '';

@@ -288,6 +288,29 @@ d'erreurs et continue de fonctionner. Une commande n'est jamais perdue pour
 un serveur de courriel muet — c'est délibéré : perdre un accusé de réception
 est ennuyeux, perdre la commande le serait bien davantage.
 
+### Le lien de suivi
+
+Le courriel de confirmation propose « Suivre ma commande ». Où il mène dépend
+de la commande :
+
+- **commande passée avec un compte** → l'espace client ;
+- **commande passée sans compte** → `/suivi/<référence>?jeton=…`, la même
+  fiche, ouverte par un jeton tiré au sort à la commande.
+
+Le second cas n'est pas un détail : la boutique autorise et met en avant la
+commande sans compte. Sans ce lien, ces clients-là recevaient une invitation à
+se connecter à un compte qu'ils n'avaient pas.
+
+Le jeton n'est connu que du destinataire du message. La référence seule ne
+suffit pas — on lirait la commande du voisin en changeant six caractères — et
+la comparaison se fait en temps constant, pour que le temps de réponse ne
+laisse rien deviner.
+
+> **Le numéro de suivi du transporteur n'existe pas encore** au moment de la
+> confirmation : il naît à l'achat de l'étiquette. Le courriel de confirmation
+> le dit, et c'est l'avis d'expédition qui l'apporte ensuite, avec son lien
+> direct vers le site du transporteur.
+
 ### Mot de passe oublié
 
 Le lien envoyé est valable **deux heures** et ne sert **qu'une fois**. La
@@ -991,6 +1014,16 @@ Un champ de recherche en tête de la liste, qui porte sur la **référence**, le
 **nom**, l'**adresse électronique** et le **numéro de suivi** — c'est avec l'un
 des quatre qu'un client se présente au téléphone. Il ne masque pas les
 commandes impayées : c'est souvent celles-là qu'on cherche.
+
+### Les commandes, en classeur Excel
+
+Sur la page **Commandes**, « Exporter en Excel » télécharge une ligne par
+commande : référence, date, statut, client, mode de remise, destination,
+montants, suivi, numéro de facture. Les dates sont de vraies dates et les
+montants de vrais nombres — ils se trient et se somment.
+
+Comme pour les stocks, les filtres et la recherche en cours sont repris : ce
+qu'on voit à l'écran est ce qu'on télécharge.
 
 ### L'état des stocks, en classeur Excel
 

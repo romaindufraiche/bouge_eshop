@@ -95,13 +95,36 @@ ob_start();
     <?php endif; ?>
 </p>
 
-<p style="margin:0;">
-    <a href="<?= e(url('/compte/commande/' . $commande['reference'])) ?>"
+<?php
+// Le lien de suivi.
+// Avec un compte, il mène à l'espace client ; sans compte, au suivi ouvert
+// par le jeton — la boutique autorise la commande sans compte, le lien doit
+// donc s'ouvrir sans compte lui aussi.
+$suivi = $commande['customer_id'] !== null || empty($commande['tracking_token'])
+    ? url('/compte/commande/' . rawurlencode((string) $commande['reference']))
+    : url(\Bouge\Controller\CheckoutController::trackingPath(
+        (string) $commande['reference'],
+        (string) $commande['tracking_token']
+    ));
+?>
+
+<p style="margin:0 0 20px;">
+    <a href="<?= e($suivi) ?>"
        style="display:inline-block;padding:12px 22px;border-radius:999px;background:#a8441b;
               color:#ffffff;text-decoration:none;font:600 14px/1 Helvetica,Arial,sans-serif;">
         Suivre ma commande
     </a>
 </p>
+
+<?php if (!$retrait): ?>
+    <?php /* Dire tout de suite que le numéro de suivi viendra plus tard évite
+             le courriel « où est mon colis ? » du lendemain. Inutile sur un
+             retrait : le premier paragraphe l'a déjà dit. */ ?>
+    <p style="margin:0;font:400 13px/1.6 Helvetica,Arial,sans-serif;color:#59443a;">
+        Le numéro de suivi du transporteur apparaîtra sur cette page dès le départ
+        du colis, et vous recevrez un message à ce moment-là.
+    </p>
+<?php endif; ?>
 <?php
 $corps = (string) ob_get_clean();
 

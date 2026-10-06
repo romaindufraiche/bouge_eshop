@@ -2,9 +2,9 @@
 /**
  * Mise en page de l'administration.
  *
- * Barre latérale fixe sur grand écran, navigation empilée sur mobile. Les
- * libellés sont ceux du métier (« Produits », « Commandes »), jamais du
- * vocabulaire technique.
+ * Bandeau collant en haut de page, à toutes les largeurs. Les libellés sont
+ * ceux du métier (« Produits », « Commandes »), jamais du vocabulaire
+ * technique.
  *
  * @var string               $content
  * @var array<string, mixed> $shop
@@ -62,10 +62,13 @@ $pastilleTitres = [
 <a class="sr-only skip-link" href="#contenu">Aller au contenu</a>
 
 <div class="admin-shell">
-    <aside class="admin-side">
+    <header class="admin-side">
         <div class="admin-side__logo">
+            <?php /* Le mot « Administration » a été retiré : il coûtait cent
+                     trente pixels sur la ligne — assez pour faire passer le
+                     bandeau sur deux rangs à 1280 px — et n'apprenait rien
+                     que le fond anthracite et les sections ne disent déjà. */ ?>
             <?= View::partial('partials/logo', ['shop' => $shop, 'ton' => 'creme', 'lien' => '/admin']) ?>
-            <span class="eyebrow">Administration</span>
         </div>
 
         <nav class="admin-nav" aria-label="Sections de l'administration">
@@ -106,7 +109,7 @@ $pastilleTitres = [
                 <button class="btn btn--ghost btn--sm" type="submit">Se déconnecter</button>
             </form>
         </div>
-    </aside>
+    </header>
 
     <main class="admin-main" id="contenu">
         <?php if ($flash !== null): ?>

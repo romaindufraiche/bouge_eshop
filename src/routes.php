@@ -79,6 +79,12 @@ $router->get('/commande', [CheckoutController::class, 'form']);
 $router->post('/commande', [CheckoutController::class, 'submit']);
 $router->get('/commande/confirmation', [CheckoutController::class, 'confirmation']);
 
+// Suivi d'une commande passée sans compte : la référence et le jeton reçu par
+// courriel suffisent. La boutique autorise la commande sans compte, le lien
+// de suivi doit donc s'ouvrir sans compte lui aussi.
+$router->get('/suivi/{reference}', [CheckoutController::class, 'tracking']);
+$router->get('/suivi/{reference}/facture', [CheckoutController::class, 'trackingInvoice']);
+
 // --- Webhook Stripe --------------------------------------------------------------
 // Seul endroit où une commande devient « payée » et où le stock est décompté.
 
@@ -118,6 +124,9 @@ $router->post('/admin/points-de-retrait/enregistrer', [AdminPickupPointControlle
 $router->post('/admin/points-de-retrait/supprimer', [AdminPickupPointController::class, 'delete']);
 
 $router->get('/admin/commandes', [AdminOrderController::class, 'index']);
+// Avant « /admin/commandes/{id} », sinon « export » serait pris pour un
+// identifiant — la même précaution que pour l'export des produits.
+$router->get('/admin/commandes/export', [AdminOrderController::class, 'export']);
 $router->get('/admin/commandes/{id}', [AdminOrderController::class, 'show']);
 $router->post('/admin/commandes/statut', [AdminOrderController::class, 'updateStatus']);
 $router->post('/admin/commandes/note', [AdminOrderController::class, 'updateNote']);

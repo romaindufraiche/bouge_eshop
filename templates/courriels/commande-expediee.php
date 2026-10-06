@@ -74,10 +74,22 @@ ob_start();
     </p>
 <?php endif; ?>
 
+<?php
+// Le lien de suivi.
+// Avec un compte, il mène à l'espace client ; sans compte, au suivi ouvert
+// par le jeton — la boutique autorise la commande sans compte, le lien doit
+// donc s'ouvrir sans compte lui aussi.
+$suivi = $commande['customer_id'] !== null || empty($commande['tracking_token'])
+    ? url('/compte/commande/' . rawurlencode((string) $commande['reference']))
+    : url(\Bouge\Controller\CheckoutController::trackingPath(
+        (string) $commande['reference'],
+        (string) $commande['tracking_token']
+    ));
+?>
+
 <p style="margin:0;font:400 13px/1.6 Helvetica,Arial,sans-serif;color:#59443a;">
     Le détail de la commande reste consultable
-    <a href="<?= e($site) ?>/compte/commande/<?= e($commande['reference']) ?>"
-       style="color:#a8441b;">dans votre espace</a>.
+    <a href="<?= e($suivi) ?>" style="color:#a8441b;">sur cette page</a>.
 </p>
 <?php
 echo View::partial('courriels/_enveloppe', [

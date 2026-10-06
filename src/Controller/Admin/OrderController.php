@@ -7,6 +7,7 @@ namespace Bouge\Controller\Admin;
 use Bouge\Repository\OrderRepository;
 use Bouge\Shipping\CarrierException;
 use Bouge\Shipping\Carriers;
+use Bouge\Shipping\Tracking;
 use Bouge\Support\Auth;
 use Bouge\Support\Database;
 use Bouge\Support\Invoice;
@@ -14,6 +15,7 @@ use Bouge\Support\Mailer;
 use Bouge\Support\Session;
 use Bouge\Support\Shipping;
 use Bouge\Support\Status;
+use Bouge\Support\Xlsx;
 use Bouge\Support\View;
 
 /**
@@ -194,6 +196,96 @@ final class OrderController
         Session::flash('admin', 'Étiquette achetée. Imprimez-la, collez-la sur le colis, et déposez-le.'
             . ($prevenu ? " Le client vient de recevoir son avis d'expédition." : ''));
         redirect('/admin/commandes/' . $id);
+
+        return '';
+    }
+
+    /**
+     * Les commandes en classeur Excel.
+     *
+     * Une ligne par commande, pas par article : c'est le suivi commercial
+     * qu'on exporte — ce qui est entré, ce qui reste à préparer —, pas le
+     * détail de chaque colis, qui se lit sur la fiche. Les filtres et la
+     * recherche en cours sont repris : ce qu'on voit à l'écran est ce qu'on
+     * télécharge.
+     */
+    public function export(): string
+    {
+        Auth::require();
+
+        $commandes = (new OrderRepository())->forAdmin(
+            (string) ($_GET['statut'] ?? ''),
+            (string) ($_GET['remise'] ?? ''),
+            trim((string) ($_GET['q'] ?? ''))
+        );
+
+        $lignes = [];
+
+        foreach ($commandes as $commande) {
+            $remise = Status::fulfilments()[$commande['fulfilment']] ?? $commande['fulfilment'];
+
+            // Le lieu de livraison tient en une colonne : l'adresse pour un
+            // domicile, l'enseigne et la ville pour un point relais, rien
+            // pour un retrait sur place.
+            $destination = match ((string) $commande['fulfilment']) {
+                Status::DELIVERY => trim(
+                    (string) ($commande['shipping_address_line1'] ?? '') . ' '
+                    . (string) ($commande['shipping_postal_code'] ?? '') . ' '
+                    . (string) ($commande['shipping_city'] ?? '')
+                ),
+                Status::RELAY => trim(
+                    (string) ($commande['relay_name'] ?? '') . ' — '
+                    . (string) ($commande['relay_postal_code'] ?? '') . ' '
+                    . (string) ($commande['relay_city'] ?? ''),
+                    ' —'
+                ),
+                default => 'Concept store',
+            };
+
+            $lignes[] = [
+                $commande['reference'],
+                // Une vraie date, pas du texte : Excel doit pouvoir trier et
+                // filtrer dessus.
+                $commande['created_at'] === null ? null : new \DateTimeImmutable((string) $commande['created_at']),
+                Status::orderLabel((string) $commande['status']),
+                $commande['customer_name'],
+                $commande['email'],
+                $commande['phone'],
+                $remise,
+                $destination,
+                (int) $commande['item_count'],
+                (int) $commande['subtotal_cents'] / 100,
+                (int) ($commande['shipping_cents'] ?? 0) / 100,
+                (int) $commande['total_cents'] / 100,
+                $commande['paid_at'] === null ? null : new \DateTimeImmutable((string) $commande['paid_at']),
+                Tracking::nom((string) ($commande['tracking_carrier'] ?? '')),
+                $commande['tracking_number'],
+                $commande['shipped_at'] === null ? null : new \DateTimeImmutable((string) $commande['shipped_at']),
+                $commande['invoice_number'] === null
+                    ? ''
+                    : Invoice::reference((int) $commande['invoice_number'], $commande['invoiced_at'] ?? null),
+            ];
+        }
+
+        $classeur = Xlsx::build(
+            [
+                'Référence', 'Date', 'Statut', 'Client', 'Adresse électronique', 'Téléphone',
+                'Mode de remise', 'Destination', 'Articles',
+                'Sous-total (€)', 'Livraison (€)', 'Total (€)',
+                'Payée le', 'Transporteur', 'N° de suivi', 'Expédiée le', 'Facture',
+            ],
+            $lignes,
+            'Commandes au ' . date('d-m-Y')
+        );
+
+        $nom = 'commandes-bouge-club-' . date('Y-m-d') . '.xlsx';
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="' . $nom . '"');
+        header('Content-Length: ' . strlen($classeur));
+        header('Cache-Control: no-store, must-revalidate');
+
+        echo $classeur;
 
         return '';
     }

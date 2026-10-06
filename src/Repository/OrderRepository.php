@@ -272,6 +272,41 @@ final class OrderRepository
         );
     }
 
+    /**
+     * Retrouve une commande par sa référence et son jeton de suivi.
+     *
+     * C'est le chemin des commandes passées sans compte : le jeton tient lieu
+     * de preuve. `hash_equals` compare en temps constant — sans lui, le temps
+     * de réponse laisserait deviner le jeton caractère par caractère.
+     *
+     * @return array<string, mixed>|null
+     */
+    public function findByToken(string $reference, string $jeton): ?array
+    {
+        if (strlen($jeton) !== 32) {
+            return null;
+        }
+
+        $order = Database::first(
+            'SELECT o.*, pp.name AS pickup_name, pp.address_line1 AS pickup_address,
+                    pp.postal_code AS pickup_postal_code, pp.city AS pickup_city,
+                    pp.hours AS pickup_hours
+             FROM orders o
+             LEFT JOIN pickup_points pp ON pp.id = o.pickup_point_id
+             WHERE o.reference = ?',
+            [$reference]
+        );
+
+        if ($order === null
+            || $order['tracking_token'] === null
+            || !hash_equals((string) $order['tracking_token'], $jeton)
+        ) {
+            return null;
+        }
+
+        return $this->withItems($order);
+    }
+
     /** Référence lisible au téléphone : sans I, O, 0 ni 1, qui se confondent. */
     public static function generateReference(): string
     {
@@ -283,6 +318,17 @@ final class OrderRepository
         }
 
         return 'BG-' . $suffix;
+    }
+
+    /**
+     * Le jeton qui ouvre la fiche de commande sans compte.
+     *
+     * Seize octets tirés au hasard : assez pour qu'on ne le devine pas, assez
+     * court pour tenir dans une adresse sans la rendre illisible.
+     */
+    public static function generateTrackingToken(): string
+    {
+        return bin2hex(random_bytes(16));
     }
 
     /** @return array<int, array<string, mixed>> */

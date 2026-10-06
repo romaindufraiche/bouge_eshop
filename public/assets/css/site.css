@@ -692,22 +692,37 @@ h3:has(.marque-inline) { line-height: 1.3; }
    Une barre horizontale qui s'empile sur mobile, plutôt qu'un tiroir latéral :
    avec quelques dizaines d'articles, le tiroir coûterait un clic pour rien. */
 
+/* Tout se centre sur un seul axe.
+   Avec `align-items: flex-end` et des retraits bas réglés à la main, la
+   rangée portait quatre centres différents : les intitulés à 420,8 px, les
+   menus à 420,3, le bouton à 418,8 et les cases à 422,8 — quatre pixels
+   d'écart, assez pour que l'œil le voie sans savoir le nommer. */
 .filtres {
   display: flex;
   flex-wrap: wrap;
   gap: 1rem 1.25rem;
-  align-items: flex-end;
+  align-items: center;
   padding: 1.25rem;
   border: 1px solid var(--line);
   border-radius: var(--radius-surface);
   background: var(--sand);
 }
-.filtres .field { margin-top: 0; }
+.filtres .field {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 0;
+}
 .filtres .field + .field { margin-top: 0; }
 .filtres label { font-size: 0.8125rem; font-weight: 600; }
-.filtres select { width: auto; min-width: 11rem; margin-top: 0.35rem; background: var(--white); }
-.filtres__cases { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; padding-bottom: 0.6rem; }
-.filtres__actions { display: flex; align-items: center; gap: 1rem; margin-left: auto; padding-bottom: 0.1rem; }
+.filtres select {
+  width: auto;
+  min-width: 11rem;
+  margin-top: 0;
+  background-color: var(--white);
+}
+.filtres__cases { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; }
+.filtres__actions { display: flex; align-items: center; gap: 1rem; margin-left: auto; }
 @media (max-width: 640px) {
   .filtres { flex-direction: column; align-items: stretch; }
   .filtres select { width: 100%; }
@@ -1173,6 +1188,36 @@ textarea {
 
 textarea { resize: vertical; min-height: 6rem; }
 
+/* La flèche des menus déroulants.
+   Celle du navigateur est un triangle gris, de taille et de position
+   variables d'un système à l'autre, et sans rapport avec le trait de la
+   loupe de recherche. On la remplace par le même chevron, dessiné au même
+   1,6 px, posé à une distance fixe du bord droit. Le `padding-right` lui
+   réserve sa place, sinon un libellé long passerait dessous. */
+select {
+  appearance: none;
+  padding-right: 2.4rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23232323' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 6.5 8 10.5 12 6.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.85rem center;
+  background-size: 15px 15px;
+  cursor: pointer;
+}
+/* `appearance: none` efface aussi la flèche du sélecteur multiple, qui n'en
+   a pas : on lui rend sa place. */
+select[multiple] { padding-right: 0.8rem; background-image: none; }
+
+/* Les cases à cocher prennent la couleur de la marque plutôt que le bleu du
+   système, et une taille fixe : sans elle, leur hauteur varie d'un
+   navigateur à l'autre et la ligne se décale. */
+input[type='checkbox'],
+input[type='radio'] {
+  width: 1rem;
+  height: 1rem;
+  margin: 0;
+  accent-color: var(--accent-deep);
+}
+
 input[aria-invalid='true'],
 select[aria-invalid='true'],
 textarea[aria-invalid='true'] { border-color: var(--accent); }
@@ -1191,7 +1236,10 @@ textarea[aria-invalid='true'] { border-color: var(--accent); }
 .choice__title { display: block; font-weight: 600; font-size: 0.9375rem; }
 .choice__detail { display: block; margin-top: 0.15rem; font-size: 0.875rem; color: var(--ink-soft); }
 
-.inline-check { display: flex; gap: 0.6rem; align-items: flex-start; font-size: 0.875rem; }
+/* `center` et non `flex-start` : ces deux cases ne servent que dans la barre
+   de filtres, sur un libellé d'une seule ligne. Alignées sur le haut, elles
+   tombaient deux pixels sous le reste de la rangée. */
+.inline-check { display: flex; gap: 0.6rem; align-items: center; font-size: 0.875rem; }
 
 /* --- 9. Panier et commande --------------------------------------------------- */
 
@@ -1387,15 +1435,26 @@ textarea[aria-invalid='true'] { border-color: var(--accent); }
 
 .admin-shell { min-height: 100vh; }
 
+/* Le bandeau d'administration : logo à gauche, sections au milieu, compte à
+   droite. Collant en haut, pour que les sections restent à portée au bas
+   d'une longue liste de produits. */
 .admin-side {
+  position: sticky;
+  top: 0;
+  z-index: 20;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 1rem var(--gutter);
+  gap: 1rem 1.5rem;
+  padding: 0.85rem var(--gutter);
   background: var(--ink);
   color: var(--cream);
+}
+/* Le groupe du compte est poussé à droite ; la navigation occupe le milieu. */
+.admin-side__foot { margin-left: auto; }
+
+@media (min-width: 900px) {
+  .admin-side { padding: 0.85rem 2.5rem; }
 }
 .admin-side a { color: inherit; }
 .admin-side__logo { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; }
@@ -1409,12 +1468,6 @@ textarea[aria-invalid='true'] { border-color: var(--accent); }
 .admin-side .btn--ghost:hover { background: var(--cream); color: var(--ink); }
 
 .admin-nav ul { display: flex; flex-wrap: wrap; gap: 0.25rem; list-style: none; margin: 0; padding: 0; }
-/* Sur grand écran la barre est une colonne : chaque lien prend toute la
-   largeur et pousse sa pastille à droite. */
-@media (min-width: 960px) {
-  .admin-nav ul { flex-direction: column; gap: 0.15rem; }
-  .admin-nav a { justify-content: space-between; width: 100%; }
-}
 .admin-nav a {
   display: inline-flex;
   align-items: center;
@@ -1457,25 +1510,16 @@ textarea[aria-invalid='true'] { border-color: var(--accent); }
 /* Même raison que pour `.admin-columns` : colonne de grille, donc
    `min-width: auto` par défaut. Un tableau large poussait toute la zone
    principale sous la fenêtre au lieu de défiler à l'intérieur. */
-.admin-main { padding: 2rem var(--gutter) 5rem; max-width: 72rem; min-width: 0; }
+/* 88 rem et non 72 : la colonne latérale a disparu, la page entière revient
+   aux tableaux. Le plafond reste, pour qu'une ligne de texte ne traverse pas
+   un écran de 27 pouces. */
+.admin-main { padding: 2rem var(--gutter) 5rem; max-width: 88rem; min-width: 0; margin: 0 auto; }
 
 @media (min-width: 960px) {
-  .admin-shell { display: grid; grid-template-columns: 15rem 1fr; }
-  .admin-side {
-    position: sticky;
-    top: 0;
-    align-self: start;
-    flex-direction: column;
-    align-items: stretch;
-    justify-content: flex-start;
-    gap: 2rem;
-    height: 100vh;
-    padding: 2rem 1.25rem;
-  }
-  .admin-side__logo { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
-  .admin-nav ul { flex-direction: column; gap: 0.15rem; }
-  .admin-nav a { display: block; }
-  .admin-side__foot { margin-top: auto; flex-direction: column; align-items: flex-start; }
+  /* La barre reste en haut, sur toute la largeur.
+     En colonne de 15 rem, elle prenait un cinquième de l'écran en permanence
+     pour cinq liens, et les tableaux — produits, commandes — se serraient
+     d'autant. En bandeau, la page entière leur revient. */
   .admin-main { padding: 3rem 2.5rem 6rem; }
 }
 

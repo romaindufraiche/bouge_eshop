@@ -2,8 +2,21 @@
 /**
  * Détail d'une commande du client, avec son avancement.
  *
+ * Le même gabarit sert au client connecté et au suivi sans compte : seule
+ * l'adresse des liens change, d'où `$base`.
+ *
  * @var array<string, mixed> $commande
+ * @var string               $base    Préfixe des liens : '/compte/commande/<ref>'
+ *                                    ou '/suivi/<ref>?jeton=…'
+ * @var bool                 $avecCompte
  */
+
+$base ??= '/compte/commande/' . rawurlencode((string) $commande['reference']);
+$avecCompte ??= true;
+// Le lien de facture reprend le jeton quand il y en a un.
+$lienFacture = str_contains($base, '?')
+    ? preg_replace('#\?#', '/facture?', $base, 1)
+    : $base . '/facture';
 
 use Bouge\Shipping\Tracking;
 use Bouge\Support\Money;
@@ -28,7 +41,11 @@ $annulee = $commande['status'] === Status::ORDER_CANCELLED;
     <div class="section">
         <nav aria-label="Fil d'Ariane">
             <ol class="breadcrumb">
-                <li><a href="/compte">Mon compte</a></li>
+                <?php if ($avecCompte): ?>
+                    <li><a href="/compte">Mon compte</a></li>
+                <?php else: ?>
+                    <li><a href="/">Accueil</a></li>
+                <?php endif; ?>
                 <li aria-hidden="true">/</li>
                 <li aria-current="page">Commande <?= e($commande['reference']) ?></li>
             </ol>
@@ -204,7 +221,7 @@ $annulee = $commande['status'] === Status::ORDER_CANCELLED;
                         </p>
                         <p style="margin-top:1rem">
                             <a class="btn btn--ghost btn--sm"
-                               href="/compte/commande/<?= e($commande['reference']) ?>/facture">
+                               href="<?= e($lienFacture) ?>">
                                 Télécharger la facture
                             </a>
                         </p>
