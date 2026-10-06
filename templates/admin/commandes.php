@@ -13,8 +13,9 @@
 
 use Bouge\Support\Money;
 use Bouge\Support\Status;
+use Bouge\Support\View;
 ?>
-<header class="admin-head">
+<header class="admin-head between">
     <div>
         <h1 class="t-l">Commandes</h1>
         <p class="muted t-s">
@@ -23,13 +24,14 @@ use Bouge\Support\Status;
         </p>
     </div>
     <div class="row">
-        <?php /* Comme pour les produits, l'export reprend les filtres et la
-                 recherche en cours : ce qu'on voit à l'écran est ce qu'on
+        <?php /* Comme pour les produits : même place en haut à droite, même
+                 bouton, même libellé. L'export reprend les filtres et la
+                 recherche en cours — ce qu'on voit à l'écran est ce qu'on
                  télécharge. */ ?>
-        <a class="btn btn--ghost"
-           href="/admin/commandes/export<?= $_GET !== [] ? '?' . e(http_build_query($_GET)) : '' ?>">
-            Exporter en Excel
-        </a>
+        <?= View::partial('partials/export', [
+            'href'  => '/admin/commandes/export',
+            'quoi'  => 'les commandes',
+        ]) ?>
     </div>
 </header>
 

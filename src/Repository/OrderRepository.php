@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Bouge\Repository;
 
 use Bouge\Shipping\ShippingLabel;
+use Bouge\Support\AdminAlerts;
 use Bouge\Support\Database;
 use Bouge\Support\Status;
 use PDO;
@@ -335,10 +336,13 @@ final class OrderRepository
     public function dashboardCounts(): array
     {
         return [
-            'to_prepare' => (int) Database::run(
-                'SELECT COUNT(*) FROM orders WHERE status IN (?, ?)',
-                [Status::ORDER_PAID, Status::ORDER_PREPARING]
-            )->fetchColumn(),
+            // « À préparer » veut dire : payée, et pas encore prise en main.
+            // Les commandes déjà en préparation en sortaient donc, sauf
+            // qu'elles y étaient comptées : la tuile du tableau de bord
+            // annonçait sept commandes quand la pastille de la barre, qui
+            // compte la même chose, en annonçait quatre. Même définition des
+            // deux côtés, et une seule source — AdminAlerts.
+            'to_prepare' => AdminAlerts::awaitingPreparation(),
             'paid_total' => (int) Database::run(
                 'SELECT COALESCE(SUM(total_cents), 0) FROM orders WHERE paid_at IS NOT NULL AND status <> ?',
                 [Status::ORDER_CANCELLED]

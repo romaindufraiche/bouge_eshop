@@ -12,6 +12,7 @@
 use Bouge\Support\Money;
 use Bouge\Support\Pricing;
 use Bouge\Support\Status;
+use Bouge\Support\View;
 
 $sorts = [
     'recent'    => 'Les plus récents',
@@ -30,10 +31,10 @@ $sorts = [
         <?php /* L'export reprend les filtres en cours : ce qu'on voit à
                  l'écran est ce qu'on télécharge. Un bouton qui renverrait tout
                  le catalogue après une recherche serait une surprise. */ ?>
-        <a class="btn btn--ghost"
-           href="/admin/produits/export<?= $_GET !== [] ? '?' . e(http_build_query($_GET)) : '' ?>">
-            Exporter les stocks
-        </a>
+        <?= View::partial('partials/export', [
+            'href'  => '/admin/produits/export',
+            'quoi'  => 'les produits et leurs stocks',
+        ]) ?>
         <a class="btn" href="/admin/produits/nouveau">Ajouter un produit</a>
     </div>
 </header>

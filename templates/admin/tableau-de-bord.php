@@ -20,7 +20,10 @@ use Bouge\Support\Status;
 </header>
 
 <div class="admin-stats">
-    <a class="admin-stat" href="/admin/commandes">
+    <?php /* Vers la file filtrée, pas vers la liste entière : la tuile
+             annonce un travail, elle doit y conduire. Même destination que
+             la pastille de la barre, qui compte la même chose. */ ?>
+    <a class="admin-stat" href="/admin/commandes?statut=<?= e(Status::ORDER_PAID) ?>">
         <span class="eyebrow">Commandes à préparer</span>
         <strong class="nums"><?= (int) $toPrepare ?></strong>
     </a>

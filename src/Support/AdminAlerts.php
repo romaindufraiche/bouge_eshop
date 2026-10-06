@@ -46,13 +46,16 @@ final class AdminAlerts
     }
 
     /**
-     * Commandes payées qu'on n'a pas encore prises en main.
+     * Commandes en attente de préparation.
      *
-     * « Payée » est l'état dans lequel le webhook les laisse : dès que la
-     * préparation commence, le statut change et la pastille retombe. C'est
-     * donc bien une file d'attente, pas un total.
+     * C'est-à-dire : payées, et pas encore prises en main. « Payée » est
+     * l'état dans lequel le webhook Stripe les laisse ; dès que la
+     * préparation commence, le statut passe à « En préparation » et la
+     * commande sort du compte. C'est donc une file d'attente, pas un total —
+     * et c'est exactement ce que la pastille de la barre annonce, le lien de
+     * la pastille ouvrant cette même liste filtrée.
      */
-    public static function newOrders(): int
+    public static function awaitingPreparation(): int
     {
         return self::$nouvelles ??= (int) Database::run(
             'SELECT COUNT(*) FROM orders WHERE status = ?',

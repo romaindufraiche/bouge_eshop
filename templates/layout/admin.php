@@ -15,6 +15,7 @@ use Bouge\Support\AdminAlerts;
 use Bouge\Support\Auth;
 use Bouge\Support\Csrf;
 use Bouge\Support\Session;
+use Bouge\Support\Status;
 use Bouge\Support\View;
 
 $user = Auth::user();
@@ -39,12 +40,21 @@ $sections = [
 // rien à signaler : une pastille à zéro est un bruit, pas une information.
 $pastilles = [
     '/admin/produits'  => AdminAlerts::outOfStock(),
-    '/admin/commandes' => AdminAlerts::newOrders(),
+    '/admin/commandes' => AdminAlerts::awaitingPreparation(),
 ];
 
 $pastilleTitres = [
     '/admin/produits'  => 'produit(s) en rupture',
-    '/admin/commandes' => 'commande(s) à préparer',
+    '/admin/commandes' => 'commande(s) en attente de préparation',
+];
+
+// Chaque pastille mène à la file qu'elle annonce, pas à la liste complète.
+// Sans cela, « 4 commandes à préparer » ouvrait seize commandes et il fallait
+// refaire le filtre à la main : la notification désignait un travail sans
+// jamais y conduire.
+$pastilleLiens = [
+    '/admin/produits'  => '/admin/produits?statut=' . Status::PRODUCT_PUBLISHED . '&tri=stock',
+    '/admin/commandes' => '/admin/commandes?statut=' . Status::ORDER_PAID,
 ];
 ?>
 <!DOCTYPE html>
@@ -82,20 +92,22 @@ $pastilleTitres = [
                         : str_starts_with($path, $href);
                     ?>
                     <?php $compte = $pastilles[$href] ?? 0; ?>
-                    <li>
-                        <a href="<?= e($href) ?>"<?= $active ? ' aria-current="page"' : '' ?>>
-                            <span><?= e($label) ?></span>
-                            <?php if ($compte > 0): ?>
-                                <?php /* Le nombre est lu par les lecteurs
-                                         d'écran avec ce qu'il compte : une
-                                         pastille qui ne dit que « 3 » ne veut
-                                         rien dire à l'oreille. */ ?>
-                                <span class="pastille">
-                                    <span aria-hidden="true"><?= $compte > 99 ? '99+' : (int) $compte ?></span>
-                                    <span class="sr-only"><?= (int) $compte ?> <?= e($pastilleTitres[$href] ?? '') ?></span>
-                                </span>
-                            <?php endif; ?>
-                        </a>
+                    <li class="admin-nav__item<?= $active ? ' est-active' : '' ?>">
+                        <a href="<?= e($href) ?>"<?= $active ? ' aria-current="page"' : '' ?>><?= e($label) ?></a>
+
+                        <?php if ($compte > 0): ?>
+                            <?php /* La pastille est un lien à part entière, et
+                                     non un ornement du précédent : elle ouvre
+                                     directement la file qu'elle compte. Le
+                                     nombre est lu par les lecteurs d'écran
+                                     avec ce qu'il compte — une pastille qui ne
+                                     dit que « 3 » ne veut rien dire à
+                                     l'oreille. */ ?>
+                            <a class="pastille" href="<?= e($pastilleLiens[$href] ?? $href) ?>">
+                                <span aria-hidden="true"><?= $compte > 99 ? '99+' : (int) $compte ?></span>
+                                <span class="sr-only"><?= (int) $compte ?> <?= e($pastilleTitres[$href] ?? '') ?></span>
+                            </a>
+                        <?php endif; ?>
                     </li>
                 <?php endforeach; ?>
             </ul>

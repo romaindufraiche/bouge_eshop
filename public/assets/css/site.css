@@ -1553,13 +1553,20 @@ textarea[aria-invalid='true'] { border-color: var(--accent); }
 .admin-side .btn--ghost:hover { background: var(--cream); color: var(--ink); }
 
 .admin-nav ul { display: flex; flex-wrap: wrap; gap: 0.25rem; list-style: none; margin: 0; padding: 0; }
-.admin-nav a {
+
+/* L'onglet est la pastille arrondie, pas le lien : la notification est un
+   second lien, posé à côté du premier, qui mène droit à la file qu'elle
+   annonce. Les deux restent dans la même forme, et l'onglet actif les porte
+   tous les deux sur son fond crème. */
+.admin-nav__item {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
   padding: 0.45rem 0.8rem;
   border: 1px solid transparent;
   border-radius: var(--radius-control);
+}
+.admin-nav a {
   font-size: 0.875rem;
   color: color-mix(in srgb, var(--cream) 75%, transparent);
   text-decoration: none;
@@ -1588,9 +1595,12 @@ textarea[aria-invalid='true'] { border-color: var(--accent); }
 
 /* Sur l'onglet actif le fond devient crème : le rouge y perdrait son
    contraste, on l'assombrit juste ce qu'il faut. */
-.admin-nav a[aria-current='page'] .pastille { background: #b81e32; }
+.admin-nav__item.est-active .pastille { background: #b81e32; }
+.admin-nav__item.est-active .pastille:hover { background: #9a1829; }
+.pastille:hover { background: #b81e32; text-decoration: none; }
 .admin-nav a:hover { color: var(--cream); text-decoration: none; }
-.admin-nav a[aria-current='page'] { background: var(--cream); color: var(--ink); font-weight: 600; }
+.admin-nav__item.est-active { background: var(--cream); }
+.admin-nav__item.est-active a { color: var(--ink); font-weight: 600; }
 
 /* Même raison que pour `.admin-columns` : colonne de grille, donc
    `min-width: auto` par défaut. Un tableau large poussait toute la zone

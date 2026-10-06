@@ -16,7 +16,12 @@ $relais = $commande['fulfilment'] === Status::RELAY;
 
 ob_start();
 ?>
-<h1 style="margin:0 0 4px;font:700 22px/1.25 Helvetica,Arial,sans-serif;color:#232323;">
+<?php /* Le titre en capitales espacées : les messageries ne chargent pas
+         Sun Motter, mais ses capitales serrées se laissent évoquer par du
+         gras en majuscules. C'est la seule façon de rappeler la police
+         d'affichage sans dépendre d'une police distante. */ ?>
+<h1 style="margin:0 0 6px;font:700 21px/1.2 Helvetica,Arial,sans-serif;letter-spacing:.02em;
+           text-transform:uppercase;color:#232323;">
     Merci, c'est confirmé.
 </h1>
 <p style="margin:0 0 20px;color:#59443a;">
@@ -116,7 +121,7 @@ $suivi = $commande['customer_id'] !== null || empty($commande['tracking_token'])
     <a href="<?= e($suivi) ?>"
        style="display:inline-block;padding:12px 22px;border-radius:999px;background:#a8441b;
               color:#ffffff;text-decoration:none;font:600 14px/1 Helvetica,Arial,sans-serif;">
-        Suivre ma commande
+        Suivre ma commande &rarr;
     </a>
 </p>
 
@@ -133,7 +138,12 @@ $suivi = $commande['customer_id'] !== null || empty($commande['tracking_token'])
 $corps = (string) ob_get_clean();
 
 echo View::partial('courriels/_enveloppe', [
-    'titre' => $sujet,
-    'corps' => $corps,
-    'shop'  => $shop,
+    'titre'  => $sujet,
+    'corps'  => $corps,
+    'shop'   => $shop,
+    // Ce que la liste des messages montre à côté de l'objet. Sans lui, Gmail
+    // affiche « Commande BC-… du 12/03/2026 », ce qui n'apprend rien.
+    'apercu' => $retrait
+        ? 'Votre commande est enregistrée. On vous écrit dès qu\'elle est prête à retirer.'
+        : 'Votre commande est enregistrée et part sous 48 heures ouvrées.',
 ]);

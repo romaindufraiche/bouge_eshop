@@ -23,7 +23,11 @@ $site = rtrim((string) \Bouge\Support\Config::get('site_url', ''), '/');
 
 ob_start();
 ?>
-<h1 style="margin:0 0 4px;font:700 22px/1.25 Helvetica,Arial,sans-serif;color:#232323;">
+<?php /* Même composition que l'accusé de commande : capitales espacées,
+         pour évoquer la police d'affichage que les messageries ne chargent
+         pas. */ ?>
+<h1 style="margin:0 0 6px;font:700 21px/1.2 Helvetica,Arial,sans-serif;letter-spacing:.02em;
+           text-transform:uppercase;color:#232323;">
     <?= $relais ? 'Votre colis est parti.' : 'Votre commande est en route.' ?>
 </h1>
 <p style="margin:0 0 20px;color:#59443a;">
@@ -42,11 +46,20 @@ ob_start();
 
 <?php if ($numero !== ''): ?>
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
-           style="border-collapse:collapse;margin:0 0 20px;background:#f3eedc;border-radius:8px;">
+           bgcolor="#f3eedc"
+           style="border-collapse:collapse;margin:0 0 20px;background:#f3eedc;border-radius:10px;">
         <tr>
-            <td style="padding:16px 18px;font:400 14px/1.6 Helvetica,Arial,sans-serif;color:#59443a;">
-                Numéro de suivi<br>
-                <strong style="color:#232323;font-size:16px;letter-spacing:.02em;"><?= e($numero) ?></strong>
+            <td style="padding:16px 18px;font:400 12px/1.5 Helvetica,Arial,sans-serif;
+                       letter-spacing:.1em;text-transform:uppercase;color:#59443a;">
+                Numéro de suivi<?php if ($transporteur !== ''): ?> · <?= e($transporteur) ?><?php endif; ?>
+                <?php /* Le numéro en grand, et en chasse fixe : c'est une
+                         suite de caractères qu'on recopie à la main dans le
+                         champ d'un transporteur, chiffre par chiffre. */ ?>
+                <div style="margin-top:6px;font:700 18px/1.3 'Courier New',Courier,monospace;
+                            letter-spacing:.04em;text-transform:none;color:#232323;
+                            word-break:break-all;">
+                    <?= e($numero) ?>
+                </div>
             </td>
         </tr>
     </table>
@@ -56,7 +69,7 @@ ob_start();
             <a href="<?= e($lien) ?>"
                style="display:inline-block;padding:12px 22px;border-radius:999px;background:#a8441b;
                       color:#ffffff;text-decoration:none;font:600 14px/1 Helvetica,Arial,sans-serif;">
-                Suivre mon colis
+                Suivre mon colis &rarr;
             </a>
         </p>
     <?php endif; ?>
@@ -93,7 +106,10 @@ $suivi = $commande['customer_id'] !== null || empty($commande['tracking_token'])
 </p>
 <?php
 echo View::partial('courriels/_enveloppe', [
-    'titre' => $sujet,
-    'corps' => (string) ob_get_clean(),
-    'shop'  => $shop,
+    'titre'  => $sujet,
+    'corps'  => (string) ob_get_clean(),
+    'shop'   => $shop,
+    'apercu' => $numero !== ''
+        ? 'Votre colis est parti. Numéro de suivi : ' . $numero
+        : 'Votre colis est parti.',
 ]);
