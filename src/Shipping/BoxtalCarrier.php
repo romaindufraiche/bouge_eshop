@@ -158,7 +158,7 @@ final class BoxtalCarrier implements Carrier
             $parametres[self::PARAM_POINT_RELAIS] = (string) $order['relay_code'];
         }
 
-        $xpath = $this->requete('api/v1/order', $parametres);
+        $xpath = $this->requete('api/v1/order', $parametres, 'POST');
 
         $envoi = $xpath->query('/order/shipment')->item(0);
 
@@ -409,10 +409,21 @@ final class BoxtalCarrier implements Carrier
      * @param array<string, mixed> $parametres
      * @throws CarrierException
      */
-    private function requete(string $action, array $parametres = []): DOMXPath
+    private function requete(string $action, array $parametres = [], string $methode = 'GET'): DOMXPath
     {
         $serveur = $this->test ? self::SERVEUR_TEST : self::SERVEUR_PROD;
-        $curl = curl_init($serveur . $action);
+
+        // La cotation et la lecture d'un point relais se font en GET, avec les
+        // paramètres dans l'adresse ; seule la création d'une commande est un
+        // POST. Tout partait en POST : /api/v1/cotation répondait alors
+        // « 405 Method Not Allowed », et aucun devis n'aboutissait.
+        $adresse = $serveur . $action;
+
+        if ($methode === 'GET' && $parametres !== []) {
+            $adresse .= '?' . http_build_query($parametres);
+        }
+
+        $curl = curl_init($adresse);
 
         if ($curl === false) {
             throw new CarrierException('Impossible de contacter Boxtal.');
@@ -430,7 +441,7 @@ final class BoxtalCarrier implements Carrier
             ],
         ]);
 
-        if ($parametres !== []) {
+        if ($methode === 'POST') {
             curl_setopt($curl, CURLOPT_POST, true);
             curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($parametres));
         }
