@@ -410,36 +410,57 @@ main { flex: 1; }
 .marque-inline {
   display: inline-flex;
   align-items: baseline;
-  /* Le fichier porte déjà 14,7 % de marge de chaque côté : un écart nul ici
-     laisse tout de même de l'air avant « CLUB ». */
-  gap: 0;
+  /* L'air entre le nom et « Club ». Les marges transparentes du fichier étant
+     retirées plus bas, cet écart est le seul qui compte — on le voit tel
+     qu'il est écrit. Le point du wordmark tombe tout contre son bord droit :
+     il lui faut un peu plus qu'une espace ordinaire. */
+  gap: 0.4em;
   /* Le nom ne doit jamais être coupé en fin de ligne. */
   white-space: nowrap;
-  /* Le fichier porte 14,7 % de marge à gauche, soit 0,41em à la taille
-     affichée : sans rattrapage, l'espace avant le nom paraît double. */
-  margin-left: -0.26em;
 }
 
-/* Quand le mot « Club » ne suit pas, c'est l'image qui termine le nom : sa
-   marge droite détacherait la ponctuation qui vient après. */
-.marque-inline:not(:has(.marque-inline__club)) { margin-right: -0.3em; }
-
 .marque-inline img {
-  /* Le fichier porte 30 % de marge en haut et en bas : à 1,35em affiché,
-     l'encre fait environ 0,52em — l'ordre de grandeur d'une capitale. */
-  height: 1.35em;
+  /* L'image ne se laisse ni comprimer ni plafonner. Les marges négatives
+     ci-dessous rendent le conteneur flexible plus étroit que l'encre ; la
+     règle de base `img { max-width: 100% }` s'y accrochait alors et écrasait
+     le wordmark en largeur — 124 px mesurés au lieu de 176, visible à l'œil
+     nu sur la ligne où « Club » ne suit pas. */
+  flex: none;
+  max-width: none;
+  /* Le fichier porte 30 % de marge en haut et en bas : l'encre fait donc
+     40 % de la hauteur affichée.
+
+     À 1,35em, cette encre tombait à 0,54em, soit les trois quarts d'une
+     capitale de Sun Motter (0,69em mesuré sur le rendu) : le nom de la
+     marque paraissait plus petit que le mot qui le précède, ce qui se
+     remarque. À 2,35em l'encre vaut 0,94em — l'ascendante dépasse d'un
+     cheveu la capitale et la descendante du « g » tombe sous la ligne,
+     comme n'importe quelle minuscule. */
+  height: 2.35em;
   width: auto;
   /* Une image s'aligne par son bord bas, pas par une ligne de base : sans
      correction, le wordmark flotte au-dessus du texte. Sa ligne de base tombe
      à 61,6 % de la hauteur du fichier, donc 38,4 % de la hauteur affichée
      séparent cette ligne du bord bas — c'est ce qu'on rattrape ici. */
-  transform: translateY(0.519em);
+  transform: translateY(0.902em);
+  /* Les marges transparentes du fichier sont retirées de la mise en page :
+     30 % en haut et en bas (0,705em), 14,7 % de chaque côté (0,72em, le
+     fichier faisant 2,081 fois sa hauteur). Sans cela la boîte écarterait les
+     lignes du titre pour du vide, et l'espace autour du nom vaudrait le
+     double de celui qu'on a écrit. Ces valeurs suivent la hauteur ci-dessus :
+     les changer ensemble, ou le calage saute. */
+  margin: -0.705em -0.72em;
 }
 
 .marque-inline__club {
-  margin-left: 0.12em;
+  /* L'interlettrage ajoute un blanc après le « B » final : sans ce
+     rattrapage, la virgule qui suit « Club » paraît décollée du mot. */
+  margin-right: -0.22em;
   font-family: 'Manrope', system-ui, sans-serif;
-  font-size: 0.42em;
+  /* Calé sur le wordmark, pas sur le cadratin : à 0,42em il était écrasé par
+     le nom désormais plus grand. « Club » reste subordonné — c'est le propos
+     du verrou — mais se lit comme un mot de la phrase. */
+  font-size: 0.7em;
   font-weight: 600;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -1428,7 +1449,23 @@ textarea[aria-invalid='true'] { border-color: var(--accent); }
 }
 .concept-store__visuel img { width: 80%; max-width: 14rem; height: auto; }
 
-/* Le plan, sous la mascotte. Le cadre porte le fond et les coins arrondis :
+/* La capture du site de la salle remplit son cadre bord à bord : c'est une
+   image composée, pas un dessin détouré qu'il faudrait poser sur un fond. */
+.concept-store__visuel--capture {
+  padding: 0;
+  overflow: hidden;
+  background: var(--ink);
+}
+.concept-store__visuel--capture img { width: 100%; max-width: none; height: auto; }
+.concept-store__visuel--capture a { display: block; transition: transform 0.3s ease-out; }
+.concept-store__visuel--capture a:hover { transform: scale(1.02); }
+
+@media (prefers-reduced-motion: reduce) {
+  .concept-store__visuel--capture a { transition: none; }
+  .concept-store__visuel--capture a:hover { transform: none; }
+}
+
+/* Le plan, sous la mascotte./* Le plan, sous la mascotte. Le cadre porte le fond et les coins arrondis :
    l'iframe d'OpenStreetMap, elle, arrive avec une bordure que rien d'autre
    sur le site ne porte. */
 .concept-store__plan {
@@ -2361,6 +2398,21 @@ a:hover .vignette img { transform: scale(1.06); }
   border: 1px solid color-mix(in srgb, var(--cream) 40%, transparent);
   border-radius: 50%;
 }
+
+/* --- La ligne de contact ------------------------------------------------------
+   Une seule ligne entre la section du concept store et le pied de page, le
+   tampon réduit à la taille d'une majuscule posé devant. */
+
+.ligne-contact {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 1.1rem 0;
+  text-align: center;
+}
+.ligne-contact img { width: 1.75rem; height: 1.75rem; flex: none; }
 
 /* --- La note manuscrite -------------------------------------------------------
    Reenie Beanie au-dessus d'un titre de section, légèrement de travers : la

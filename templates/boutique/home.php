@@ -435,15 +435,20 @@ $freeAbove = $shop['shipping']['free_above_cents'];
 
 <?= View::partial('partials/concept-store', ['shop' => $shop]) ?>
 
-<section class="section--tight section--line">
+<?php /* La ligne de contact, et rien de plus. Elle occupait un quart
+         d'écran — un tampon de six rem au-dessus d'une phrase, le tout
+         dans une section à l'aise —, pour une information qui tient sur
+         une ligne et que le pied de page répète juste en dessous. */ ?>
+<section class="section--line">
     <div class="wrap">
-        <div class="stack" style="display:flex;flex-direction:column;align-items:center;text-align:center;padding:2rem 0">
+        <p class="ligne-contact t-s muted">
             <img class="tourne" src="<?= e(asset('/assets/brand/tampon-anthracite.png')) ?>" alt=""
-                 width="560" height="560" style="width:6rem;height:6rem" loading="lazy">
-            <p class="t-s muted" style="max-width:28rem">
-                Une question sur une taille, un modèle, un délai&nbsp;? Écrivez-nous à
-                <a href="mailto:<?= e($shop['email']) ?>"><?= e($shop['email']) ?></a>.
-            </p>
-        </div>
+                 width="560" height="560" loading="lazy">
+            <?php /* La phrase entière dans un span : en flex, chaque nœud de
+                     texte devient un élément, et l'écart se glisserait entre
+                     l'adresse et le point final. */ ?>
+            <span>Une question sur une taille, un modèle, un délai&nbsp;? Écrivez-nous à
+                <a href="mailto:<?= e($shop['email']) ?>"><?= e($shop['email']) ?></a>.</span>
+        </p>
     </div>
 </section>

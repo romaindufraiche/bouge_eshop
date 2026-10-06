@@ -84,7 +84,11 @@ return [
             "Et une commande passée ici ne part pas chez une enseigne : elle fait vivre le lieu.",
             "Le reste se vit sur place. Poussez la porte, on vous fera visiter.",
         ],
-        'url'     => '',
+        // L'adresse du site de la salle. Celle-ci est l'aperçu publié sur
+        // GitHub Pages : à remplacer par le domaine définitif dès qu'il
+        // existe, le bouton « Découvrir la salle » et la capture de la
+        // section « le lieu » pointant tous deux dessus.
+        'url'     => 'https://krokow.github.io/bouge/',
         'address' => '8 rue Albert Simonin, 92400 Courbevoie',
         'hours'   => 'Du mardi au samedi, 10h – 19h',
 

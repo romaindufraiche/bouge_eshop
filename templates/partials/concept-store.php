@@ -73,12 +73,29 @@ if (($store['name'] ?? '') === '') {
             </div>
 
             <div>
-                <?php /* La mascotte plutôt qu'une photo de salle : nous n'en
-                         avons pas, et en inventer une serait mentir sur le
-                         lieu. */ ?>
-                <div class="concept-store__visuel">
-                    <img src="<?= e(asset('/assets/brand/mascotte-02.png')) ?>"
-                         alt="" width="720" height="720" loading="lazy">
+                <?php /* Le site de la salle, en capture : c'est le lieu
+                         lui-même qui se montre, avec ses vraies images et
+                         son vrai monde. La mascotte occupait cette place
+                         faute de mieux — elle illustrait la marque, pas
+                         l'endroit dont parle le paragraphe à côté.
+
+                         La capture est cliquable quand l'adresse du site
+                         est renseignée : on voit la salle, on y va. */ ?>
+                <?php
+                $capture = '<img src="' . e(asset('/assets/images/salle/site-bouge.jpg')) . '"'
+                    . ' alt="La page d\'accueil du site de ' . e($store['name'])
+                    . ' : le logo de la marque sur une photo de la salle."'
+                    . ' width="1600" height="806" loading="lazy">';
+                ?>
+                <div class="concept-store__visuel concept-store__visuel--capture">
+                    <?php if (!empty($store['url'])): ?>
+                        <a href="<?= e($store['url']) ?>" target="_blank" rel="noopener">
+                            <?= $capture ?>
+                            <span class="sr-only">(nouvel onglet)</span>
+                        </a>
+                    <?php else: ?>
+                        <?= $capture ?>
+                    <?php endif; ?>
                 </div>
 
                 <?php
