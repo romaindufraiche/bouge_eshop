@@ -267,7 +267,7 @@ final class OrderController
             ];
         }
 
-        $classeur = Xlsx::build(
+        return Xlsx::telecharger(
             [
                 'Référence', 'Date', 'Statut', 'Client', 'Adresse électronique', 'Téléphone',
                 'Mode de remise', 'Destination', 'Articles',
@@ -275,19 +275,10 @@ final class OrderController
                 'Payée le', 'Transporteur', 'N° de suivi', 'Expédiée le', 'Facture',
             ],
             $lignes,
-            'Commandes au ' . date('d-m-Y')
+            'Commandes au ' . date('d-m-Y'),
+            'commandes-bouge-club-' . date('Y-m-d') . '.xlsx',
+            '/admin/commandes'
         );
-
-        $nom = 'commandes-bouge-club-' . date('Y-m-d') . '.xlsx';
-
-        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment; filename="' . $nom . '"');
-        header('Content-Length: ' . strlen($classeur));
-        header('Cache-Control: no-store, must-revalidate');
-
-        echo $classeur;
-
-        return '';
     }
 
     /** La facture en PDF, telle que le client la reçoit. */

@@ -88,28 +88,17 @@ final class ProductController
             ];
         }
 
-        $classeur = Xlsx::build(
+        return Xlsx::telecharger(
             [
                 'Produit', 'Rayon', 'Statut', 'Stock', 'Déclinaisons',
                 'Prix (€)', 'Prix promo (€)', 'Valeur du stock (€)',
                 'Poids (g)', 'Origine',
             ],
             $lignes,
-            'Stocks au ' . date('d-m-Y')
+            'Stocks au ' . date('d-m-Y'),
+            'stocks-bouge-club-' . date('Y-m-d') . '.xlsx',
+            '/admin/produits'
         );
-
-        $nom = 'stocks-bouge-club-' . date('Y-m-d') . '.xlsx';
-
-        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment; filename="' . $nom . '"');
-        header('Content-Length: ' . strlen($classeur));
-        // Un état des stocks daté n'a pas à être servi depuis le cache du
-        // navigateur : il serait faux dès le lendemain.
-        header('Cache-Control: no-store, must-revalidate');
-
-        echo $classeur;
-
-        return '';
     }
 
     public function create(): string

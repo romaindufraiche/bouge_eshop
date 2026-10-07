@@ -26,6 +26,51 @@ use ZipArchive;
 final class Xlsx
 {
     /**
+     * Construit le classeur et l'envoie au navigateur en téléchargement.
+     *
+     * Les trois exports de l'administration passent par ici : ils répétaient
+     * le même bloc d'en-têtes HTTP, et surtout ils laissaient remonter
+     * l'absence de l'extension `zip` en erreur 500 — le visiteur voyait
+     * « Quelque chose s'est mal passé de notre côté », sans savoir qu'il
+     * manquait une extension PHP ni laquelle. Le message est maintenant lu
+     * par le commerçant, qui peut le transmettre tel quel à son hébergeur.
+     *
+     * @param list<string>                      $entetes
+     * @param list<list<string|int|float|null>> $lignes
+     * @param string $feuille nom de l'onglet
+     * @param string $fichier nom du fichier téléchargé, extension comprise
+     * @param string $retour  où renvoyer si le classeur ne peut pas être écrit
+     */
+    public static function telecharger(
+        array $entetes,
+        array $lignes,
+        string $feuille,
+        string $fichier,
+        string $retour
+    ): string {
+        try {
+            $classeur = self::build($entetes, $lignes, $feuille);
+        } catch (RuntimeException $e) {
+            // Journalisé pour le développeur, résumé pour le commerçant.
+            error_log('Export Excel impossible : ' . $e->getMessage());
+            Session::flash('admin', $e->getMessage());
+            redirect($retour);
+        }
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="' . $fichier . '"');
+        header('Content-Length: ' . strlen($classeur));
+        // Un export daté n'a pas à rester dans le cache du navigateur : il est
+        // faux dès le lendemain, et le fichier client porte en plus des
+        // données personnelles.
+        header('Cache-Control: no-store, must-revalidate');
+
+        echo $classeur;
+
+        return '';
+    }
+
+    /**
      * @param list<string>            $entetes
      * @param list<list<string|int|float|null>> $lignes
      * @return string Le contenu binaire du fichier .xlsx

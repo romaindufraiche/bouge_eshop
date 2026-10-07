@@ -1042,8 +1042,16 @@ Le classeur est écrit par `src/Support/Xlsx.php`, sans bibliothèque — un
 PhpSpreadsheet aurait chargé une centaine de fichiers dans `vendor/` pour dix
 colonnes. Un CSV aurait été plus court encore, mais Excel francophone s'y
 trompe régulièrement sur le séparateur décimal, et un état des stocks dont on
-ne peut pas faire la somme ne sert à rien. Seule exigence : l'extension PHP
-`zip`, présente sur tous les hébergements courants.
+ne peut pas faire la somme ne sert à rien. Seule exigence : **l'extension PHP
+`zip`**, présente sur tous les hébergements mutualisés courants.
+
+Elle ne l'était pas dans l'image Docker de la démonstration : `php:8.3-apache`
+ne la compile pas, et les trois exports y tombaient en erreur 500 sans dire
+pourquoi. Le `Dockerfile` l'installe désormais (`libzip-dev`, puis
+`docker-php-ext-install zip`). Et quand elle manque malgré tout, le bouton
+ramène à la page d'où il part avec le message en clair — « l'extension PHP
+zip est nécessaire… », de quoi le transmettre tel quel à son hébergeur — au
+lieu d'une page d'erreur muette.
 
 ### Le fichier client, en classeur Excel
 

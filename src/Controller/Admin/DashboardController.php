@@ -95,29 +95,17 @@ final class DashboardController
             ];
         }
 
-        $classeur = Xlsx::build(
+        return Xlsx::telecharger(
             [
                 'Nom', 'Adresse électronique', 'Téléphone', 'Code postal', 'Ville',
                 'Compte', 'Commandes', 'Total dépensé (€)', 'Panier moyen (€)',
                 'Première commande', 'Dernière commande', 'Inscrit le', 'Dernière connexion',
             ],
             $lignes,
-            'Clients au ' . date('d-m-Y')
+            'Clients au ' . date('d-m-Y'),
+            'clients-bouge-club-' . date('Y-m-d') . '.xlsx',
+            '/admin'
         );
-
-        $nom = 'clients-bouge-club-' . date('Y-m-d') . '.xlsx';
-
-        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment; filename="' . $nom . '"');
-        header('Content-Length: ' . strlen($classeur));
-        // Un fichier client daté n'a pas à rester dans le cache du navigateur :
-        // il contient des données personnelles, et il est faux dès le
-        // lendemain.
-        header('Cache-Control: no-store, must-revalidate');
-
-        echo $classeur;
-
-        return '';
     }
 
     /**

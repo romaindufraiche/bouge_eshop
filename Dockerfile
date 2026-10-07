@@ -19,8 +19,14 @@
 
 FROM php:8.3-apache
 
-# pdo_mysql est la seule extension à ajouter : mbstring, curl, fileinfo et
-# iconv sont déjà compilées dans l'image officielle.
+# Deux extensions à ajouter : mbstring, curl, fileinfo et iconv sont déjà
+# compilées dans l'image officielle, pas celles-ci.
+#
+#   - pdo_mysql, pour parler à la base ;
+#   - zip, dont dépend src/Support/Xlsx.php — un .xlsx n'est qu'une archive ZIP
+#     de fichiers XML. Sans elle, les trois exports Excel de l'administration
+#     (produits, commandes, fichier client) tombent en erreur 500. Elle
+#     réclame libzip à la compilation.
 #
 # Le php.ini de production est mis en place au passage : sans lui, PHP affiche
 # ses erreurs à l'écran — chemins du serveur et trace d'appels compris. Sur une
@@ -29,10 +35,10 @@ FROM php:8.3-apache
 # Pas de commentaire à l'intérieur du RUN : les continuations de ligne en font
 # une seule commande, et un « # » y masquerait tout ce qui suit.
 RUN set -eux; \
-    docker-php-ext-install -j"$(nproc)" pdo_mysql; \
     apt-get update; \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-        mariadb-server mariadb-client; \
+        libzip-dev mariadb-server mariadb-client; \
+    docker-php-ext-install -j"$(nproc)" pdo_mysql zip; \
     rm -rf /var/lib/apt/lists/*; \
     a2enmod rewrite headers; \
     mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
